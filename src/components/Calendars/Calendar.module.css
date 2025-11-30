@@ -1,0 +1,68 @@
+
+.calendar :global(.rbc-toolbar) {
+  flex-direction: row;
+}
+
+.calendar :global(.rbc-month-row + .rbc-month-row) {
+  border-top: 1px solid #f1f1f1;
+}
+
+.calendar :global(.rbc-toolbar .rbc-toolbar-label) {
+  text-align: left;
+  font-weight: 600;
+  color: #0d205d;
+  font-size: 16px;
+  padding: 0;
+}
+.calendar :global(.rbc-toolbar .rbc-btn-group:last-of-type) {
+  display: none;
+}
+.calendar :global(.rbc-toolbar .rbc-btn-group button) {
+  border: none;
+  padding: 0 0 0 20px;
+  font-weight: 600;
+}
+.calendar :global(.rbc-toolbar .rbc-btn-group button:first-of-type) {
+  display: none;
+}
+.calendar :global(.rbc-toolbar .rbc-btn-group:first-of-type) {
+  order: 2;
+}
+
+.calendar :global(.rbc-header) {
+  padding: 10px 0;
+  color: #333333;
+  border-bottom: 1px solid #f1f1f1;
+}
+.calendar :global(.rbc-month-view) {
+  border: 1px solid #f1f1f1;
+}
+.calendar :global(.rbc-off-range-bg) {
+  background-color: #fff;
+}
+.calendar :global(.rbc-today) {
+  background-color: #fff;
+  font-weight: 600;
+}
+.calendar :global(.rbc-event) {
+  background-color: #fff;
+  color: #0d205d;
+  font-size: 14px;
+  font-weight: 400;  
+}
+
+.calendar :global(.rbc-btn-group button:hover) {
+  background-color: #fff;
+}
+
+.calendar :global(.rbc-show-more) {
+  color: #0d205d;           /* 글자 색상 */
+  font-weight: 400;         /* 글자 두께 */
+  background-color: transparent; /* 배경 투명 */
+  text-decoration: none;    /* 밑줄 제거 */
+}
+
+.calendar :global(.rbc-show-more:hover) {
+  color: #0d205d;           /* 마우스 올렸을 때 색상 */
+  text-decoration: underline; /* 마우스 올렸을 때 밑줄 */
+}
