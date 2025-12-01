@@ -7,90 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 전시회 코드 ENUM
-enum ArtCode {
-  BOOK
-  CHILDREN_FAMILY
-  DANCE_BALLET
-  EDUCATION_EXPERIENCE
-  ETC
-  EVENT_FESTIVAL
-  EXHIBITION
-  KOREAN_MUSIC
-  MUSICAL_OPERA
-  MUSIC_CONCERT
-  PHYSICAL_EDUCATION
-  THEATER
-}
+// Todo 테이블
+model Todo {
+  idx        Int       @id @default(autoincrement())
+  memberId   String?   @map("member_id") @db.VarChar(45)
+  projectId  String?   @map("project_id") @db.VarChar(45)
+  subject    String?   @db.VarChar(45)
+  content    String?   @db.VarChar(45)
+  finish     String?   @db.VarChar(45)
+  date       DateTime? @db.Date
 
-// 전시회 타입 ENUM
-enum ArtType {
-  EDUCATION_EXPERIENCE
-  EVENT_FESTIVAL
-  PERFORMANCE_EXHIBITION
-}
-
-// 전시회 테이블
-model Art {
-  id        BigInt   @id @default(autoincrement())
-  title     String   @db.VarChar(255)
-  artType   ArtType  @map("art_type")
-  artCode   ArtCode  @map("art_code")
-  seq       Int
-  startDate DateTime @map("start_date") @db.Date
-  endDate   DateTime @map("end_date") @db.Date
-  price     String?  @db.VarChar(255)
-  placeName String?  @map("place_name") @db.VarChar(255)
-  placeId   BigInt?  @map("place_id")
-  area      String?  @db.VarChar(255)
-  sigungu   String?  @db.VarChar(255)
-  thumbnail String?  @db.VarChar(255)
-  phone     String?  @db.VarChar(255)
-  viewCount Int      @default(0) @map("view_count") @db.Int
-  createdAt DateTime @default(now()) @map("created_at") @db.DateTime(6)
-  updatedAt DateTime? @updatedAt @map("updated_at") @db.DateTime(6)
-
-  // 관계: 한 전시회는 여러 추천에 포함될 수 있음
-  recommends ArtRecommend[]
-  // 관계: 한 전시회는 하나의 장소를 가질 수 있음
-  place      Place?   @relation(fields: [placeId], references: [id])
-
-  // 인덱스 설정 
-  @@index([artCode], map: "art_code_index")
-  @@index([seq], map: "art_seq_index")
-  @@index([artType], map: "art_type_index")
-  @@index([placeId], map: "FKf1n61ny04abxiw85tx0ctmxx1")
-  @@map("art")
-}
-
-// 추천 테이블
-model ArtRecommend {
-  id        BigInt      @id @default(autoincrement())
-  artId     BigInt   @map("art_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @map("updated_at")
-
-  // 관계: 각 추천은 하나의 전시회를 가리킴
-  art       Art      @relation(fields: [artId], references: [id])
-
-  @@map("art_recommend")
-}
-
-// 장소 테이블
-model Place {
-  id        BigInt    @id @default(autoincrement())
-  seq       Int
-  createdAt DateTime  @map("created_at") @db.DateTime(6)
-  updatedAt DateTime? @map("updated_at") @db.DateTime(6)
-  address   String?   @db.VarChar(255)
-  latitude  String?   @db.VarChar(255)
-  longitude String?   @db.VarChar(255)
-  url       String?   @db.VarChar(1000)
-
-  // 관계: 한 장소는 여러 전시회에서 사용될 수 있음
-  arts      Art[]
-
-  // 인덱스 설정
-  @@index([seq], map: "place_seq_index")
-  @@map("place")
+  @@map("todo")
 }
