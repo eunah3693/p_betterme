@@ -1,5 +1,5 @@
 // Todo 조회 요청
-export interface MonthlyTodoRequest {
+export interface TodoRequest {
   memberId: string;
   startDate: string;  // YYYY-MM-DD
   endDate: string;    // YYYY-MM-DD
@@ -17,7 +17,7 @@ export interface TodoItem {
 }
 
 // Todo 응답
-export interface MonthlyTodoResponse {
+export interface TodoResponse {
   success: boolean;
   data: TodoItem[];
 }

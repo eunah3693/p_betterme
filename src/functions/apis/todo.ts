@@ -1,12 +1,12 @@
 import { axiosInstance } from './axios';
-import { MonthlyTodoRequest, MonthlyTodoResponse } from '@/interfaces/todo';
+import { TodoRequest, TodoResponse } from '@/interfaces/todo';
 
 const TODO_URL = '/api/todo';
 
-// 월간 Todo 조회
-export const getMonthlyTodo = async (params: MonthlyTodoRequest): Promise<MonthlyTodoResponse> => {
+// Todo 조회
+export const getTodo = async (params: TodoRequest): Promise<TodoResponse> => {
   try {
-    const { data } = await axiosInstance.get<MonthlyTodoResponse>(TODO_URL, {
+    const { data } = await axiosInstance.get<TodoResponse>(TODO_URL, {
       params,
     });
     return data;

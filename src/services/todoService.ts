@@ -1,5 +1,5 @@
 import { TodoRepository } from '@/repositories/todotRepository';
-import { TodoItem, MonthlyTodoResponse } from '@/interfaces/todo';
+import { TodoItem, TodoResponse } from '@/interfaces/todo';
 
 export class TodoService {
   private todoRepository: TodoRepository;
@@ -8,10 +8,10 @@ export class TodoService {
     this.todoRepository = new TodoRepository();
   }
   
-  // 월간 Todo 조회
-  async getMonthlyTodo(memberId: string, startDate: string, endDate: string): Promise<MonthlyTodoResponse> {
+  // Todo 조회
+  async viewTodo(memberId: string, startDate: string, endDate: string): Promise<TodoResponse> {
     try {
-      const todos = await this.todoRepository.findMonthlyTodos(memberId, startDate, endDate);
+      const todos = await this.todoRepository.getTodos(memberId, startDate, endDate);
       return {
         success: true,
         data: todos

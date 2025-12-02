@@ -17,8 +17,8 @@ export class TodoRepository {
     };
   }
 
-  // 특정 회원의 한 달치 Todo 조회
-  async findMonthlyTodos(memberId: string, startDate: string, endDate: string): Promise<TodoItem[]> {
+  // 특정 회원의 특정 기간의 Todo 조회
+  async getTodos(memberId: string, startDate: string, endDate: string): Promise<TodoItem[]> {
     const todoData = await prisma.todo.findMany({
       where: {
         memberId: memberId,

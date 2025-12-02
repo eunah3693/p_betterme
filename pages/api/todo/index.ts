@@ -1,15 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { TodoService } from '@/services/todoService';
-import { MonthlyTodoResponse } from '@/interfaces/todo';
+import { TodoResponse } from '@/interfaces/todo';
 import { withErrorHandler, validateMethod, createErrorResponse } from '@/lib/api';
 
 const todoService = new TodoService();
 
 async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<MonthlyTodoResponse | { error: string }>
+  res: NextApiResponse<TodoResponse | { error: string }>
 ) {
-  // HTTP 메서드 검증
+
   if (!validateMethod(req, ['GET', 'POST', 'PUT', 'DELETE'])) {
     return res.status(405).json({ 
       error: 'Method not allowed', 
@@ -21,7 +21,7 @@ async function handler(
   // 메서드별 처리
   switch (req.method) {
     case 'GET':
-      return await showMonthlyTodo(req, res);
+      return await viewTodo(req, res);
     case 'POST':
       return await createTodo(req, res);
     case 'PUT':
@@ -34,10 +34,10 @@ async function handler(
 // withErrorHandler로 자동 에러 처리
 export default withErrorHandler(handler);
 
-// 월간 Todo 조회
-async function showMonthlyTodo(
+// Todo 조회
+async function viewTodo(
   req: NextApiRequest,
-  res: NextApiResponse<MonthlyTodoResponse>
+  res: NextApiResponse<TodoResponse>
 ) {
   const { memberId, startDate, endDate } = req.query;
 
@@ -48,7 +48,7 @@ async function showMonthlyTodo(
     });
   }
 
-  const result = await todoService.getMonthlyTodo(
+  const result = await todoService.viewTodo(
     memberId as string,
     startDate as string,
     endDate as string

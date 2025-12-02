@@ -1,27 +1,27 @@
 import type { AppProps } from 'next/app';
 import {
-  DehydratedState,
-  Hydrate,
   QueryClient,
   QueryClientProvider,
-} from 'react-query';
+  HydrationBoundary,
+} from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import React, { useState } from 'react';
-import { ReactQueryDevtools } from 'react-query/devtools';
-import {isProduction} from "@/functions/utils/commons";
+import { isProduction } from "@/functions/utils/commons";
 
 import '@/styles/global.css';
 
 export default function MyApp({
   Component,
   pageProps,
-}: AppProps<{ dehydratedState: DehydratedState }>) {
+}: AppProps) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
         defaultOptions: {
           queries: {
-            retry: false,
+            retry: 2,
             refetchOnWindowFocus: false,
+            staleTime: 1000 * 60 * 5, // 5분
           },
         },
       }),
@@ -29,15 +29,12 @@ export default function MyApp({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Hydrate state={pageProps.dehydratedState}>
-        {/*<GlobalStyle />*/}
+      <HydrationBoundary state={pageProps.dehydratedState}>
         <Component {...pageProps} />
-        {/*<FloatingButton />*/}
         <ReactQueryDevtools
           initialIsOpen={!isProduction()}
-          position="bottom-right"
         />
-      </Hydrate>
+      </HydrationBoundary>
     </QueryClientProvider>
   );
 }

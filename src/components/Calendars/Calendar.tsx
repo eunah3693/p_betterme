@@ -13,7 +13,6 @@ export interface TodoCalendarEvent {
 interface TodoCalendarProps {
   events: TodoCalendarEvent[];
   onSelectEvent: (evt: TodoCalendarEvent) => void;
-  onSelectSlot: (slotInfo: { start: Date; end: Date }) => void;
 }
 
 const DynamicTodoCalendar = dynamic(
@@ -30,7 +29,7 @@ const DynamicTodoCalendar = dynamic(
     
     const localizer = mod.momentLocalizer(moment);
     
-    const TodoCalendarComponent = ({ events, onSelectEvent, onSelectSlot }: TodoCalendarProps) => {
+    const TodoCalendarComponent = ({ events, onSelectEvent }: TodoCalendarProps) => {
       return React.createElement(mod.Calendar as unknown as React.ComponentType<Record<string, unknown>>, {
         localizer,
         events,
@@ -59,9 +58,6 @@ const DynamicTodoCalendar = dynamic(
         onSelectEvent: (evt: TodoCalendarEvent) => {
           onSelectEvent(evt);
         },
-        onSelectSlot: (slotInfo: { start: Date; end: Date }) => {
-          onSelectSlot(slotInfo);
-        },
         selectable: true,
         eventPropGetter: (event: TodoCalendarEvent) => ({
           style: {
@@ -83,13 +79,12 @@ const DynamicTodoCalendar = dynamic(
   }
 );
 
-function TodoCalendar({ events, onSelectEvent, onSelectSlot }: TodoCalendarProps) {
+function TodoCalendar({ events, onSelectEvent }: TodoCalendarProps) {
   return (
     <div>
       <DynamicTodoCalendar
         events={events}
         onSelectEvent={onSelectEvent}
-        onSelectSlot={onSelectSlot}
       />
     </div>
   );
