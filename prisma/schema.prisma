@@ -19,3 +19,25 @@ model Todo {
 
   @@map("todo")
 }
+
+// Blog 테이블
+model Blog {
+  idx       Int       @id @default(autoincrement())
+  memberId  String?   @map("member_id") @db.VarChar(45)
+  subject   String?   @db.VarChar(45)
+  content   String?   @db.Text
+  date      DateTime? @db.Date
+
+  @@map("blog")
+}
+
+// Diary 테이블
+model Diary {
+  idx       Int       @id @default(autoincrement())
+  memberId  String?   @map("member_id") @db.VarChar(45)
+  subject   String?   @db.VarChar(45)
+  content   String?   @db.Text
+  date      DateTime? @db.Date
+
+  @@map("diary")
+}
