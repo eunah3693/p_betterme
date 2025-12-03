@@ -11,14 +11,6 @@ import { useArtFilterStore } from '@/store/arts';
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  const { setFilter, resetFilter } = useArtFilterStore();
-
-  const handleNavClick = async (item: typeof navData[number]) => {
-    if (item.filter) setFilter(item.filter);
-    else resetFilter();
-    setIsOpen(false);
-    await router.push(item.url);
-  };
 
   return (
     <nav className="bg-white flex justify-center">
@@ -41,7 +33,6 @@ function NavBar() {
                 <Link href={item.url} prefetch={true} key={index}>
                   <button
                     className="block py-2 text-info text-right"
-                    onClick={() => handleNavClick(item)}
                   >
                     {item.text}
                   </button>
