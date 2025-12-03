@@ -44,6 +44,7 @@ interface TextareaProps extends VariantProps<typeof TextareaVariants> {
     errorColor: ColorVariant;
   };
   placeholder?: string;
+  rows?: number;
 }
 
 function Textarea({ 
@@ -53,7 +54,8 @@ function Textarea({
   value, 
   onChange, 
   error = {error: false, errorMessage: '', errorColor: 'default'},
-  placeholder
+  placeholder,
+  rows
 }: TextareaProps) {
   return (
     <div className="flex flex-col gap-1">
@@ -66,6 +68,7 @@ function Textarea({
         value={value}
         onChange={onChange}
         placeholder={placeholder}
+        rows={rows}
       ></textarea>
       {error.error && error.errorMessage && (
         <span className="text-caution text-sm pl-2">{error.errorMessage}</span>

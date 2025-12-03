@@ -4,11 +4,14 @@ import NavBar from '@/components/NavBar';
 import TodoList from '@/components/Todo';
 import type { TodoItem } from '@/components/Todo';
 import TodoCalendar, { type TodoCalendarEvent } from '@/components/Calendars/Calendar';
+import TodoPopup from '@/components/Calendars/TodoPopup';
 import type { TodoItem as ApiTodoItem } from '@/interfaces/todo';
-import { getTodo } from '@/functions/apis/todo';
+import { getTodo, createTodo, updateTodo, deleteTodo } from '@/functions/apis/todo';
 
 const Page = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const { 
     data: todos = [], 
@@ -38,6 +41,7 @@ const Page = () => {
       return result.data.map((item: ApiTodoItem) => ({
         id: item.idx,
         text: item.subject || '',
+        content: item.content || '',
         completed: item.finish === 'Y',
         date: item.date || new Date().toISOString(),
       }));
@@ -53,14 +57,95 @@ const Page = () => {
     start: new Date(todo.date || new Date()),
     end: new Date(todo.date || new Date()),
     title: todo.text,
+    content: todo.content || '',
     completed: todo.completed,
   }));
 
+  // 선택된 날짜의 할일 필터링
+  const selectedDateTodos = selectedDate 
+    ? todos.filter((todo: TodoItem) => {
+        const todoDate = new Date(todo.date || new Date()).toDateString();
+        return todoDate === selectedDate.toDateString();
+      })
+    : [];
+
   // 캘린더에서 이벤트 클릭
   const handleSelectEvent = (event: TodoCalendarEvent) => {
-    const todo = todos.find((t: TodoItem) => t.id === event.id);
-    if (todo) {
-     
+    setSelectedDate(event.start);
+    setIsPopupOpen(true);
+  };
+
+  // 캘린더에서 빈 날짜 클릭
+  const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
+    setSelectedDate(slotInfo.start);
+    setIsPopupOpen(true);
+  };
+
+  // 할일 생성
+  const handleCreateTodo = async (data: { title: string; content: string }) => {
+    if (!selectedDate) return;
+
+    try {
+      await createTodo({
+        memberId: 'test',
+        subject: data.title,
+        content: data.content,
+        finish: 'N',
+        date: selectedDate.toISOString().split('T')[0],
+      });
+      
+      await refetch();
+      alert('할 일이 등록되었습니다!');
+    } catch (error) {
+      console.error('할 일 등록 실패:', error);
+      alert('할 일 등록에 실패했습니다.');
+    }
+  };
+
+  // 할일 수정
+  const handleUpdateTodo = async (id: number, data: { title: string; content: string }) => {
+    try {
+      await updateTodo({
+        idx: id,
+        subject: data.title,
+        content: data.content,
+      });
+      
+      await refetch();
+      alert('할 일이 수정되었습니다!');
+    } catch (error) {
+      console.error('할 일 수정 실패:', error);
+      alert('할 일 수정에 실패했습니다.');
+    }
+  };
+
+  // 할일 삭제
+  const handleDeleteTodo = async (id: number) => {
+    try {
+      await deleteTodo(id);
+      await refetch();
+      alert('할 일이 삭제되었습니다!');
+    } catch (error) {
+      console.error('할 일 삭제 실패:', error);
+      alert('할 일 삭제에 실패했습니다.');
+    }
+  };
+
+  // 할일 완료 토글
+  const handleToggleComplete = async (id: number) => {
+    const todo = todos.find((t: TodoItem) => t.id === id);
+    if (!todo) return;
+
+    try {
+      await updateTodo({
+        idx: id,
+        finish: todo.completed ? 'N' : 'Y',
+      });
+      
+      await refetch();
+    } catch (error) {
+      console.error('할 일 상태 변경 실패:', error);
+      alert('할 일 상태 변경에 실패했습니다.');
     }
   };
 
@@ -98,6 +183,7 @@ const Page = () => {
                 <TodoCalendar
                   events={calendarEvents}
                   onSelectEvent={handleSelectEvent}
+                  onSelectSlot={handleSelectSlot}
                 />
               )}
             </div>
@@ -105,6 +191,18 @@ const Page = () => {
           </div>
         </div>
       </div>
+
+      {/* Todo 관리 팝업 */}
+      <TodoPopup
+        isOpen={isPopupOpen}
+        selectedDate={selectedDate}
+        todos={selectedDateTodos}
+        onClose={() => setIsPopupOpen(false)}
+        onSubmit={handleCreateTodo}
+        onUpdate={handleUpdateTodo}
+        onDelete={handleDeleteTodo}
+        onToggleComplete={handleToggleComplete}
+      />
     </div>
   );
 };

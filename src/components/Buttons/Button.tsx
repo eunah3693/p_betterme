@@ -20,6 +20,8 @@ export const ButtonVariants = cva(
         bgInfo: 'bg-info text-white',
         bgCaution: 'bg-caution text-white',
         bgHighlight: 'bg-highlight text-white',
+        bgGray: 'bg-gray-500 text-white',
+        bgDanger: 'bg-red-500 text-white',
       },
       size: {
         default: 'px-2 py-1',
@@ -40,7 +42,7 @@ export const ButtonVariants = cva(
 interface ButtonProps extends VariantProps<typeof ButtonVariants> {
   className?: string;
   children?: React.ReactNode;
-  onClick?: () => void;
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
 }
 

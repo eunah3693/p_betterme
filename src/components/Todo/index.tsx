@@ -5,6 +5,7 @@ import { cn } from '@/constants/cn';
 export interface TodoItem {
   id: number;
   text: string;
+  content?: string;
   completed: boolean;
   date?: string;
 }
