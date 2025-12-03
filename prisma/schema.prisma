@@ -41,3 +41,16 @@ model Diary {
 
   @@map("diary")
 }
+
+// Member 테이블
+model Member {
+  idx       Int     @id @default(autoincrement())
+  id        String  @db.VarChar(45)
+  password  String  @db.VarChar(45)
+  nickname  String  @db.VarChar(45)
+  job       String  @db.VarChar(45)
+  jobInfo   String  @map("job_info") @db.VarChar(255)
+  myBadge   String  @map("my_badge") @db.VarChar(255)
+
+  @@map("member")
+}

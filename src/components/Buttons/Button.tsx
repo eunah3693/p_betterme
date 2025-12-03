@@ -44,14 +44,16 @@ interface ButtonProps extends VariantProps<typeof ButtonVariants> {
   children?: React.ReactNode;
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   type?: "button" | "submit" | "reset";
+  disabled?: boolean;
 }
 
-function Button({ color, size, className, children, onClick, type = "button" }: ButtonProps) {
+function Button({ color, size, className, children, onClick, type = "button", disabled }: ButtonProps) {
   return (
     <button 
       className={cn(ButtonVariants({ color, size, className }))}
       onClick={onClick}
       type={type}
+      disabled={disabled}
     >
       {children && children}
     </button>

@@ -5,6 +5,6 @@ export const paths = {
   PROJECT: '/project',
   CHAT: '/chat',
   LOGIN: '/login',
-  SIGHNUP: '/sighnup',
+  SIGNUP: '/signup',
   MYINFO: '/myinfo',
 };

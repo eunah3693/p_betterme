@@ -47,6 +47,8 @@ interface InputProps extends VariantProps<typeof InputVariants> {
   placeholder?: string;
   label?: string;
   labelClass?: string;
+  type?: string;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 function Input2({ 
@@ -58,7 +60,9 @@ function Input2({
   error = {error: false, errorMessage: '', errorColor: 'default'},
   placeholder,
   label,
-  labelClass
+  labelClass,
+  type = "text",
+  onKeyDown
 }: InputProps) {
   return (
     <div className="flex flex-col gap-1 py-1">
@@ -70,7 +74,7 @@ function Input2({
           {label}
         </label>
         <input 
-          type="text" 
+          type={type}
           id="first_name" 
           className={cn(InputVariants({ 
             color: error.error ? error.errorColor : color, 
@@ -80,6 +84,7 @@ function Input2({
           placeholder={placeholder} 
           value={value}
           onChange={onChange}
+          onKeyDown={onKeyDown}
         />
       </div>
       {error.error && error.errorMessage && (
