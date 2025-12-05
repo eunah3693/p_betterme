@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
-import TodoList from '@/components/Todo';
 import type { TodoItem } from '@/components/Todo';
 import TodoCalendar, { type TodoCalendarEvent } from '@/components/Calendars/Calendar';
 import TodoPopup from '@/components/Calendars/TodoPopup';
@@ -42,8 +41,10 @@ const Page = () => {
         id: item.idx,
         text: item.subject || '',
         content: item.content || '',
-        completed: item.finish === 'Y',
-        date: item.date || new Date().toISOString(),
+        completed: item.finish === '1',
+        date: item.startDate || new Date().toISOString(),
+        startDate: item.startDate || new Date().toISOString(),
+        finishDate: item.finishDate || new Date().toISOString(),
       }));
     },
     staleTime: 1000 * 60 * 5,
@@ -52,20 +53,28 @@ const Page = () => {
   });
 
 
-  const calendarEvents: TodoCalendarEvent[] = todos.map((todo: TodoItem) => ({
+  const calendarEvents: TodoCalendarEvent[] = todos.map((todo: any) => ({
     id: todo.id,
-    start: new Date(todo.date || new Date()),
-    end: new Date(todo.date || new Date()),
+    start: new Date(todo.startDate || new Date()),
+    end: new Date(todo.finishDate || new Date()),
     title: todo.text,
     content: todo.content || '',
     completed: todo.completed,
   }));
 
-  // 선택된 날짜의 할일 필터링
+  // 선택된 날짜의 할일 필터링 (기간 포함)
   const selectedDateTodos = selectedDate 
-    ? todos.filter((todo: TodoItem) => {
-        const todoDate = new Date(todo.date || new Date()).toDateString();
-        return todoDate === selectedDate.toDateString();
+    ? todos.filter((todo: any) => {
+        const todoStart = new Date(todo.startDate || new Date());
+        const todoEnd = new Date(todo.finishDate || new Date());
+        const selected = new Date(selectedDate);
+        
+        // 선택된 날짜가 Todo의 시작일과 종료일 사이에 있는지 확인
+        todoStart.setHours(0, 0, 0, 0);
+        todoEnd.setHours(0, 0, 0, 0);
+        selected.setHours(0, 0, 0, 0);
+        
+        return selected >= todoStart && selected <= todoEnd;
       })
     : [];
 
@@ -82,16 +91,19 @@ const Page = () => {
   };
 
   // 할일 생성
-  const handleCreateTodo = async (data: { title: string; content: string }) => {
+  const handleCreateTodo = async (data: { title: string; content: string; startDate?: string; finishDate?: string }) => {
     if (!selectedDate) return;
 
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    
     try {
       await createTodo({
         memberId: 'test',
         subject: data.title,
         content: data.content,
-        finish: 'N',
-        date: selectedDate.toISOString().split('T')[0],
+        finish: '0',
+        startDate: data.startDate || dateStr,
+        finishDate: data.finishDate || dateStr,
       });
       
       await refetch();
@@ -103,12 +115,14 @@ const Page = () => {
   };
 
   // 할일 수정
-  const handleUpdateTodo = async (id: number, data: { title: string; content: string }) => {
+  const handleUpdateTodo = async (id: number, data: { title: string; content: string; startDate?: string; finishDate?: string }) => {
     try {
       await updateTodo({
         idx: id,
         subject: data.title,
         content: data.content,
+        startDate: data.startDate,
+        finishDate: data.finishDate,
       });
       
       await refetch();
@@ -133,16 +147,14 @@ const Page = () => {
 
   // 할일 완료 토글
   const handleToggleComplete = async (id: number) => {
-    const todo = todos.find((t: TodoItem) => t.id === id);
-    if (!todo) return;
-
     try {
       await updateTodo({
         idx: id,
-        finish: todo.completed ? 'N' : 'Y',
+        finish: '1',  // 완료 버튼 클릭 시 무조건 1(완료)로 설정
       });
       
       await refetch();
+      alert('할 일이 완료되었습니다!');
     } catch (error) {
       console.error('할 일 상태 변경 실패:', error);
       alert('할 일 상태 변경에 실패했습니다.');
@@ -157,7 +169,7 @@ const Page = () => {
         <div className="w-full max-w-[1920px] lg:w-[1920px] md:w-[90%] w-[90%]">
           <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-main mb-2">나의 캘린더</h1>
+              <h1 className="text-3xl font-bold text-main mb-2">Todo Calendar</h1>
             </div>
             <div className="mb-8">
               {isLoading ? (

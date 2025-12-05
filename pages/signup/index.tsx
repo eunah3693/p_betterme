@@ -1,127 +1,79 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import NavBar from '@/components/NavBar';
 import Input from '@/components/Forms/Input';
 import Textarea from '@/components/Forms/Textarea';
 import Button from '@/components/Buttons/Button';
 import Badge from '@/components/Forms/Badge';
-import { checkId, signup } from '@/functions/apis/member';
+import LoadingOverlay from '@/components/Loading/LoadingOverlay';
+import { useCheckId } from '@/functions/hooks/member/useCheckId';
+import { useBadge } from '@/functions/hooks/member/useBadge';
+import { signup } from '@/functions/apis/member';
+import { signupSchema } from '@/lib/validation';
+
+type SignupFormData = z.infer<typeof signupSchema>;
 
 const SignupPage = () => {
   const router = useRouter();
 
-  // 폼 상태
-  const [id, setId] = useState('');
-  const [password, setPassword] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [job, setJob] = useState('');
-  const [jobInfo, setJobInfo] = useState('');
-  
-  // 배지 관련 상태
-  const [badgeInput, setBadgeInput] = useState('');
-  const [badges, setBadges] = useState<string[]>([]);
+  // React Hook Form 설정정
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    mode: 'onBlur',
+  });
 
-  // ID 중복 체크 상태
-  const [idChecked, setIdChecked] = useState(false);
-  const [idAvailable, setIdAvailable] = useState(false);
-  const [idCheckMessage, setIdCheckMessage] = useState('');
+  // 현재 ID 값 watch
+  const currentId = watch('id');
 
-  // 로딩 상태
-  const [isCheckingId, setIsCheckingId] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // ID 중복 체크 hook
+  const {
+    checked: idChecked,
+    available: idAvailable,
+    message: idCheckMessage,
+    loading: isCheckingId,
+    handleCheck: handleCheckId,
+  } = useCheckId(currentId || '');
 
-  // ID 입력 시 중복체크 초기화
-  const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setId(e.target.value);
-    setIdChecked(false);
-    setIdAvailable(false);
-    setIdCheckMessage('');
-  };
-
-  // ID 중복 체크
-  const handleCheckId = async () => {
-    if (!id.trim()) {
-      alert('아이디를 입력해주세요!');
-      return;
-    }
-
-    setIsCheckingId(true);
-    try {
-      const result = await checkId(id);
-      setIdChecked(true);
-      setIdAvailable(result.available);
-      setIdCheckMessage(result.message || '');
-    } catch (error) {
-      console.error('ID 중복 체크 실패:', error);
-      alert('ID 중복 체크에 실패했습니다.');
-    } finally {
-      setIsCheckingId(false);
-    }
-  };
-
-  // 배지 추가
-  const handleAddBadge = () => {
-    if (!badgeInput.trim()) {
-      alert('배지 내용을 입력해주세요!');
-      return;
-    }
-
-    if (badges.includes(badgeInput.trim())) {
-      alert('이미 추가된 배지입니다!');
-      return;
-    }
-
-    setBadges([...badges, badgeInput.trim()]);
-    setBadgeInput('');
-  };
-
-  // 배지 삭제
-  const handleRemoveBadge = (badgeToRemove: string) => {
-    setBadges(badges.filter(badge => badge !== badgeToRemove));
-  };
-
-  // Enter 키로 배지 추가
-  const handleBadgeKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddBadge();
-    }
-  };
+  // 배지 hook
+  const {
+    badgeInput,
+    setBadgeInput,
+    badges,
+    handleAddBadge,
+    handleRemoveBadge,
+    handleBadgeKeyDown,
+    getBadgeString,
+  } = useBadge();
 
   // 회원가입 제출
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // 유효성 검사
-    if (!id.trim()) {
-      alert('아이디를 입력해주세요!');
+  const onSubmit = async (data: SignupFormData) => {
+    // ID 중복 체크 확인
+    if (!idChecked) {
+      alert('아이디 중복 체크를 해주세요!');
+      return;
+    }
+    // ID 사용가능여부
+    if (!idAvailable) {
+      alert('사용할 수 없는 아이디입니다!');
       return;
     }
 
-    if (!idChecked || !idAvailable) {
-      alert('아이디 중복 체크를 완료해주세요!');
-      return;
-    }
-
-    if (!password.trim()) {
-      alert('비밀번호를 입력해주세요!');
-      return;
-    }
-
-    if (!nickname.trim()) {
-      alert('닉네임을 입력해주세요!');
-      return;
-    }
-
-    setIsSubmitting(true);
     try {
       const result = await signup({
-        id,
-        password,
-        nickname,
-        job: job || '',
-        jobInfo: jobInfo || '',
-        myBadge: badges.join(','), // 배지를 쉼표로 구분
+        id: data.id,
+        password: data.password,
+        nickname: data.nickname,
+        job: data.job || '',
+        jobInfo: data.jobInfo || '',
+        myBadge: getBadgeString(), 
       });
 
       if (result.success) {
@@ -133,44 +85,56 @@ const SignupPage = () => {
     } catch (error) {
       console.error('회원가입 실패:', error);
       alert('회원가입에 실패했습니다.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="font-notoSans min-h-screen bg-gray-50">
-      <NavBar />
+    <>
+      <LoadingOverlay 
+        isLoading={isCheckingId || isSubmitting} 
+        message={isCheckingId ? 'ID 중복 확인 중' : '회원가입 처리 중'}
+      />
+      <div className="font-notoSans min-h-screen bg-gray-50">
+        <NavBar />
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[600px]">
           <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-            <h1 className="text-3xl font-bold text-main mb-8 text-center">회원가입</h1>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <h1 className="text-3xl font-bold text-main mb-8">회원가입</h1>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-5">
               {/* 아이디 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 mb-2">
                   아이디 <span className="text-red-500">*</span>
                 </label>
-                <div className="flex gap-2">
-                  <Input
-                    value={id}
-                    onChange={handleIdChange}
-                    placeholder="아이디를 입력하세요"
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleCheckId}
-                    color={idChecked && idAvailable ? 'bgInfo' : 'bgMain'}
-                    size="md"
-                    className="whitespace-nowrap"
-                    disabled={isCheckingId}
-                  >
-                    {isCheckingId ? '확인 중...' : '중복확인'}
-                  </Button>
+                <div className="flex gap-2 items-center">
+                  <div className="flex-2 w-full">
+                    <Input
+                      color="bgray"
+                      size="md"
+                      {...register('id')}
+                      placeholder="아이디를 입력하세요 (영문, 숫자, 밑줄 4-20자)"
+                      className="flex-1"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <Button
+                      type="button"
+                      onClick={handleCheckId}
+                      color={idChecked && idAvailable ? 'bgInfo' : 'bgMain'}
+                      size="md"
+                      className="whitespace-nowrap"
+                      disabled={isCheckingId}
+                    >
+                      중복확인
+                    </Button>
+                  </div>
                 </div>
-                {idCheckMessage && (
+                {errors.id && (
+                  <p className="mt-2 text-sm text-red-500">
+                    {errors.id.message}
+                  </p>
+                )}
+                {idCheckMessage && !errors.id && (
                   <p className={`mt-2 text-sm ${idAvailable ? 'text-green-600' : 'text-red-500'}`}>
                     {idCheckMessage}
                   </p>
@@ -179,39 +143,52 @@ const SignupPage = () => {
 
               {/* 비밀번호 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 mb-2">
                   비밀번호 <span className="text-red-500">*</span>
                 </label>
                 <Input
+                  color="bgray"
+                  size="md"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="비밀번호를 입력하세요"
+                  {...register('password')}
+                  placeholder="비밀번호를 입력하세요 (6-20자)"
                   className="w-full"
                 />
+                {errors.password && (
+                  <p className="mt-2 text-sm text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
 
               {/* 닉네임 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 mb-2">
                   닉네임 <span className="text-red-500">*</span>
                 </label>
                 <Input
-                  value={nickname}
-                  onChange={(e) => setNickname(e.target.value)}
-                  placeholder="닉네임을 입력하세요"
+                  color="bgray"
+                  size="md"
+                  {...register('nickname')}
+                  placeholder="닉네임을 입력하세요 (2-10자)"
                   className="w-full"
                 />
+                {errors.nickname && (
+                  <p className="mt-2 text-sm text-red-500">
+                    {errors.nickname.message}
+                  </p>
+                )}
               </div>
 
               {/* 직업 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 mb-2">
                   직업
                 </label>
                 <Input
-                  value={job}
-                  onChange={(e) => setJob(e.target.value)}
+                  color="bgray"
+                  size="md"
+                  {...register('job')}
                   placeholder="직업을 입력하세요"
                   className="w-full"
                 />
@@ -219,12 +196,13 @@ const SignupPage = () => {
 
               {/* 직업 소개 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 mb-2">
                   직업 소개
                 </label>
                 <Textarea
-                  value={jobInfo}
-                  onChange={(e) => setJobInfo(e.target.value)}
+                  color="bgray"
+                  size="md"
+                  {...register('jobInfo')}
                   placeholder="직업에 대해 소개해주세요"
                   rows={4}
                   className="w-full"
@@ -233,28 +211,34 @@ const SignupPage = () => {
 
               {/* 내 소개 배지 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  내 소개 (배지)
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  내 배지
                 </label>
                 
                 {/* 배지 추가 입력 */}
-                <div className="flex gap-2 mb-4">
-                  <Input
-                    value={badgeInput}
-                    onChange={(e) => setBadgeInput(e.target.value)}
-                    onKeyDown={handleBadgeKeyDown}
-                    placeholder="예: 성실한, 노력, 긍정"
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleAddBadge}
-                    color="bgMain"
-                    size="md"
-                    className="whitespace-nowrap"
-                  >
-                    추가
-                  </Button>
+                <div className="flex gap-2 items-center">
+                  <div className="flex-2 w-full">
+                      <Input
+                        color="bgray"
+                        size="md"
+                        value={badgeInput}
+                        onChange={(e) => setBadgeInput(e.target.value)}
+                        onKeyDown={handleBadgeKeyDown}
+                        placeholder="예: 성실한, 노력, 긍정"
+                        className="flex-1"
+                      />
+                  </div>
+                  <div className="flex-1">
+                    <Button
+                      type="button"
+                      onClick={handleAddBadge}
+                      color="bgMain"
+                      size="md"
+                      className="whitespace-nowrap"
+                    >
+                      추가
+                    </Button>
+                  </div>
                 </div>
 
                 {/* 배지 리스트 */}
@@ -262,17 +246,12 @@ const SignupPage = () => {
                   <div className="flex flex-wrap gap-2 p-4 bg-gray-50 rounded-lg">
                     {badges.map((badge, index) => (
                       <div key={index} className="flex items-center gap-1">
-                        <Badge color="bMain" size="md">
+                        <Badge color="bMain" size="sm">
                           {badge}
+                          <span  onClick={() => handleRemoveBadge(badge)}
+                          className="ml-3 text-white hover:text-red-500 transition-colors"
+                          title="삭제">✕</span>
                         </Badge>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveBadge(badge)}
-                          className="ml-1 text-gray-500 hover:text-red-500 transition-colors"
-                          title="삭제"
-                        >
-                          ✕
-                        </button>
                       </div>
                     ))}
                   </div>
@@ -288,7 +267,7 @@ const SignupPage = () => {
                   className="flex-1"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? '등록 중...' : '회원가입'}
+                  회원가입
                 </Button>
                 <Button
                   type="button"
@@ -307,7 +286,7 @@ const SignupPage = () => {
               이미 계정이 있으신가요?{' '}
               <button
                 onClick={() => router.push('/login')}
-                className="text-main font-medium hover:underline"
+                className="text-main font-bold hover:underline"
               >
                 로그인하기
               </button>
@@ -316,6 +295,7 @@ const SignupPage = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

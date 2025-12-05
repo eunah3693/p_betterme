@@ -23,7 +23,8 @@ export const createTodo = async (todoData: {
   subject: string;
   content?: string;
   finish?: string;
-  date: string;
+  startDate: string;
+  finishDate: string;
 }) => {
   try {
     const { data } = await axiosInstance.post(TODO_URL, todoData);
@@ -40,7 +41,8 @@ export const updateTodo = async (todoData: {
   subject?: string;
   content?: string;
   finish?: string;
-  date?: string;
+  startDate?: string;
+  finishDate?: string;
 }) => {
   try {
     const { data } = await axiosInstance.put(TODO_URL, todoData);

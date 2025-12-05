@@ -5,7 +5,6 @@ export const navData = [
   { text: 'DIARY', url: paths.DIARY},
   { text: 'BLOG', url: paths.BLOG },
   { text: 'PROJECT', url: paths.PROJECT },
-  { text: 'CHAT', url: paths.CHAT },
   { text: 'LOGIN', url: paths.LOGIN },
   { text: 'SIGN UP', url: paths.SIGNUP },
   { text: 'MY INFO', url: paths.MYINFO },

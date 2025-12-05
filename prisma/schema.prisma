@@ -15,7 +15,8 @@ model Todo {
   subject    String?   @db.VarChar(45)
   content    String?   @db.VarChar(45)
   finish     String?   @db.VarChar(45)
-  date       DateTime? @db.Date
+  startDate  DateTime? @map("start_date") @db.Date
+  finishDate DateTime? @map("finish_date") @db.Date
 
   @@map("todo")
 }

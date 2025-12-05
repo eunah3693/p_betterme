@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { DiaryItem } from '@/interfaces/diary';
+import { DiaryItem, CreateDiaryRequest, UpdateDiaryRequest } from '@/interfaces/diary';
 import { Prisma } from '@prisma/client';
 
 export class DiaryRepository {
@@ -40,12 +40,7 @@ export class DiaryRepository {
   }
 
   // 일기 추가
-  async createDiary(data: {
-    memberId: string;
-    subject: string;
-    content: string;
-    date: Date;
-  }): Promise<DiaryItem> {
+  async createDiary(data: CreateDiaryRequest): Promise<DiaryItem> {
     const diary = await prisma.diary.create({
       data: {
         memberId: data.memberId,
@@ -59,11 +54,7 @@ export class DiaryRepository {
   }
 
   // 일기 수정
-  async updateDiary(idx: number, data: {
-    subject?: string;
-    content?: string;
-    date?: Date;
-  }): Promise<DiaryItem> {
+  async updateDiary(idx: number, data: UpdateDiaryRequest): Promise<DiaryItem> {
     const diary = await prisma.diary.update({
       where: { idx },
       data

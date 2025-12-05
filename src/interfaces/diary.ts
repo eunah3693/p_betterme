@@ -12,15 +12,14 @@ export interface CreateDiaryRequest {
   memberId: string;
   subject: string;
   content: string;
-  date: string; // YYYY-MM-DD
+  date: Date;
 }
 
 // Diary 수정 요청
 export interface UpdateDiaryRequest {
-  idx: number;
   subject?: string;
   content?: string;
-  date?: string;
+  date?: Date;
 }
 
 // Diary 응답

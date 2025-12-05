@@ -16,7 +16,7 @@ function NavBar() {
     <nav className="bg-white flex justify-center">
       <div className="w-[1920px] max-w-full flex flex-wrap items-center justify-between px-4 py-2">
         <Link href="/" prefetch={false} className="flex items-center">
-            <Image src={logo} alt="logo" width={200} height={48} className="h-12 w-auto max-w-[200px]" />
+            <Image src={logo} alt="logo" width={120} height={40} className="h-12 w-auto max-w-[120px]" />
         </Link>
         <button 
           onClick={() => setIsOpen(!isOpen)}

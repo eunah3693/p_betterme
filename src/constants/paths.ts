@@ -1,5 +1,5 @@
 export const paths = {
-  CALENDAR: '/calendar',
+  CALENDAR: '/',
   DIARY: '/diary',
   BLOG: '/blog',
   PROJECT: '/project',

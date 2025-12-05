@@ -2,11 +2,14 @@ import { axiosInstance } from './axios';
 import { SignupRequest, LoginRequest, MemberResponse, CheckIdResponse } from '@/interfaces/member';
 
 const MEMBER_URL = '/api/member';
+const CHECK_ID_URL = `${MEMBER_URL}/check-id`;
+const SIGNUP_URL = `${MEMBER_URL}/signup`;
+const LOGIN_URL = `${MEMBER_URL}/login`;
 
 // 아이디 중복 체크
 export const checkId = async (id: string): Promise<CheckIdResponse> => {
   try {
-    const { data } = await axiosInstance.get<CheckIdResponse>(`${MEMBER_URL}?id=${id}`);
+    const { data } = await axiosInstance.get<CheckIdResponse>(`${CHECK_ID_URL}?id=${id}`);
     return data;
   } catch (error) {
     console.error('아이디 중복 체크 실패:', error);
@@ -17,7 +20,7 @@ export const checkId = async (id: string): Promise<CheckIdResponse> => {
 // 회원가입
 export const signup = async (signupData: SignupRequest): Promise<MemberResponse> => {
   try {
-    const { data } = await axiosInstance.post<MemberResponse>(MEMBER_URL, signupData);
+    const { data } = await axiosInstance.post<MemberResponse>(SIGNUP_URL, signupData);
     return data;
   } catch (error) {
     console.error('회원가입 실패:', error);
@@ -28,10 +31,7 @@ export const signup = async (signupData: SignupRequest): Promise<MemberResponse>
 // 로그인
 export const login = async (loginData: LoginRequest): Promise<MemberResponse> => {
   try {
-    const { data } = await axiosInstance.post<MemberResponse>(MEMBER_URL, {
-      ...loginData,
-      action: 'login'
-    });
+    const { data } = await axiosInstance.post<MemberResponse>(LOGIN_URL, loginData);
     return data;
   } catch (error) {
     console.error('로그인 실패:', error);
@@ -42,7 +42,7 @@ export const login = async (loginData: LoginRequest): Promise<MemberResponse> =>
 // 회원 정보 조회
 export const getMemberInfo = async (idx: number): Promise<MemberResponse> => {
   try {
-    const { data } = await axiosInstance.get<MemberResponse>(`${MEMBER_URL}?idx=${idx}`);
+    const { data } = await axiosInstance.get<MemberResponse>(`${MEMBER_URL}/${idx}`);
     return data;
   } catch (error) {
     console.error('회원 정보 조회 실패:', error);
@@ -58,7 +58,8 @@ export const updateMemberInfo = async (updateData: {
   myBadge?: string;
 }): Promise<MemberResponse> => {
   try {
-    const { data } = await axiosInstance.put<MemberResponse>(MEMBER_URL, updateData);
+    const { idx, ...body } = updateData;
+    const { data } = await axiosInstance.put<MemberResponse>(`${MEMBER_URL}/${idx}`, body);
     return data;
   } catch (error) {
     console.error('회원 정보 수정 실패:', error);

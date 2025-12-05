@@ -1,5 +1,5 @@
 import { MemberRepository } from '@/repositories/memberRepository';
-import { MemberResponse, CheckIdResponse, SignupRequest, LoginRequest } from '@/interfaces/member';
+import { MemberResponse, CheckIdResponse, SignupRequest, LoginRequest, UpdateMemberRequest } from '@/interfaces/member';
 
 export class MemberService {
   private memberRepository: MemberRepository;
@@ -38,7 +38,7 @@ export class MemberService {
 
   // 로그인
   async login(data: LoginRequest): Promise<MemberResponse> {
-    const member = await this.memberRepository.login(data.id, data.password);
+    const member = await this.memberRepository.login(data);
     
     if (!member) {
       return {
@@ -85,7 +85,7 @@ export class MemberService {
   }
 
   // 회원 정보 수정
-  async updateMemberInfo(idx: number, data: { job?: string; jobInfo?: string; myBadge?: string }): Promise<MemberResponse> {
+  async updateMemberInfo(idx: number, data: UpdateMemberRequest): Promise<MemberResponse> {
     try {
       const member = await this.memberRepository.updateMember(idx, data);
       

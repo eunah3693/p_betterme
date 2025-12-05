@@ -32,6 +32,13 @@ export interface MemberResponse {
   message?: string;
 }
 
+export interface UpdateMemberRequest {
+  nickname?: string;
+  job?: string;
+  jobInfo?: string;
+  myBadge?: string;
+}
+
 export interface CheckIdResponse {
   success: boolean;
   available: boolean;

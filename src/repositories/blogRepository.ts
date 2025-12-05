@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { BlogItem } from '@/interfaces/blog';
+import { BlogItem, CreateBlogRequest, UpdateBlogRequest } from '@/interfaces/blog';
 import { Prisma } from '@prisma/client';
 
 export class BlogRepository {
@@ -40,12 +40,7 @@ export class BlogRepository {
   }
 
   // 블로그 추가
-  async createBlog(data: {
-    memberId: string;
-    subject: string;
-    content: string;
-    date: Date;
-  }): Promise<BlogItem> {
+  async createBlog(data: CreateBlogRequest): Promise<BlogItem> {
     const blog = await prisma.blog.create({
       data: {
         memberId: data.memberId,
@@ -59,11 +54,7 @@ export class BlogRepository {
   }
 
   // 블로그 수정
-  async updateBlog(idx: number, data: {
-    subject?: string;
-    content?: string;
-    date?: Date;
-  }): Promise<BlogItem> {
+  async updateBlog(idx: number, data: UpdateBlogRequest): Promise<BlogItem> {
     const blog = await prisma.blog.update({
       where: { idx },
       data

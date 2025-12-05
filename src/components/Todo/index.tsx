@@ -8,6 +8,8 @@ export interface TodoItem {
   content?: string;
   completed: boolean;
   date?: string;
+  startDate?: string;
+  finishDate?: string;
 }
 
 interface TodoListProps {
@@ -49,7 +51,6 @@ function TodoList({
           id: Date.now(),
           text: newTodo.trim(),
           completed: false,
-          date: new Date().toISOString(),
         };
         setTodos([...todos, newTodoItem]);
       }
@@ -66,32 +67,28 @@ function TodoList({
     }
   };
 
-  // Enter 키로 추가
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  // Enter 키 처리
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleAdd();
     }
   };
 
-  return (
-    <div className={cn('bg-white rounded-lg shadow-sm p-6', className)}>
-      {/* 헤더 */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-main">오늘의 할 일</h2>
-        <span className="text-sm text-gray-500">
-          {todos.filter(t => t.completed).length} / {todos.length} 완료
-        </span>
-      </div>
+  // 통계
+  const completedCount = (onToggle ? initialTodos : todos).filter(todo => todo.completed).length;
+  const totalCount = (onToggle ? initialTodos : todos).length;
 
-      {/* 투두 추가 입력 */}
-      <div className="flex gap-2 mb-6">
+  return (
+    <div className={cn('flex flex-col gap-4', className)}>
+      {/* 투두 입력 영역 */}
+      <div className="flex gap-2">
         <input
           type="text"
           value={newTodo}
           onChange={(e) => setNewTodo(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="할 일을 입력하세요..."
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-main"
+          onKeyPress={handleKeyPress}
+          placeholder="할 일을 입력하세요"
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-main focus:border-transparent"
         />
         <button
           onClick={handleAdd}
@@ -102,49 +99,34 @@ function TodoList({
       </div>
 
       {/* 투두 리스트 */}
-      <div className="space-y-3">
-        {todos.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
-            아직 할 일이 없습니다. 추가해보세요! 📝
-          </div>
+      <div className="flex flex-col gap-2">
+        {(onToggle ? initialTodos : todos).length === 0 ? (
+          <p className="text-gray-400 text-center py-8">등록된 할 일이 없습니다.</p>
         ) : (
-          todos.map((todo) => (
+          (onToggle ? initialTodos : todos).map((todo) => (
             <div
               key={todo.id}
-              className={cn(
-                'flex items-center gap-3 p-3 rounded-lg border transition-all',
-                todo.completed
-                  ? 'bg-gray-50 border-gray-200'
-                  : 'bg-white border-gray-300 hover:border-main'
-              )}
+              className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-md hover:shadow-sm transition-shadow"
             >
-              {/* 체크박스 */}
               <Checkbox
                 checked={todo.completed}
                 onChange={() => handleToggle(todo.id)}
                 size="md"
-                color="bHighlight"
+                color="bMain"
               />
-
-              {/* 할 일 텍스트 */}
               <span
                 className={cn(
-                  'flex-1 text-base transition-all',
-                  todo.completed
-                    ? 'line-through text-gray-400'
-                    : 'text-gray-800'
+                  'flex-1 text-gray-800',
+                  todo.completed && 'line-through text-gray-400'
                 )}
               >
                 {todo.text}
               </span>
-
-              {/* 삭제 버튼 */}
               <button
                 onClick={() => handleDelete(todo.id)}
-                className="text-gray-400 hover:text-red-500 transition-colors px-2"
-                title="삭제"
+                className="px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded transition-colors"
               >
-                ✕
+                삭제
               </button>
             </div>
           ))
@@ -152,13 +134,14 @@ function TodoList({
       </div>
 
       {/* 통계 */}
-      {todos.length > 0 && (
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>전체: {todos.length}개</span>
-            <span>진행중: {todos.filter(t => !t.completed).length}개</span>
-            <span>완료: {todos.filter(t => t.completed).length}개</span>
-          </div>
+      {totalCount > 0 && (
+        <div className="flex justify-between items-center px-4 py-3 bg-gray-50 rounded-md text-sm text-gray-600">
+          <span>
+            완료: <span className="font-bold text-main">{completedCount}</span> / {totalCount}
+          </span>
+          <span>
+            진행률: <span className="font-bold text-main">{Math.round((completedCount / totalCount) * 100)}%</span>
+          </span>
         </div>
       )}
     </div>
@@ -166,3 +149,4 @@ function TodoList({
 }
 
 export default TodoList;
+

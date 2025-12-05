@@ -62,10 +62,10 @@ async function createTodo(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { memberId, projectId, subject, content, finish, date } = req.body;
+  const { memberId, projectId, subject, content, finish, startDate, finishDate } = req.body;
 
-  if (!memberId || !subject || !date) {
-    return res.status(400).json({ error: 'memberId, subject, date는 필수입니다' });
+  if (!memberId || !subject || !startDate || !finishDate) {
+    return res.status(400).json({ error: 'memberId, subject, startDate, finishDate는 필수입니다' });
   }
 
   const result = await todoService.createTodo({
@@ -73,8 +73,9 @@ async function createTodo(
     projectId,
     subject,
     content,
-    finish: finish || 'N',
-    date: new Date(date)
+    finish: finish || '0',
+    startDate: new Date(startDate),
+    finishDate: new Date(finishDate)
   });
 
   return res.status(201).json({ success: true, data: result });
@@ -85,7 +86,7 @@ async function updateTodo(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { idx, subject, content, finish, date } = req.body;
+  const { idx, subject, content, finish, startDate, finishDate } = req.body;
 
   if (!idx) {
     return res.status(400).json({ error: 'idx는 필수입니다' });
@@ -95,13 +96,15 @@ async function updateTodo(
     subject?: string;
     content?: string;
     finish?: string;
-    date?: Date;
+    startDate?: Date;
+    finishDate?: Date;
   } = {};
 
   if (subject) updateData.subject = subject;
   if (content) updateData.content = content;
   if (finish) updateData.finish = finish;
-  if (date) updateData.date = new Date(date);
+  if (startDate) updateData.startDate = new Date(startDate);
+  if (finishDate) updateData.finishDate = new Date(finishDate);
 
   const result = await todoService.updateTodo(Number(idx), updateData);
 

@@ -18,6 +18,7 @@ export const TextareaVariants = cva(
         bInfo: 'bg-white text-info border border-info',
         bCaution: 'bg-white text-info border border-caution',
         bHighlight: 'bg-white text-info border border-highlight',
+        bgray: 'bg-white text-info border border-desc',
       },
       size: {
         default: 'px-4 py-1',

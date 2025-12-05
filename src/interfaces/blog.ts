@@ -12,15 +12,14 @@ export interface CreateBlogRequest {
   memberId: string;
   subject: string;
   content: string;
-  date: string; // YYYY-MM-DD
+  date: Date;
 }
 
 // Blog 수정 요청
 export interface UpdateBlogRequest {
-  idx: number;
   subject?: string;
   content?: string;
-  date?: string;
+  date?: Date;
 }
 
 // Blog 응답
@@ -35,6 +34,9 @@ export interface BlogListResponse {
   success: boolean;
   data: BlogItem[];
 }
+
+
+
 
 
 

@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { MemberItem } from '@/interfaces/member';
+import { MemberItem, SignupRequest, LoginRequest, UpdateMemberRequest } from '@/interfaces/member';
 import { Prisma } from '@prisma/client';
 
 export class MemberRepository {
@@ -40,14 +40,7 @@ export class MemberRepository {
   }
 
   // 회원 생성
-  async createMember(data: {
-    id: string;
-    password: string;
-    nickname: string;
-    job: string;
-    jobInfo: string;
-    myBadge: string;
-  }): Promise<MemberItem> {
+  async createMember(data: SignupRequest): Promise<MemberItem> {
     const member = await prisma.member.create({
       data: {
         id: data.id,
@@ -62,23 +55,18 @@ export class MemberRepository {
   }
 
   // 로그인 (ID와 비밀번호로 조회)
-  async login(id: string, password: string): Promise<MemberItem | null> {
+  async login(data: LoginRequest): Promise<MemberItem | null> {
     const member = await prisma.member.findFirst({
       where: {
-        id,
-        password
+        id: data.id,
+        password: data.password
       }
     });
     return member ? this.changeToMemberItem(member) : null;
   }
 
   // 회원 정보 수정
-  async updateMember(idx: number, data: {
-    nickname?: string;
-    job?: string;
-    jobInfo?: string;
-    myBadge?: string;
-  }): Promise<MemberItem> {
+  async updateMember(idx: number, data: UpdateMemberRequest): Promise<MemberItem> {
     const member = await prisma.member.update({
       where: { idx },
       data

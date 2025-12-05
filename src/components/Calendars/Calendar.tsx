@@ -1,6 +1,7 @@
 import React from 'react';
 import dynamic from 'next/dynamic';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import styles from './Calendar.module.css';
 
 export interface TodoCalendarEvent {
   id: number;
@@ -87,7 +88,7 @@ const DynamicTodoCalendar = dynamic(
 
 function TodoCalendar({ events, onSelectEvent, onSelectSlot }: TodoCalendarProps) {
   return (
-    <div>
+    <div className={styles.calendar}>
       <DynamicTodoCalendar
         events={events}
         onSelectEvent={onSelectEvent}
