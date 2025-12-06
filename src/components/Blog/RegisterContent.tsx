@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { cn } from '@/constants/cn';
 import Input from '@/components/Forms/Input';
+import Button from '@/components/Buttons/Button';
 import 'react-quill-new/dist/quill.snow.css';
 
 // React Quill을 동적으로 import (Next.js SSR 문제 해결)
@@ -77,59 +78,53 @@ function BlogRegister({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={cn('bg-white rounded-lg shadow-sm p-6 md:p-8', className)}>
-      <h2 className="text-2xl font-bold text-main mb-6">블로그 글 작성</h2>
-
-      {/* 제목 입력 */}
+    <form onSubmit={handleSubmit} className={cn('', className)}>
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-bold text-gray-700 mb-2">
           제목 <span className="text-red-500">*</span>
         </label>
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="블로그 제목을 입력하세요"
-          size="lg"
+          size="md"
           color="bMain"
         />
       </div>
-
-
-      {/* 내용 입력 (Quill 에디터) */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-bold text-gray-700 mb-2">
           내용 <span className="text-red-500">*</span>
         </label>
-        <div className="bg-white border border-gray-300 rounded-md overflow-hidden">
+        <div className="bg-white border border-main rounded-md overflow-hidden">
           <ReactQuill
             theme="snow"
             value={content}
             onChange={setContent}
             modules={modules}
             formats={formats}
-            placeholder="내용을 입력하세요..."
+            placeholder="내용을 입력하세요"
             className="h-[400px]"
           />
         </div>
-        <div className="mt-16"></div> {/* Quill 에디터 하단 여백 */}
       </div>
-
-
-      {/* 제출 버튼 */}
-      <div className="flex gap-3 justify-end pt-4 border-t">
-        <button
+      <div className="flex gap-3 justify-end pt-4">
+        <Button
           type="button"
+          size="md"
+          color="bMain"
           onClick={() => window.history.back()}
-          className="px-6 py-3 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
+          className="hover:bg-gray-600 transition-colors"
         >
           취소
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
-          className="px-6 py-3 bg-main text-white rounded hover:bg-main/90 transition-colors"
+          size="md"
+          color="bgMain"
+          className="hover:bg-main/90 transition-colors"
         >
-          등록하기
-        </button>
+          저장하기
+        </Button>
       </div>
     </form>
   );

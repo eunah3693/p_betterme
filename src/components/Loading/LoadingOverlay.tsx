@@ -23,7 +23,6 @@ function LoadingOverlay({ isLoading, message = '로딩 중...' }: LoadingOverlay
             transition={{ duration: 0.2 }}
             className="bg-white rounded-lg p-8 flex flex-col items-center gap-4 shadow-2xl"
           >
-            {/* 회전하는 스피너 */}
             <motion.div
               animate={{ rotate: 360 }}
               transition={{
@@ -33,8 +32,6 @@ function LoadingOverlay({ isLoading, message = '로딩 중...' }: LoadingOverlay
               }}
               className="w-16 h-16 border-4 border-gray-200 border-t-main rounded-full"
             />
-            
-            {/* 로딩 메시지 */}
             <p className="text-gray-700 font-medium">{message}</p>
           </motion.div>
         </motion.div>

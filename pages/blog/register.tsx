@@ -14,7 +14,7 @@ const BlogWritePage = () => {
         memberId: 'test',
         subject: data.title,
         content: data.content,
-        date: new Date().toISOString().split('T')[0] // YYYY-MM-DD
+        date: new Date() // YYYY-MM-DD
       });
 
       if (result.success) {
@@ -34,7 +34,8 @@ const BlogWritePage = () => {
       <NavBar />
       
       <div className="flex justify-center py-8 px-4">
-        <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
+        <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%] bg-white rounded-lg shadow-sm p-6 md:p-8">
+          <h2 className="text-2xl font-bold text-main mb-6">블로그 글 작성</h2>
           <BlogRegister onSubmit={handleSubmit} />
         </div>
       </div>
