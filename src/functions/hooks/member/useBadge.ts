@@ -42,6 +42,7 @@ export function useBadge() {
     badgeInput,
     setBadgeInput,
     badges,
+    setBadges, 
     handleAddBadge,
     handleRemoveBadge,
     handleBadgeKeyDown,

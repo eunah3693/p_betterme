@@ -64,15 +64,17 @@ const LoginPage = () => {
       <div className="flex justify-center items-center py-16 px-4">
         <div className="w-full max-w-[450px]">
           <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-            <h1 className="text-3xl font-bold text-main mb-8 text-center">로그인</h1>
+            <h1 className="text-3xl font-bold text-main mb-8">로그인</h1>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* 아이디 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 mb-2">
                   아이디
                 </label>
                 <Input
+                  color="bgray"
+                  size="md"
                   value={id}
                   onChange={(e) => setId(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -83,10 +85,12 @@ const LoginPage = () => {
 
               {/* 비밀번호 */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-bold text-gray-700 mb-2">
                   비밀번호
                 </label>
                 <Input
+                  color="bgray"
+                  size="md"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -100,7 +104,7 @@ const LoginPage = () => {
               <Button
                 type="submit"
                 color="bgMain"
-                size="lg"
+                size="md"
                 className="w-full mt-6"
                 disabled={isSubmitting}
               >
@@ -113,7 +117,7 @@ const LoginPage = () => {
               계정이 없으신가요?{' '}
               <button
                 onClick={() => router.push('/signup')}
-                className="text-main font-medium hover:underline"
+                className="text-main font-bold hover:underline"
               >
                 회원가입하기
               </button>

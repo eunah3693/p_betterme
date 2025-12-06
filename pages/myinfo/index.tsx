@@ -5,7 +5,9 @@ import Input from '@/components/Forms/Input';
 import Textarea from '@/components/Forms/Textarea';
 import Button from '@/components/Buttons/Button';
 import Badge from '@/components/Forms/Badge';
+import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import { getMemberInfo, updateMemberInfo } from '@/functions/apis/member';
+import { useBadge } from '@/functions/hooks/member/useBadge';
 import { MemberItem } from '@/interfaces/member';
 
 const MyInfoPage = () => {
@@ -19,10 +21,18 @@ const MyInfoPage = () => {
   // 수정 가능한 필드
   const [job, setJob] = useState('');
   const [jobInfo, setJobInfo] = useState('');
-  
-  // 배지 관련 상태
-  const [badgeInput, setBadgeInput] = useState('');
-  const [badges, setBadges] = useState<string[]>([]);
+
+  // 배지 hook
+  const {
+    badgeInput,
+    setBadgeInput,
+    badges,
+    setBadges,
+    handleAddBadge,
+    handleRemoveBadge,
+    handleBadgeKeyDown,
+    getBadgeString,
+  } = useBadge();
 
   // 로딩 상태
   const [isLoading, setIsLoading] = useState(true);
@@ -76,35 +86,6 @@ const MyInfoPage = () => {
     loadUserInfo();
   }, [router]);
 
-  // 배지 추가
-  const handleAddBadge = () => {
-    if (!badgeInput.trim()) {
-      alert('배지 내용을 입력해주세요!');
-      return;
-    }
-
-    if (badges.includes(badgeInput.trim())) {
-      alert('이미 추가된 배지입니다!');
-      return;
-    }
-
-    setBadges([...badges, badgeInput.trim()]);
-    setBadgeInput('');
-  };
-
-  // 배지 삭제
-  const handleRemoveBadge = (badgeToRemove: string) => {
-    setBadges(badges.filter(badge => badge !== badgeToRemove));
-  };
-
-  // Enter 키로 배지 추가
-  const handleBadgeKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddBadge();
-    }
-  };
-
   // 회원 정보 수정 제출
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -120,7 +101,7 @@ const MyInfoPage = () => {
         idx: userIdx,
         job: job || '',
         jobInfo: jobInfo || '',
-        myBadge: badges.join(','), // 배지를 쉼표로 구분
+        myBadge: getBadgeString(), // 배지를 쉼표로 구분
       });
 
       if (result.success) {
@@ -158,134 +139,154 @@ const MyInfoPage = () => {
   }
 
   return (
-    <div className="font-notoSans min-h-screen bg-gray-50">
-      <NavBar />
+    <>
+      <LoadingOverlay 
+        isLoading={isSubmitting} 
+        message="회원 정보 수정 중"
+      />
+      <div className="font-notoSans min-h-screen bg-gray-50">
+        <NavBar />
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[600px]">
           <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
-            <h1 className="text-3xl font-bold text-main mb-8 text-center">내 정보 수정</h1>
-
-            {/* 수정 불가능한 정보 표시 */}
-            <div className="mb-8 p-4 bg-gray-50 rounded-lg space-y-3">
-              <div>
-                <span className="text-sm text-gray-600">아이디: </span>
-                <span className="font-medium text-gray-800">{userId}</span>
-              </div>
-              <div>
-                <span className="text-sm text-gray-600">닉네임: </span>
-                <span className="font-medium text-gray-800">{nickname}</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                * 아이디와 닉네임은 수정할 수 없습니다.
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* 직업 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  직업
+            <h1 className="text-3xl font-bold text-main mb-8">내 정보 수정</h1>
+             <div>
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  아이디 <span className="ml-2 text-gray-500 font-normal">* 수정할 수 없습니다.</span>
                 </label>
                 <Input
-                  value={job}
-                  onChange={(e) => setJob(e.target.value)}
-                  placeholder="직업을 입력하세요"
+                  color="bgray"
+                  size="md"
+                  value={userId}
+                  disabled={true}
                   className="w-full"
                 />
               </div>
-
-              {/* 직업 소개 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  직업 소개
+              <div className="pt-4">
+                <label className="block text-sm font-bold text-gray-700 mb-2">
+                  닉네임 <span className="ml-2 text-gray-500 font-normal">* 수정할 수 없습니다.</span>
                 </label>
-                <Textarea
-                  value={jobInfo}
-                  onChange={(e) => setJobInfo(e.target.value)}
-                  placeholder="직업에 대해 소개해주세요"
-                  rows={4}
+                <Input
+                  color="bgray"
+                  size="md"
+                  value={nickname}
+                  disabled={true}
                   className="w-full"
                 />
               </div>
-
-              {/* 내 소개 배지 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  내 소개 (배지)
-                </label>
-                
-                {/* 배지 추가 입력 */}
-                <div className="flex gap-2 mb-4">
+              <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+                {/* 직업 */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    직업
+                  </label>
                   <Input
-                    value={badgeInput}
-                    onChange={(e) => setBadgeInput(e.target.value)}
-                    onKeyDown={handleBadgeKeyDown}
-                    placeholder="예: 성실한, 노력, 긍정"
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    onClick={handleAddBadge}
-                    color="bgMain"
+                    color="bgray"
                     size="md"
-                    className="whitespace-nowrap"
-                  >
-                    추가
-                  </Button>
+                    value={job}
+                    onChange={(e) => setJob(e.target.value)}
+                    placeholder="직업을 입력하세요"
+                    className="w-full"
+                  />
                 </div>
 
-                {/* 배지 리스트 */}
-                {badges.length > 0 ? (
-                  <div className="flex flex-wrap gap-2 p-4 bg-gray-50 rounded-lg">
-                    {badges.map((badge, index) => (
-                      <div key={index} className="flex items-center gap-1">
-                        <Badge color="bMain" size="md">
-                          {badge}
-                        </Badge>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveBadge(badge)}
-                          className="ml-1 text-gray-500 hover:text-red-500 transition-colors"
-                          title="삭제"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-4 bg-gray-50 rounded-lg text-center text-gray-400 text-sm">
-                    등록된 배지가 없습니다. 위에서 배지를 추가해보세요!
-                  </div>
-                )}
-              </div>
+                {/* 직업 소개 */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    직업 소개
+                  </label>
+                  <Textarea
+                    color="bgray"
+                    size="md"
+                    value={jobInfo}
+                    onChange={(e) => setJobInfo(e.target.value)}
+                    placeholder="직업에 대해 소개해주세요"
+                    rows={4}
+                    className="w-full"
+                  />
+                </div>
 
-              {/* 제출 버튼 */}
-              <div className="flex gap-4 pt-4">
-                <Button
-                  type="submit"
-                  color="bgMain"
-                  size="lg"
-                  className="flex-1"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? '수정 중...' : '수정하기'}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() => router.push('/')}
-                  color="bgGray"
-                  size="lg"
-                  className="flex-1"
-                >
-                  취소
-                </Button>
-              </div>
-            </form>
+                {/* 내 소개 배지 */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    내 소개 (배지)
+                  </label>
+                  
+                  {/* 배지 추가 입력 */}
+                  <div className="flex gap-2 mb-4 items-center">
+                    <div className="flex-2 w-full">
+                      <Input
+                        color="bgray"
+                        size="md"
+                        value={badgeInput}
+                        onChange={(e) => setBadgeInput(e.target.value)}
+                        onKeyDown={handleBadgeKeyDown}
+                        placeholder="예: 성실한, 노력, 긍정"
+                        className="flex-1"
+                      />
+                    </div>
+                    <div className="flex-1 text-md">
+                      <Button
+                        type="button"
+                        onClick={handleAddBadge}
+                        color="bgMain"
+                        size="md"
+                        className="whitespace-nowrap"
+                      >
+                        추가
+                      </Button>
+                    </div>
+                  
+                  </div>
+
+                  {/* 배지 리스트 */}
+                  {badges.length > 0 ? (
+                    <div className="flex flex-wrap gap-2 p-4 bg-gray-50 rounded-lg">
+                      {badges.map((badge, index) => (
+                        <div key={index} className="flex items-center gap-1">
+                          <Badge color="bMain" size="sm">
+                            {badge}
+                            <span  onClick={() => handleRemoveBadge(badge)}
+                            className="ml-3 text-white hover:text-red-500 transition-colors"
+                            title="삭제">✕</span>
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-gray-50 rounded-lg text-center text-gray-400 text-sm">
+                      등록된 배지가 없습니다. 위에서 배지를 추가해보세요!
+                    </div>
+                  )}
+                </div>
+
+                {/* 제출 버튼 */}
+                <div className="flex gap-4 pt-4">
+                  <Button
+                    type="submit"
+                    color="bgMain"
+                    size="lg"
+                    className="flex-1"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? '수정 중...' : '수정하기'}
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={() => router.push('/')}
+                    color="bgGray"
+                    size="lg"
+                    className="flex-1"
+                  >
+                    취소
+                  </Button>
+                </div>
+              </form>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
