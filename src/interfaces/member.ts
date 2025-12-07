@@ -32,6 +32,13 @@ export interface MemberResponse {
   message?: string;
 }
 
+export interface LoginResponse {
+  success: boolean;
+  data: Omit<MemberItem, 'password'> | null;
+  token?: string;
+  message?: string;
+}
+
 export interface UpdateMemberRequest {
   nickname?: string;
   job?: string;

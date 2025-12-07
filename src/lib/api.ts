@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
+import { UnauthorizedError, ForbiddenError, NotFoundError, ValidationError } from '@/lib/errors';
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -57,11 +58,25 @@ export const withErrorHandler = (
       await handler(req, res);
     } catch (error) {
       console.error('API Error:', error);
+      
+      // 에러 타입에 따라 상태 코드 결정
+      let statusCode = 500;
+      if (error instanceof UnauthorizedError) {
+        statusCode = 401;
+      } else if (error instanceof ForbiddenError) {
+        statusCode = 403;
+      } else if (error instanceof NotFoundError) {
+        statusCode = 404;
+      } else if (error instanceof ValidationError) {
+        statusCode = 400;
+      }
+      
+      const message = error instanceof Error ? error.message : 'Unknown error';
       createErrorResponse(
         res,
-        500,
-        'Internal Server Error',
-        error instanceof Error ? error.message : 'Unknown error'
+        statusCode,
+        message,
+        message
       );
     }
   };

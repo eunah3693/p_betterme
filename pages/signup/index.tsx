@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,6 +9,7 @@ import Textarea from '@/components/Forms/Textarea';
 import Button from '@/components/Buttons/Button';
 import Badge from '@/components/Forms/Badge';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
 import { useCheckId } from '@/functions/hooks/member/useCheckId';
 import { useBadge } from '@/functions/hooks/member/useBadge';
 import { signup } from '@/functions/apis/member';
@@ -19,7 +20,6 @@ type SignupFormData = z.infer<typeof signupSchema>;
 const SignupPage = () => {
   const router = useRouter();
 
-  // React Hook Form 설정정
   const {
     register,
     handleSubmit,
@@ -30,10 +30,8 @@ const SignupPage = () => {
     mode: 'onBlur',
   });
 
-  // 현재 ID 값 watch
   const currentId = watch('id');
 
-  // ID 중복 체크 hook
   const {
     checked: idChecked,
     available: idAvailable,
@@ -42,7 +40,6 @@ const SignupPage = () => {
     handleCheck: handleCheckId,
   } = useCheckId(currentId || '');
 
-  // 배지 hook
   const {
     badgeInput,
     setBadgeInput,
@@ -53,16 +50,40 @@ const SignupPage = () => {
     getBadgeString,
   } = useBadge();
 
+  const [modal, setModal] = useState({
+    isOpen: false,
+    message: '',
+    type: 'info' as 'info' | 'success' | 'error' | 'warning',
+    onConfirm: () => {},
+  });
+
+  const showModal = (
+    message: string,
+    type: 'info' | 'success' | 'error' | 'warning' = 'info',
+    onConfirm?: () => void
+  ) => {
+    setModal({
+      isOpen: true,
+      message,
+      type,
+      onConfirm: onConfirm || (() => {}),
+    });
+  };
+
+  const closeModal = () => {
+    setModal((prev) => ({ ...prev, isOpen: false }));
+  };
+
   // 회원가입 제출
   const onSubmit = async (data: SignupFormData) => {
     // ID 중복 체크 확인
     if (!idChecked) {
-      alert('아이디 중복 체크를 해주세요!');
+      showModal('아이디 중복 체크를 해주세요!', 'warning');
       return;
     }
     // ID 사용가능여부
     if (!idAvailable) {
-      alert('사용할 수 없는 아이디입니다!');
+      showModal('사용할 수 없는 아이디입니다!', 'error');
       return;
     }
 
@@ -77,14 +98,17 @@ const SignupPage = () => {
       });
 
       if (result.success) {
-        alert('회원가입이 완료되었습니다!');
-        router.push('/login');
+        showModal(
+          '회원가입이 완료되었습니다!',
+          'success',
+          () => router.push('/login')
+        );
       } else {
-        alert(result.message || '회원가입에 실패했습니다.');
+        showModal(result.message || '회원가입에 실패했습니다.', 'error');
       }
     } catch (error) {
       console.error('회원가입 실패:', error);
-      alert('회원가입에 실패했습니다.');
+      showModal('회원가입에 실패했습니다.', 'error');
     }
   };
 
@@ -93,6 +117,13 @@ const SignupPage = () => {
       <LoadingOverlay 
         isLoading={isCheckingId || isSubmitting} 
         message={isCheckingId ? 'ID 중복 확인 중' : '회원가입 처리 중'}
+      />
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        message={modal.message}
+        type={modal.type}
       />
       <div className="font-notoSans min-h-screen bg-gray-50">
         <NavBar />
@@ -135,7 +166,7 @@ const SignupPage = () => {
                   </p>
                 )}
                 {idCheckMessage && !errors.id && (
-                  <p className={`mt-2 text-sm ${idAvailable ? 'text-green-600' : 'text-red-500'}`}>
+                  <p className={`mt-2 text-sm ${idAvailable ? 'text-main' : 'text-red-500'}`}>
                     {idCheckMessage}
                   </p>
                 )}

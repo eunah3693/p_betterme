@@ -1,16 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image'
 import hamBurger from '@public/assets/hamburger.svg'
 import { useRouter } from 'next/router';
 import { navData } from '@/constants/strings';
 import logo from '@public/assets/logo.svg'
-import { useArtFilterStore } from '@/store/arts';
+import { isAuthenticated } from '@/lib/storage';
 
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      setIsLoggedIn(isAuthenticated());
+    };
+
+    checkLoginStatus();
+    
+    // 페이지 변경 시마다 로그인 상태 확인
+    const handleRouteChange = () => {
+      checkLoginStatus();
+    };
+    
+    router.events.on('routeChangeComplete', handleRouteChange);
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('auth-change', checkLoginStatus);
+    }
+    
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('auth-change', checkLoginStatus);
+      }
+    };
+  }, [router]);
 
   return (
     <nav className="bg-white flex justify-center">
@@ -29,15 +56,24 @@ function NavBar() {
         </button>
         <div className={`${isOpen ? 'block' : 'hidden'} w-full md:block md:w-auto`} id="navbar-default">
           <ul className="font-medium flex flex-col p-4 md:p-0 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:bg-white">
-              {navData.map((item, index) => (
-                <Link href={item.url} prefetch={true} key={index}>
-                  <button
-                    className="block py-2 text-info text-right"
-                  >
-                    {item.text}
-                  </button>
-                </Link>
-              ))}
+              {navData
+                .filter((item) => {
+                  // 로그인 상태: MY INFO만 표시
+                  if (isLoggedIn) {
+                    return item.text === 'MY INFO';
+                  }
+                  // 비로그인 상태: LOGIN, SIGN UP만 표시
+                  return item.text === 'LOGIN' || item.text === 'SIGN UP';
+                })
+                .map((item, index) => (
+                  <Link href={item.url} prefetch={true} key={index}>
+                    <button
+                      className="block py-2 text-info text-right"
+                    >
+                      {item.text}
+                    </button>
+                  </Link>
+                ))}
             </ul>
         </div>
       </div>

@@ -9,6 +9,7 @@ import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import { getMemberInfo, updateMemberInfo } from '@/functions/apis/member';
 import { useBadge } from '@/functions/hooks/member/useBadge';
 import { MemberItem } from '@/interfaces/member';
+import { getUser, setUser } from '@/lib/storage';
 
 const MyInfoPage = () => {
   const router = useRouter();
@@ -43,14 +44,13 @@ const MyInfoPage = () => {
     const loadUserInfo = async () => {
       try {
         // localStorage에서 사용자 정보 가져오기
-        const userStr = localStorage.getItem('user');
-        if (!userStr) {
+        const user = getUser();
+        if (!user) {
           alert('로그인이 필요합니다!');
           router.push('/login');
           return;
         }
 
-        const user: MemberItem = JSON.parse(userStr);
         setUserIdx(user.idx);
 
         // API에서 최신 정보 조회
@@ -109,7 +109,7 @@ const MyInfoPage = () => {
         
         // localStorage 업데이트
         if (result.data) {
-          localStorage.setItem('user', JSON.stringify(result.data));
+          setUser(result.data);
         }
         
         router.push('/');

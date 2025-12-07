@@ -1,14 +1,14 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { MemberService } from '@/services/memberService';
-import { MemberResponse } from '@/interfaces/member';
-import { withErrorHandler, createSuccessResponse } from '@/lib/api';
+import { LoginResponse } from '@/interfaces/member';
+import { withErrorHandler } from '@/lib/api';
 import { loginSchema } from '@/lib/validation';
 
 const memberService = new MemberService();
 
 async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<MemberResponse | { error: string }>
+  res: NextApiResponse<LoginResponse | { error: string }>
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -28,11 +28,14 @@ async function handler(
 
   const result = await memberService.login(validation.data);
 
-  if (!result.success) {
-    return res.status(401).json(result);
+  // JWT 토큰을 httpOnly Cookie에 설정
+  if (result.token) {
+    res.setHeader('Set-Cookie', [
+      `token=${result.token}; HttpOnly; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Strict`,
+    ]);
   }
 
-  return createSuccessResponse(res, result.data, result.message);
+  return res.status(200).json(result);
 }
 
 export default withErrorHandler(handler);

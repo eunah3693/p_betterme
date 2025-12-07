@@ -1,5 +1,7 @@
 import { MemberRepository } from '@/repositories/memberRepository';
-import { MemberResponse, CheckIdResponse, SignupRequest, LoginRequest, UpdateMemberRequest } from '@/interfaces/member';
+import { MemberResponse, CheckIdResponse, SignupRequest, LoginRequest, UpdateMemberRequest, LoginResponse } from '@/interfaces/member';
+import { generateToken } from '@/lib/jwt';
+import { UnauthorizedError } from '@/lib/errors';
 
 export class MemberService {
   private memberRepository: MemberRepository;
@@ -37,20 +39,27 @@ export class MemberService {
   }
 
   // 로그인
-  async login(data: LoginRequest): Promise<MemberResponse> {
+  async login(data: LoginRequest): Promise<LoginResponse> {
     const member = await this.memberRepository.login(data);
     
     if (!member) {
-      return {
-        success: false,
-        data: null,
-        message: '아이디 또는 비밀번호가 일치하지 않습니다.'
-      };
+      throw new UnauthorizedError('아이디 또는 비밀번호가 일치하지 않습니다.');
     }
+
+    // JWT 토큰 생성
+    const token = generateToken({
+      idx: member.idx,
+      id: member.id,
+      nickname: member.nickname,
+    });
+
+    // 비밀번호 제외한 정보 반환
+    const { password, ...memberWithoutPassword } = member;
 
     return {
       success: true,
-      data: member,
+      data: memberWithoutPassword,
+      token,
       message: '로그인에 성공했습니다.'
     };
   }

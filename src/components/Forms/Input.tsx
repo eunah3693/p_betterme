@@ -1,3 +1,4 @@
+import React, { forwardRef } from 'react';
 import { cva, VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/constants/cn';
@@ -35,67 +36,60 @@ export const InputVariants = cva(
   },
 );
 
-interface InputProps extends VariantProps<typeof InputVariants> {
+interface InputProps extends VariantProps<typeof InputVariants>, Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size' | 'color'> {
   className?: string;
-  value?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   error?: {
     error: boolean;
     errorMessage: string;
     errorColor: ColorVariant;
   };
-  placeholder?: string;
   label?: string;
   labelClass?: string;
-  type?: string;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  disabled?: boolean;
 }
 
-function Input2({ 
+const Input = forwardRef<HTMLInputElement, InputProps>(({ 
   color, 
   size, 
   className, 
-  value, 
-  onChange, 
   error = {error: false, errorMessage: '', errorColor: 'default'},
   placeholder,
   label,
   labelClass,
   type = "text",
-  onKeyDown,
   disabled = false,
-}: InputProps) {
+  ...rest
+}, ref) => {
   return (
     <div className="flex flex-col gap-1 py-1">
       <div className="flex flex-col gap-[2px]">
-        <label 
-          htmlFor="first_name" 
-          className={labelClass}
-        >
-          {label}
-        </label>
+        {label && (
+          <label 
+            htmlFor={rest.name || rest.id} 
+            className={labelClass}
+          >
+            {label}
+          </label>
+        )}
         <input 
+          ref={ref}
           type={type}
-          id="first_name" 
           className={cn(InputVariants({ 
             color: error.error ? error.errorColor : color, 
             size, 
             className 
           }))}
           placeholder={placeholder} 
-          value={value}
-          onChange={onChange}
-          onKeyDown={onKeyDown}
           disabled={disabled}
+          {...rest}
         />
       </div>
       {error.error && error.errorMessage && (
         <span className="text-caution text-sm pl-2">{error.errorMessage}</span>
       )}
-      
     </div>
   );
-}
+});
 
-export default Input2;
+Input.displayName = 'Input';
+
+export default Input;
