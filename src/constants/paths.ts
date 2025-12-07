@@ -7,4 +7,5 @@ export const paths = {
   LOGIN: '/login',
   SIGNUP: '/signup',
   MYINFO: '/myinfo',
+  LOGOUT: '/logout',
 };

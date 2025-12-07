@@ -1,13 +1,23 @@
 import { paths } from './paths';
 
-export const navData = [
+// 공통 메뉴 (로그인 여부와 관계없이 항상 표시)
+export const commonNavData = [
   { text: 'CALENDAR', url: paths.CALENDAR},
   { text: 'DIARY', url: paths.DIARY},
   { text: 'BLOG', url: paths.BLOG },
   { text: 'PROJECT', url: paths.PROJECT },
+];
+
+// 비로그인 시 표시되는 메뉴
+export const guestNavData = [
   { text: 'LOGIN', url: paths.LOGIN },
   { text: 'SIGN UP', url: paths.SIGNUP },
+];
+
+// 로그인 시 표시되는 메뉴
+export const authNavData = [
   { text: 'MY INFO', url: paths.MYINFO },
+  { text: 'LOGOUT', url: paths.LOGOUT },
 ];
 
 

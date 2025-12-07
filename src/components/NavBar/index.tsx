@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image'
 import hamBurger from '@public/assets/hamburger.svg'
 import { useRouter } from 'next/router';
-import { navData } from '@/constants/strings';
+import { commonNavData, guestNavData, authNavData } from '@/constants/strings';
 import logo from '@public/assets/logo.svg'
 import { isAuthenticated } from '@/lib/storage';
 
@@ -39,6 +39,15 @@ function NavBar() {
     };
   }, [router]);
 
+  // 로그인 상태에 따라 메뉴 데이터 결합
+  const navData = useMemo(() => {
+    if (isLoggedIn) {
+      return [...commonNavData, ...authNavData];
+    } else {
+      return [...commonNavData, ...guestNavData];
+    }
+  }, [isLoggedIn]);
+
   return (
     <nav className="bg-white flex justify-center">
       <div className="w-[1920px] max-w-full flex flex-wrap items-center justify-between px-4 py-2">
@@ -56,24 +65,15 @@ function NavBar() {
         </button>
         <div className={`${isOpen ? 'block' : 'hidden'} w-full md:block md:w-auto`} id="navbar-default">
           <ul className="font-medium flex flex-col p-4 md:p-0 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:bg-white">
-              {navData
-                .filter((item) => {
-                  // 로그인 상태: MY INFO만 표시
-                  if (isLoggedIn) {
-                    return item.text === 'MY INFO';
-                  }
-                  // 비로그인 상태: LOGIN, SIGN UP만 표시
-                  return item.text === 'LOGIN' || item.text === 'SIGN UP';
-                })
-                .map((item, index) => (
-                  <Link href={item.url} prefetch={true} key={index}>
-                    <button
-                      className="block py-2 text-info text-right"
-                    >
-                      {item.text}
-                    </button>
-                  </Link>
-                ))}
+              {navData.map((item, index) => (
+                <Link href={item.url} prefetch={true} key={index}>
+                  <button
+                    className="block py-2 text-info text-right"
+                  >
+                    {item.text}
+                  </button>
+                </Link>
+              ))}
             </ul>
         </div>
       </div>
