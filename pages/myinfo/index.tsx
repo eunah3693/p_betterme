@@ -1,27 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import NavBar from '@/components/NavBar';
 import Input from '@/components/Forms/Input';
 import Textarea from '@/components/Forms/Textarea';
 import Button from '@/components/Buttons/Button';
 import Badge from '@/components/Forms/Badge';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
 import { getMemberInfo, updateMemberInfo } from '@/functions/apis/member';
 import { useBadge } from '@/functions/hooks/member/useBadge';
-import { MemberItem } from '@/interfaces/member';
 import { getUser, setUser } from '@/lib/storage';
+import { updateMemberSchema } from '@/lib/validation';
+
+type UpdateMemberFormData = z.infer<typeof updateMemberSchema>;
 
 const MyInfoPage = () => {
   const router = useRouter();
 
-  // 사용자 정보 상태
   const [userIdx, setUserIdx] = useState<number | null>(null);
   const [userId, setUserId] = useState('');
   const [nickname, setNickname] = useState('');
-  
-  // 수정 가능한 필드
-  const [job, setJob] = useState('');
-  const [jobInfo, setJobInfo] = useState('');
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<UpdateMemberFormData>({
+    resolver: zodResolver(updateMemberSchema),
+    defaultValues: {
+      job: '',
+      jobInfo: '',
+    },
+  });
 
   // 배지 hook
   const {
@@ -37,112 +51,130 @@ const MyInfoPage = () => {
 
   // 로딩 상태
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 사용자 정보 로드
+  // 모달 상태
+  const [modal, setModal] = useState({
+    isOpen: false,
+    message: '',
+    type: 'info' as 'info' | 'success' | 'error' | 'warning',
+    onConfirm: () => {},
+  });
+
+  const showModal = useCallback((
+    message: string,
+    type: 'info' | 'success' | 'error' | 'warning' = 'info',
+    onConfirm?: () => void
+  ) => {
+    setModal({
+      isOpen: true,
+      message,
+      type,
+      onConfirm: onConfirm || (() => {}),
+    });
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setModal((prev) => ({ ...prev, isOpen: false }));
+  }, []);
+
+  // 배지 문자열을 배열로 변환
+  const parseBadges = useCallback((badgeString: string): string[] => {
+    return badgeString
+      .split(',')
+      .map(b => b.trim())
+      .filter(b => b.length > 0);
+  }, []);
+
+  // 사용자 정보 조회
   useEffect(() => {
     const loadUserInfo = async () => {
       try {
-        // localStorage에서 사용자 정보 가져오기
         const user = getUser();
         if (!user) {
-          alert('로그인이 필요합니다!');
-          router.push('/login');
+          showModal('로그인이 필요합니다', 'warning', () => {
+            router.push('/login');
+          });
+          setIsLoading(false);
           return;
         }
 
         setUserIdx(user.idx);
 
-        // API에서 최신 정보 조회
         const result = await getMemberInfo(user.idx);
         
         if (result.success && result.data) {
           setUserId(result.data.id);
           setNickname(result.data.nickname);
-          setJob(result.data.job || '');
-          setJobInfo(result.data.jobInfo || '');
           
-          // 배지 파싱 (쉼표로 구분된 문자열을 배열로)
+          reset({
+            job: result.data.job || '',
+            jobInfo: result.data.jobInfo || '',
+          });
+          
           if (result.data.myBadge) {
-            const badgeArray = result.data.myBadge
-              .split(',')
-              .map(b => b.trim())
-              .filter(b => b.length > 0);
+            const badgeArray = parseBadges(result.data.myBadge);
             setBadges(badgeArray);
           }
         } else {
-          alert('회원 정보를 불러올 수 없습니다.');
-          router.push('/');
+          showModal('회원 정보를 불러올 수 없습니다.', 'error', () => {
+            router.push('/');
+          });
         }
       } catch (error) {
         console.error('회원 정보 로드 실패:', error);
-        alert('회원 정보를 불러오는데 실패했습니다.');
-        router.push('/');
+        showModal('회원 정보를 불러오는데 실패했습니다.', 'error', () => {
+          router.push('/');
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     loadUserInfo();
-  }, [router]);
+  }, [router, reset, setBadges, parseBadges, showModal]);
 
   // 회원 정보 수정 제출
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = async (data: UpdateMemberFormData) => {
     if (!userIdx) {
-      alert('사용자 정보를 확인할 수 없습니다.');
+      showModal('사용자 정보를 확인할 수 없습니다.', 'error');
       return;
     }
 
-    setIsSubmitting(true);
     try {
       const result = await updateMemberInfo({
         idx: userIdx,
-        job: job || '',
-        jobInfo: jobInfo || '',
-        myBadge: getBadgeString(), // 배지를 쉼표로 구분
+        job: data.job || '',
+        jobInfo: data.jobInfo || '',
+        myBadge: getBadgeString(),
       });
 
       if (result.success) {
-        alert('회원 정보가 수정되었습니다!');
-        
-        // localStorage 업데이트
         if (result.data) {
           setUser(result.data);
         }
         
-        router.push('/');
+        showModal('회원 정보가 수정되었습니다', 'success');
       } else {
-        alert(result.message || '회원 정보 수정에 실패했습니다.');
+        showModal(result.message || '회원 정보 수정에 실패했습니다.', 'error');
       }
     } catch (error) {
       console.error('회원 정보 수정 실패:', error);
-      alert('회원 정보 수정에 실패했습니다.');
-    } finally {
-      setIsSubmitting(false);
+      showModal('회원 정보 수정에 실패했습니다.', 'error');
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="font-notoSans min-h-screen bg-gray-50">
-        <NavBar />
-        <div className="flex justify-center items-center py-16">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-main mx-auto mb-4"></div>
-            <p className="text-gray-600">회원 정보를 불러오는 중...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <>
       <LoadingOverlay 
-        isLoading={isSubmitting} 
-        message="회원 정보 수정 중"
+        isLoading={isLoading || isSubmitting} 
+        message={isLoading ? '회원 정보를 불러오는 중' : isSubmitting ? '회원 정보 수정 중' : ''}
+      />
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        message={modal.message}
+        type={modal.type}
       />
       <div className="font-notoSans min-h-screen bg-gray-50">
         <NavBar />
@@ -174,7 +206,7 @@ const MyInfoPage = () => {
                   className="w-full"
                 />
               </div>
-              <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-4">
                 {/* 직업 */}
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -183,11 +215,13 @@ const MyInfoPage = () => {
                   <Input
                     color="bgray"
                     size="md"
-                    value={job}
-                    onChange={(e) => setJob(e.target.value)}
                     placeholder="직업을 입력하세요"
                     className="w-full"
+                    {...register('job')}
                   />
+                  {errors.job && (
+                    <p className="text-red-500 text-sm mt-1">{errors.job.message}</p>
+                  )}
                 </div>
 
                 {/* 직업 소개 */}
@@ -198,12 +232,14 @@ const MyInfoPage = () => {
                   <Textarea
                     color="bgray"
                     size="md"
-                    value={jobInfo}
-                    onChange={(e) => setJobInfo(e.target.value)}
                     placeholder="직업에 대해 소개해주세요"
                     rows={4}
                     className="w-full"
+                    {...register('jobInfo')}
                   />
+                  {errors.jobInfo && (
+                    <p className="text-red-500 text-sm mt-1">{errors.jobInfo.message}</p>
+                  )}
                 </div>
 
                 {/* 내 소개 배지 */}
@@ -247,7 +283,7 @@ const MyInfoPage = () => {
                           <Badge color="bMain" size="sm">
                             {badge}
                             <span  onClick={() => handleRemoveBadge(badge)}
-                            className="ml-3 text-white hover:text-red-500 transition-colors"
+                            className="ml-3 text-white cursor-pointer"
                             title="삭제">✕</span>
                           </Badge>
                         </div>
@@ -269,7 +305,7 @@ const MyInfoPage = () => {
                     className="flex-1"
                     disabled={isSubmitting}
                   >
-                    {isSubmitting ? '수정 중...' : '수정하기'}
+                    수정하기
                   </Button>
                   <Button
                     type="button"

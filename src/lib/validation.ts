@@ -39,3 +39,9 @@ export const loginSchema = z.object({
   id: z.string().min(1, '아이디를 입력해주세요'),
   password: z.string().min(1, '비밀번호를 입력해주세요'),
 });
+
+// 회원 정보 수정 스키마
+export const updateMemberSchema = z.object({
+  job: z.string().optional(),
+  jobInfo: z.string().max(500, '직업 소개는 최대 500자까지 가능합니다').optional(),
+});

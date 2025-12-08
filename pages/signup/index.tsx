@@ -280,7 +280,7 @@ const SignupPage = () => {
                         <Badge color="bMain" size="sm">
                           {badge}
                           <span  onClick={() => handleRemoveBadge(badge)}
-                          className="ml-3 text-white hover:text-red-500 transition-colors"
+                          className="ml-3 text-white cursor-pointer"
                           title="삭제">✕</span>
                         </Badge>
                       </div>
