@@ -31,7 +31,7 @@ export function useCheckId(id: string) {
     try {
       const result = await checkId(id);
       setChecked(true);
-      setAvailable(result.available);
+      setAvailable(true);
       setMessage(result.message || '');
     } catch (err) {
       alert("ID 중복 체크 실패");

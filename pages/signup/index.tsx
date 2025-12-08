@@ -83,7 +83,7 @@ const SignupPage = () => {
     }
     // ID 사용가능여부
     if (!idAvailable) {
-      showModal('사용할 수 없는 아이디입니다!', 'error');
+      showModal('사용할 수 없는 아이디입니다', 'error');
       return;
     }
 

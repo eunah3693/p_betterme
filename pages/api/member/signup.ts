@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { MemberService } from '@/services/memberService';
 import { MemberResponse } from '@/interfaces/member';
-import { withErrorHandler } from '@/lib/api';
+import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
 import { signupSchema } from '@/lib/validation';
 
 const memberService = new MemberService();
@@ -11,19 +11,14 @@ async function handler(
   res: NextApiResponse<MemberResponse | { error: string }>
 ) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return createErrorResponse(res, 405, 'Method not allowed');
   }
 
-  // Zod로 유효성 검사
   const validation = signupSchema.safeParse(req.body);
   
   if (!validation.success) {
     const errorMessage = validation.error.issues[0]?.message || 'Invalid request';
-    return res.status(400).json({
-      success: false,
-      data: null,
-      message: errorMessage
-    });
+    return createErrorResponse(res, 400, errorMessage);
   }
 
   const result = await memberService.signup({
@@ -34,13 +29,13 @@ async function handler(
   });
 
   if (!result.success) {
-    return res.status(400).json(result);
+    return createErrorResponse(res, 400, result.message || '회원가입에 실패했습니다.');
   }
 
   return res.status(201).json({
     success: true,
+    message: result.message,
     data: result.data,
-    message: result.message
   });
 }
 

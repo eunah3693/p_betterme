@@ -59,7 +59,7 @@ export const updateMemberInfo = async (updateData: {
 }): Promise<MemberResponse> => {
   try {
     const { idx, ...body } = updateData;
-    const { data } = await axiosInstance.put<MemberResponse>(`${MEMBER_URL}/${idx}`, body);
+    const { data } = await axiosInstance.put<MemberResponse>(`${MEMBER_URL}/${idx}/update`, body);
     return data;
   } catch (error) {
     console.error('회원 정보 수정 실패:', error);

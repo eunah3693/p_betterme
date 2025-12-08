@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { MemberService } from '@/services/memberService';
 import { CheckIdResponse } from '@/interfaces/member';
-import { withErrorHandler } from '@/lib/api';
+import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
 import { checkIdSchema } from '@/lib/validation';
 
 const memberService = new MemberService();
@@ -11,22 +11,23 @@ async function handler(
   res: NextApiResponse<CheckIdResponse | { error: string }>
 ) {
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return createErrorResponse(res, 405, 'Method not allowed');
   }
 
   const validation = checkIdSchema.safeParse(req.query);
   
   if (!validation.success) {
     const errorMessage = validation.error.issues[0]?.message || 'Invalid request';
-    return res.status(400).json({
-      success: false,
-      available: false,
-      message: errorMessage
-    });
+    return createErrorResponse(res, 400, errorMessage);
   }
 
   const result = await memberService.checkId(validation.data.id);
-  return res.status(200).json(result);
+  
+  if (!result.success) {
+    return createErrorResponse(res, 400, result.message || '아이디 중복 체크에 실패했습니다.');
+  }
+
+  return createSuccessResponse(res, result, result.message);
 }
 
 export default withErrorHandler(handler);
