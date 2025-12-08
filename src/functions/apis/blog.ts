@@ -17,9 +17,7 @@ export const getAllBlogs = async (): Promise<BlogListResponse> => {
 // 특정 블로그 조회
 export const getBlogByIdx = async (idx: number): Promise<BlogResponse> => {
   try {
-    const { data } = await axiosInstance.get<BlogResponse>(BLOG_URL, {
-      params: { idx }
-    });
+    const { data } = await axiosInstance.get<BlogResponse>(`${BLOG_URL}/${idx}`);
     return data;
   } catch (error) {
     console.error('블로그 조회 실패:', error);
@@ -33,7 +31,7 @@ export const createBlog = async (
 ): Promise<{ success: boolean; data: BlogItem; message?: string }> => {
   try {
     const { data } = await axiosInstance.post<{ success: boolean; data: BlogItem; message?: string }>(
-      BLOG_URL,
+      `${BLOG_URL}/register`,
       blogData
     );
     return data;
@@ -48,9 +46,10 @@ export const updateBlog = async (
   blogData: UpdateBlogRequest
 ): Promise<{ success: boolean; data: BlogItem; message?: string }> => {
   try {
+    const { idx, ...body } = blogData;
     const { data } = await axiosInstance.put<{ success: boolean; data: BlogItem; message?: string }>(
-      BLOG_URL,
-      blogData
+      `${BLOG_URL}/${idx}/update`,
+      body
     );
     return data;
   } catch (error) {
@@ -62,7 +61,7 @@ export const updateBlog = async (
 // 블로그 삭제
 export const deleteBlog = async (idx: number) => {
   try {
-    const { data } = await axiosInstance.delete(`${BLOG_URL}?idx=${idx}`);
+    const { data } = await axiosInstance.delete(`${BLOG_URL}/${idx}/delete`);
     return data;
   } catch (error) {
     console.error('블로그 삭제 실패:', error);

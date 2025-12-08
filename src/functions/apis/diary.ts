@@ -17,9 +17,7 @@ export const getAllDiaries = async (): Promise<DiaryListResponse> => {
 // 특정 일기 조회
 export const getDiaryByIdx = async (idx: number): Promise<DiaryResponse> => {
   try {
-    const { data } = await axiosInstance.get<DiaryResponse>(DIARY_URL, {
-      params: { idx }
-    });
+    const { data } = await axiosInstance.get<DiaryResponse>(`${DIARY_URL}/${idx}`);
     return data;
   } catch (error) {
     console.error('일기 조회 실패:', error);
@@ -33,7 +31,7 @@ export const createDiary = async (
 ): Promise<{ success: boolean; data: DiaryItem; message?: string }> => {
   try {
     const { data } = await axiosInstance.post<{ success: boolean; data: DiaryItem; message?: string }>(
-      DIARY_URL,
+      `${DIARY_URL}/register`,
       diaryData
     );
     return data;
@@ -48,9 +46,10 @@ export const updateDiary = async (
   diaryData: UpdateDiaryRequest
 ): Promise<{ success: boolean; data: DiaryItem; message?: string }> => {
   try {
+    const { idx, ...body } = diaryData;
     const { data } = await axiosInstance.put<{ success: boolean; data: DiaryItem; message?: string }>(
-      DIARY_URL,
-      diaryData
+      `${DIARY_URL}/${idx}/update`,
+      body
     );
     return data;
   } catch (error) {
@@ -62,7 +61,7 @@ export const updateDiary = async (
 // 일기 삭제
 export const deleteDiary = async (idx: number) => {
   try {
-    const { data } = await axiosInstance.delete(`${DIARY_URL}?idx=${idx}`);
+    const { data } = await axiosInstance.delete(`${DIARY_URL}/${idx}/delete`);
     return data;
   } catch (error) {
     console.error('일기 삭제 실패:', error);

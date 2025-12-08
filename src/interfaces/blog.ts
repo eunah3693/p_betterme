@@ -17,6 +17,7 @@ export interface CreateBlogRequest {
 
 // Blog 수정 요청
 export interface UpdateBlogRequest {
+  idx: number;
   subject?: string;
   content?: string;
   date?: Date;

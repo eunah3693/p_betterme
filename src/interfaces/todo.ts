@@ -41,4 +41,5 @@ export interface TodoItem {
 export interface TodoResponse {
   success: boolean;
   data: TodoItem[];
+  message?: string;
 }

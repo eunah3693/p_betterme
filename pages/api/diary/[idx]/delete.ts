@@ -1,25 +1,26 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { DiaryService } from '@/services/diaryService';
-import { DiaryListResponse } from '@/interfaces/diary';
 import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
 
 const diaryService = new DiaryService();
 
 async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<DiaryListResponse | { error: string }>
+  res: NextApiResponse<{ success: boolean; message: string } | { error: string }>
 ) {
-  if (req.method !== 'GET') {
+  if (req.method !== 'DELETE') {
     return createErrorResponse(res, 405, 'Method not allowed');
   }
 
-  const result = await diaryService.getAllDiaries();
-  
-  if (!result.success) {
-    return createErrorResponse(res, 500, '일기 목록을 불러오는데 실패했습니다.');
+  const { idx } = req.query;
+
+  if (!idx) {
+    return createErrorResponse(res, 400, 'idx is required');
   }
 
-  return createSuccessResponse(res, result.data, '일기 목록 조회 성공');
+  await diaryService.deleteDiary(Number(idx));
+
+  return createSuccessResponse(res, null, '일기가 삭제되었습니다.');
 }
 
 export default withErrorHandler(handler);

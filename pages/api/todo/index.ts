@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { TodoService } from '@/services/todoService';
 import { TodoResponse } from '@/interfaces/todo';
-import { withErrorHandler, validateMethod, createErrorResponse } from '@/lib/api';
+import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
 
 const todoService = new TodoService();
 
@@ -9,43 +9,14 @@ async function handler(
   req: NextApiRequest,
   res: NextApiResponse<TodoResponse | { error: string }>
 ) {
-
-  if (!validateMethod(req, ['GET', 'POST', 'PUT', 'DELETE'])) {
-    return res.status(405).json({ 
-      error: 'Method not allowed', 
-      success: false, 
-      data: [] 
-    });
+  if (req.method !== 'GET') {
+    return createErrorResponse(res, 405, 'Method not allowed');
   }
 
-  // 메서드별 처리
-  switch (req.method) {
-    case 'GET':
-      return await viewTodo(req, res);
-    case 'POST':
-      return await createTodo(req, res);
-    case 'PUT':
-      return await updateTodo(req, res);
-    case 'DELETE':
-      return await deleteTodo(req, res);
-  }
-}
-
-// withErrorHandler로 자동 에러 처리
-export default withErrorHandler(handler);
-
-// Todo 조회
-async function viewTodo(
-  req: NextApiRequest,
-  res: NextApiResponse<TodoResponse>
-) {
   const { memberId, startDate, endDate } = req.query;
 
   if (!memberId || !startDate || !endDate) {
-    return res.status(400).json({
-      success: false,
-      data: []
-    });
+    return createErrorResponse(res, 400, 'memberId, startDate, endDate는 필수입니다');
   }
 
   const result = await todoService.viewTodo(
@@ -54,76 +25,11 @@ async function viewTodo(
     endDate as string
   );
 
-  return res.status(200).json(result);
-}
-
-// Todo 생성
-async function createTodo(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { memberId, projectId, subject, content, finish, startDate, finishDate } = req.body;
-
-  if (!memberId || !subject || !startDate || !finishDate) {
-    return res.status(400).json({ error: 'memberId, subject, startDate, finishDate는 필수입니다' });
+  if (!result.success) {
+    return createErrorResponse(res, 500, 'Todo 목록을 불러오는데 실패했습니다.');
   }
 
-  const result = await todoService.createTodo({
-    memberId,
-    projectId,
-    subject,
-    content,
-    finish: finish || '0',
-    startDate: new Date(startDate),
-    finishDate: new Date(finishDate)
-  });
-
-  return res.status(201).json({ success: true, data: result });
+  return createSuccessResponse(res, result.data, 'Todo 목록 조회 성공');
 }
 
-// Todo 수정
-async function updateTodo(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { idx, subject, content, finish, startDate, finishDate } = req.body;
-
-  if (!idx) {
-    return res.status(400).json({ error: 'idx는 필수입니다' });
-  }
-
-  const updateData: {
-    subject?: string;
-    content?: string;
-    finish?: string;
-    startDate?: Date;
-    finishDate?: Date;
-  } = {};
-
-  if (subject) updateData.subject = subject;
-  if (content) updateData.content = content;
-  if (finish) updateData.finish = finish;
-  if (startDate) updateData.startDate = new Date(startDate);
-  if (finishDate) updateData.finishDate = new Date(finishDate);
-
-  const result = await todoService.updateTodo(Number(idx), updateData);
-
-  return res.status(200).json({ success: true, data: result });
-}
-
-// Todo 삭제
-async function deleteTodo(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { idx } = req.query;
-
-  if (!idx) {
-    return res.status(400).json({ error: 'idx는 필수입니다' });
-  }
-
-  await todoService.deleteTodo(Number(idx));
-
-  return res.status(200).json({ success: true, message: 'Todo 삭제 완료' });
-}
-
+export default withErrorHandler(handler);

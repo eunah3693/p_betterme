@@ -27,7 +27,7 @@ export const createTodo = async (todoData: {
   finishDate: string;
 }) => {
   try {
-    const { data } = await axiosInstance.post(TODO_URL, todoData);
+    const { data } = await axiosInstance.post(`${TODO_URL}/register`, todoData);
     return data;
   } catch (error) {
     console.error('Todo 생성 실패:', error);
@@ -45,7 +45,8 @@ export const updateTodo = async (todoData: {
   finishDate?: string;
 }) => {
   try {
-    const { data } = await axiosInstance.put(TODO_URL, todoData);
+    const { idx, ...body } = todoData;
+    const { data } = await axiosInstance.put(`${TODO_URL}/${idx}/update`, body);
     return data;
   } catch (error) {
     console.error('Todo 수정 실패:', error);
@@ -56,7 +57,7 @@ export const updateTodo = async (todoData: {
 // Todo 삭제
 export const deleteTodo = async (idx: number) => {
   try {
-    const { data } = await axiosInstance.delete(`${TODO_URL}?idx=${idx}`);
+    const { data } = await axiosInstance.delete(`${TODO_URL}/${idx}/delete`);
     return data;
   } catch (error) {
     console.error('Todo 삭제 실패:', error);
