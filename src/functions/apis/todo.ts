@@ -6,9 +6,11 @@ const TODO_URL = '/api/todo';
 // Todo 조회
 export const getTodo = async (params: TodoRequest): Promise<TodoResponse> => {
   try {
+    console.log(params);
     const { data } = await axiosInstance.get<TodoResponse>(TODO_URL, {
       params,
     });
+    console.log(data);
     return data;
   } catch (error) {
     console.error('월간 Todo 조회 실패:', error);
@@ -19,7 +21,6 @@ export const getTodo = async (params: TodoRequest): Promise<TodoResponse> => {
 // Todo 생성
 export const createTodo = async (todoData: {
   memberId: string;
-  projectId?: string;
   subject: string;
   content?: string;
   finish?: string;

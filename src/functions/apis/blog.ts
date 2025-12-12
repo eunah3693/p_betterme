@@ -1,10 +1,10 @@
 import { axiosInstance } from './axios';
-import { BlogItem, BlogListResponse, BlogResponse, CreateBlogRequest, UpdateBlogRequest } from '@/interfaces/blog';
+import { BlogItem, BlogListRequest, BlogListResponse, BlogResponse, CreateBlogRequest, UpdateBlogRequest } from '@/interfaces/blog';
 
 const BLOG_URL = '/api/blog';
 
 // 모든 블로그 조회
-export const getAllBlogs = async (): Promise<BlogListResponse> => {
+export const getAllBlogs = async ( params: BlogListRequest ): Promise<BlogListResponse> => {
   try {
     const { data } = await axiosInstance.get<BlogListResponse>(BLOG_URL);
     return data;

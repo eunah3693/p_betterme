@@ -28,7 +28,6 @@ export class TodoService {
   // Todo 추가
   async createTodo(data: {
     memberId: string;
-    projectId?: string;
     subject: string;
     content?: string;
     finish?: string;

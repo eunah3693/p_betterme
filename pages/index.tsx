@@ -1,25 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
+import { useRouter } from 'next/router';
 import type { TodoItem } from '@/components/Todo';
 import TodoCalendar, { type TodoCalendarEvent } from '@/components/Calendars/Calendar';
 import TodoPopup from '@/components/Calendars/TodoPopup';
 import type { TodoItem as ApiTodoItem } from '@/interfaces/todo';
 import { getTodo, createTodo, updateTodo, deleteTodo } from '@/functions/apis/todo';
+import { getUser } from '@/lib/storage';
 
 const Page = () => {
+  const router = useRouter();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
 
+  useEffect(() => {
+    const currentUser = getUser();
+    setUser(currentUser);
+    
+    if (!currentUser) {
+      router.push('/login');
+    }
+  }, [router]);
+
+  
   const { 
     data: todos = [], 
     isLoading,
     error,
     refetch 
   } = useQuery<TodoItem[], Error>({
-    queryKey: ['todos', 'test', currentDate.getFullYear(), currentDate.getMonth()],
+    queryKey: ['todos', user?.id, currentDate.getFullYear(), currentDate.getMonth()],
     queryFn: async (): Promise<TodoItem[]> => {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
 
       const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
       const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
@@ -28,7 +45,7 @@ const Page = () => {
       const endDateStr = endDate.toISOString().split('T')[0];
       
       const result = await getTodo({
-        memberId: 'test',
+        memberId: user.id,
         startDate: startDateStr,
         endDate: endDateStr,
       });
@@ -47,6 +64,7 @@ const Page = () => {
         finishDate: item.finishDate || new Date().toISOString(),
       }));
     },
+    enabled: !!user?.id, // user가 있을 때만 쿼리 실행
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10, 
     retry: 2,
@@ -92,13 +110,13 @@ const Page = () => {
 
   // 할일 생성
   const handleCreateTodo = async (data: { title: string; content: string; startDate?: string; finishDate?: string }) => {
-    if (!selectedDate) return;
+    if (!selectedDate || !user?.id) return;
 
     const dateStr = selectedDate.toISOString().split('T')[0];
     
     try {
       await createTodo({
-        memberId: 'test',
+        memberId: user.id,
         subject: data.title,
         content: data.content,
         finish: '0',

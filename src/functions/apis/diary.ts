@@ -1,10 +1,10 @@
 import { axiosInstance } from './axios';
-import { DiaryItem, DiaryListResponse, DiaryResponse, CreateDiaryRequest, UpdateDiaryRequest } from '@/interfaces/diary';
+import { DiaryItem, DiaryListResponse, DiaryResponse, CreateDiaryRequest, UpdateDiaryRequest, DiaryListRequest } from '@/interfaces/diary';
 
 const DIARY_URL = '/api/diary';
 
 // 모든 일기 조회
-export const getAllDiaries = async (): Promise<DiaryListResponse> => {
+export const getAllDiaries = async ( params: DiaryListRequest ): Promise<DiaryListResponse> => {
   try {
     const { data } = await axiosInstance.get<DiaryListResponse>(DIARY_URL);
     return data;

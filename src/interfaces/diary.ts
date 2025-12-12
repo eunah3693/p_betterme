@@ -30,6 +30,11 @@ export interface DiaryResponse {
   message?: string;
 }
 
+// Diary 목록 요청
+export interface DiaryListRequest {
+  memberId: string;
+}
+
 // Diary 목록 응답
 export interface DiaryListResponse {
   success: boolean;

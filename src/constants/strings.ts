@@ -5,7 +5,6 @@ export const commonNavData = [
   { text: 'CALENDAR', url: paths.CALENDAR},
   { text: 'DIARY', url: paths.DIARY},
   { text: 'BLOG', url: paths.BLOG },
-  { text: 'PROJECT', url: paths.PROJECT },
 ];
 
 // 비로그인 시 표시되는 메뉴

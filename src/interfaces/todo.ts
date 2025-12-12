@@ -8,7 +8,6 @@ export interface TodoRequest {
 // Todo 생성 요청
 export interface CreateTodoRequest {
   memberId: string;
-  projectId?: string;
   subject: string;
   content?: string;
   finish?: string;
@@ -29,7 +28,6 @@ export interface UpdateTodoRequest {
 export interface TodoItem {
   idx: number;
   memberId: string | null;
-  projectId: string | null;
   subject: string | null;
   content: string | null;
   finish: string | null;

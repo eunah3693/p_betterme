@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
@@ -9,9 +9,20 @@ import NoContent from '@/components/Empty/NoContent';
 import Card from '@/components/Cards/Card';
 import { getAllDiaries } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
+import { getUser } from '@/lib/storage';
 
 const DiaryListPage = () => {
   const router = useRouter();
+  const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
+
+  useEffect(() => {
+    const currentUser = getUser();
+    setUser(currentUser);
+    
+    if (!currentUser) {
+      router.push('/login');
+    }
+  }, [router]);
 
   const {
     data: diaryList = [],
@@ -19,9 +30,9 @@ const DiaryListPage = () => {
     error,
     refetch
   } = useQuery<DiaryItem[], Error>({
-    queryKey: ['diaries'],
+    queryKey: ['diaries', user?.id],
     queryFn: async (): Promise<DiaryItem[]> => {
-      const result = await getAllDiaries();
+      const result = await getAllDiaries({ memberId: user?.id || '' });
 
       if (!result.success || !result.data) {
         throw new Error('Failed to fetch diaries');

@@ -13,7 +13,7 @@ async function handler(
     return createErrorResponse(res, 405, 'Method not allowed');
   }
 
-  const { memberId, projectId, subject, content, finish, startDate, finishDate } = req.body;
+  const { memberId, subject, content, finish, startDate, finishDate } = req.body;
 
   if (!memberId || !subject || !startDate || !finishDate) {
     return createErrorResponse(res, 400, 'memberId, subject, startDate, finishDate는 필수입니다');
@@ -21,7 +21,6 @@ async function handler(
 
   const result = await todoService.createTodo({
     memberId,
-    projectId,
     subject,
     content,
     finish: finish || '0',

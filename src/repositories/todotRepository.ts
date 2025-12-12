@@ -9,7 +9,6 @@ export class TodoRepository {
     return {
       idx: dbRow.idx,
       memberId: dbRow.memberId,
-      projectId: dbRow.projectId,
       subject: dbRow.subject,
       content: dbRow.content,
       finish: dbRow.finish,
@@ -50,7 +49,6 @@ export class TodoRepository {
     const todo = await prisma.todo.create({
       data: {
         memberId: data.memberId,
-        projectId: data.projectId || null,
         subject: data.subject,
         content: data.content || null,
         finish: data.finish || '0',

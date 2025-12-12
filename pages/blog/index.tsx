@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
@@ -9,9 +9,20 @@ import NoContent from '@/components/Empty/NoContent';
 import Card from '@/components/Cards/Card';
 import { getAllBlogs } from '@/functions/apis/blog';
 import type { BlogItem } from '@/interfaces/blog';
+import { getUser } from '@/lib/storage';
 
 const BlogListPage = () => {
   const router = useRouter();
+  const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
+
+  useEffect(() => {
+    const currentUser = getUser();
+    setUser(currentUser);
+    
+    if (!currentUser) {
+      router.push('/login');
+    }
+  }, [router]);
 
   const {
     data: blogList = [],
@@ -19,9 +30,13 @@ const BlogListPage = () => {
     error,
     refetch
   } = useQuery<BlogItem[], Error>({
-    queryKey: ['blogs'],
+    queryKey: ['blogs', user?.id],
     queryFn: async (): Promise<BlogItem[]> => {
-      const result = await getAllBlogs();
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+
+      const result = await getAllBlogs({ memberId: user?.id || '' });
 
       if (!result.success || !result.data) {
         throw new Error('Failed to fetch blogs');

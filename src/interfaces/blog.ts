@@ -30,6 +30,11 @@ export interface BlogResponse {
   message?: string;
 }
 
+// Blog 목록 요청
+export interface BlogListRequest {
+  memberId: string;
+}
+
 // Blog 목록 응답
 export interface BlogListResponse {
   success: boolean;
