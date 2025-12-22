@@ -12,7 +12,7 @@ import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import { getMemberInfo, updateMemberInfo } from '@/functions/apis/member';
 import { useBadge } from '@/functions/hooks/member/useBadge';
-import { getUser, setUser } from '@/lib/storage';
+import { isAuthenticated, setUser } from '@/lib/storage';
 import { updateMemberSchema } from '@/lib/validation';
 
 type UpdateMemberFormData = z.infer<typeof updateMemberSchema>;
@@ -89,18 +89,10 @@ const MyInfoPage = () => {
   useEffect(() => {
     const loadUserInfo = async () => {
       try {
-        const user = getUser();
-        if (!user) {
-          showModal('로그인이 필요합니다', 'warning', () => {
-            router.push('/login');
-          });
-          setIsLoading(false);
-          return;
-        }
+        const user = isAuthenticated();
+        setUserIdx(user?.idx || 0);
 
-        setUserIdx(user.idx);
-
-        const result = await getMemberInfo(user.idx);
+        const result = await getMemberInfo(user?.idx || 0);
         
         if (result.success && result.data) {
           setUserId(result.data.id);

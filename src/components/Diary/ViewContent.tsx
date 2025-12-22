@@ -34,29 +34,6 @@ function BlogView({
           className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap break-words"
           dangerouslySetInnerHTML={{ __html: data?.content || '' }}
         />
-        <div className="flex gap-3 justify-end pt-4">
-            <Button
-              size="sm"
-              color="bMain"
-              onClick={() => window.history.back()}
-            >
-              목록
-            </Button>
-            <Button
-              size="sm"
-              color="bgMain"
-              onClick={() => router.push(`/diary/${data.idx}/update`)}
-            >
-              수정
-            </Button>
-            <Button
-              size="sm"
-              color="bgDanger"
-              onClick={() => router.push(`/diary/${data.idx}/delete`)}
-            >
-              삭제
-            </Button>
-          </div>
       </div>
     </article>
   );

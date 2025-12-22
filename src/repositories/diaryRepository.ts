@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { DiaryItem, CreateDiaryRequest, UpdateDiaryRequest } from '@/interfaces/diary';
+import { DiaryItem, CreateDiaryData, UpdateDiaryData} from '@/interfaces/diary';
 import { Prisma } from '@prisma/client';
 
 export class DiaryRepository {
@@ -15,9 +15,10 @@ export class DiaryRepository {
     };
   }
 
-  // 모든 일기 조회
-  async getAllDiaries(): Promise<DiaryItem[]> {
+  // 일기 조회
+  async getAllDiaries(memberId?: string): Promise<DiaryItem[]> {
     const diaries = await prisma.diary.findMany({
+      where: memberId ? { memberId } : undefined, 
       orderBy: {
         date: 'desc'
       }
@@ -26,10 +27,13 @@ export class DiaryRepository {
     return diaries.map(diary => this.changeToDiaryItem(diary));
   }
 
-  // 특정 일기 조회
-  async getDiaryByIdx(idx: number): Promise<DiaryItem | null> {
-    const diary = await prisma.diary.findUnique({
-      where: { idx }
+  // 일기 조회
+  async getDiaryByIdx(idx: number, memberId: string): Promise<DiaryItem | null> {
+    const diary = await prisma.diary.findFirst({
+      where: { 
+        idx,
+        memberId 
+      }
     });
 
     if (!diary) {
@@ -40,7 +44,7 @@ export class DiaryRepository {
   }
 
   // 일기 추가
-  async createDiary(data: CreateDiaryRequest): Promise<DiaryItem> {
+  async createDiary(data: CreateDiaryData): Promise<DiaryItem> {
     const diary = await prisma.diary.create({
       data: {
         memberId: data.memberId,
@@ -54,7 +58,7 @@ export class DiaryRepository {
   }
 
   // 일기 수정
-  async updateDiary(idx: number, data: UpdateDiaryRequest): Promise<DiaryItem> {
+  async updateDiary(idx: number, data: UpdateDiaryData): Promise<DiaryItem> {
     const diary = await prisma.diary.update({
       where: { idx },
       data

@@ -2,25 +2,21 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import NavBar from '@/components/NavBar';
-import BlogRegister from '@/components/Blog/RegisterContent';
-import type { BlogFormData } from '@/components/Blog/RegisterContent';
+import BlogRegister from '@/components/Diary/RegisterContent';
+import type { DiaryFormData } from '@/components/Diary/RegisterContent';
 import { createDiary } from '@/functions/apis/diary';
 import { isAuthenticated } from '@/lib/storage';
-import { UserData } from '@/interfaces/member';
 
 const DiaryWritePage = () => {
   const router = useRouter();
-  const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
-    const currentUser = isAuthenticated();
-    setUser(currentUser);
+    isAuthenticated();
   }, [router]);
 
-  const handleSubmit = async (data: BlogFormData) => {
+  const handleSubmit = async (data: DiaryFormData) => {
     try {
       const result = await createDiary({
-        memberId: user?.id || '',
         subject: data.title,
         content: data.content,
         date: new Date()

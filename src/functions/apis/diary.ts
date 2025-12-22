@@ -1,10 +1,10 @@
 import { axiosInstance } from './axios';
-import { DiaryItem, DiaryListResponse, DiaryResponse, CreateDiaryRequest, UpdateDiaryRequest, DiaryListRequest } from '@/interfaces/diary';
+import { DiaryItem, DiaryListResponse, DiaryResponse, CreateDiaryRequest, UpdateDiaryRequest, DiaryListRequest, CreateDiaryResponse } from '@/interfaces/diary';
 
 const DIARY_URL = '/api/diary';
 
-// 모든 일기 조회
-export const getAllDiaries = async ( params: DiaryListRequest ): Promise<DiaryListResponse> => {
+// 일기 조회
+export const getAllDiaries = async (): Promise<DiaryListResponse> => {
   try {
     const { data } = await axiosInstance.get<DiaryListResponse>(DIARY_URL);
     return data;
@@ -25,15 +25,14 @@ export const getDiaryByIdx = async (idx: number): Promise<DiaryResponse> => {
   }
 };
 
-// 일기 등록
+// 일기 등록 
 export const createDiary = async (
   diaryData: CreateDiaryRequest
-): Promise<{ success: boolean; data: CreateDiaryRequest; message?: string }> => {
+): Promise<CreateDiaryResponse> => {
   try {
-    console.log(diaryData);
-    const { data } = await axiosInstance.post<{ success: boolean; data: CreateDiaryRequest; message?: string }>(
+    const { data } = await axiosInstance.post<CreateDiaryResponse>(
       `${DIARY_URL}/register`,
-      diaryData
+      diaryData 
     );
     return data;
   } catch (error) {
@@ -45,10 +44,10 @@ export const createDiary = async (
 // 일기 수정
 export const updateDiary = async (
   diaryData: UpdateDiaryRequest
-): Promise<{ success: boolean; data: DiaryItem; message?: string }> => {
+): Promise<DiaryResponse> => {
   try {
     const { idx, ...body } = diaryData;
-    const { data } = await axiosInstance.put<{ success: boolean; data: DiaryItem; message?: string }>(
+    const { data } = await axiosInstance.put<DiaryResponse>(
       `${DIARY_URL}/${idx}/update`,
       body
     );

@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { UnauthorizedError, ForbiddenError, NotFoundError, ValidationError } from '@/lib/errors';
+import { verifyToken, JwtPayload } from '@/lib/jwt';
 
 export interface ApiResponse<T = unknown> {
   success: boolean;
@@ -7,6 +8,11 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
   timestamp: string;
+}
+
+// 인증된 요청에 사용자 정보 추가
+export interface AuthenticatedRequest extends NextApiRequest {
+  user?: JwtPayload;
 }
 
 // 에러 응답 
@@ -46,6 +52,35 @@ export const validateMethod = (
   allowedMethods: string[]
 ): boolean => {
   return allowedMethods.includes(req.method || '');
+};
+
+// Cookie에서 토큰 추출
+export const getTokenFromCookie = (req: NextApiRequest): string | null => {
+  const cookies = req.headers.cookie;
+  if (!cookies) return null;
+
+  const tokenCookie = cookies.split(';').find(c => c.trim().startsWith('token='));
+  if (!tokenCookie) return null;
+
+  return tokenCookie.split('=')[1];
+};
+
+// 요청에서 사용자 인증 정보 추출
+export const authenticateRequest = (req: AuthenticatedRequest): JwtPayload => {
+  const token = getTokenFromCookie(req);
+  
+  if (!token) {
+    throw new UnauthorizedError('로그인이 필요합니다.');
+  }
+
+  const payload = verifyToken(token);
+  
+  if (!payload) {
+    throw new UnauthorizedError('유효하지 않은 토큰입니다.');
+  }
+
+  req.user = payload;
+  return payload;
 };
 
 

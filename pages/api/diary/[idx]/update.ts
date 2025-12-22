@@ -1,17 +1,19 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
 import { DiaryService } from '@/services/diaryService';
-import { DiaryResponse } from '@/interfaces/diary';
-import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
+import { DiaryResponse, UpdateDiaryData, UpdateDiaryRequest } from '@/interfaces/diary';
+import { withErrorHandler, createSuccessResponse, createErrorResponse, AuthenticatedRequest, authenticateRequest } from '@/lib/api';
 
 const diaryService = new DiaryService();
 
 async function handler(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<DiaryResponse | { error: string }>
 ) {
   if (req.method !== 'PUT') {
     return createErrorResponse(res, 405, 'Method not allowed');
   }
+
+  const user = authenticateRequest(req);
 
   const { idx } = req.query;
 
@@ -21,19 +23,22 @@ async function handler(
 
   const { subject, content, date } = req.body;
 
-  const updateData: {
-    subject?: string;
-    content?: string;
-    date?: Date;
-  } = {};
+  const updateData: UpdateDiaryData = {
+    idx: Number(idx),
+    memberId: user.id,
+    subject: subject,
+    content: content,
+    date: new Date(date)
+  };
 
-  if (subject) updateData.subject = subject;
-  if (content) updateData.content = content;
-  if (date) updateData.date = new Date(date);
+  // 소유자 확인 포함된 업데이트
+  const result = await diaryService.updateDiary(updateData);
 
-  const result = await diaryService.updateDiary(Number(idx), updateData);
+  if (!result.success) {
+    return createErrorResponse(res, 403, result.message || '일기 수정에 실패했습니다.');
+  }
 
-  return createSuccessResponse(res, result, '일기가 수정되었습니다.');
+  return createSuccessResponse(res, result.data, result.message);
 }
 
 export default withErrorHandler(handler);

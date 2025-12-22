@@ -17,29 +17,29 @@ const DiaryListPage = () => {
   const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
-    const currentUser =  isAuthenticated();
+    const currentUser = isAuthenticated();
     setUser(currentUser);
   }, [router]);
 
   const {
     data: diaryList = [],
     isLoading,
-    error,
     refetch
   } = useQuery<DiaryItem[], Error>({
     queryKey: ['diaries', user?.id],
     queryFn: async (): Promise<DiaryItem[]> => {
-      const result = await getAllDiaries({ memberId: user?.id || '' });
-
+      const result = await getAllDiaries();
       if (!result.success || !result.data) {
         throw new Error('Failed to fetch diaries');
       }
 
       return result.data;
     },
-    staleTime: 1000 * 60 * 5, // 5분간 신선
-    gcTime: 1000 * 60 * 10, // 10분간 캐시 유지
-    retry: 2, // 실패 시 2번 재시도
+    enabled: !!user,
+    refetchOnMount: 'always',
+    staleTime: 0,
+    gcTime: 1000 * 60 * 10, 
+    retry: 2, 
   });
 
   const handleCardClick = (idx: number) => {
@@ -67,9 +67,7 @@ const DiaryListPage = () => {
               글쓰기
             </Button>
           </div>
-          {error ? (
-            <ErrorMessage onRetry={() => refetch()} />
-          ) : diaryList.length === 0 ? (
+          {diaryList.length === 0 ? (
             <NoContent message="작성된 일기가 없습니다." />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -1,16 +1,19 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
 import { DiaryService } from '@/services/diaryService';
-import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
+import { withErrorHandler, createSuccessResponse, createErrorResponse, AuthenticatedRequest, authenticateRequest } from '@/lib/api';
 
 const diaryService = new DiaryService();
 
 async function handler(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<{ success: boolean; message: string } | { error: string }>
 ) {
   if (req.method !== 'DELETE') {
     return createErrorResponse(res, 405, 'Method not allowed');
   }
+
+  // 🔐 JWT 토큰에서 로그인한 사용자 정보 추출
+  const user = authenticateRequest(req);
 
   const { idx } = req.query;
 
@@ -18,9 +21,14 @@ async function handler(
     return createErrorResponse(res, 400, 'idx is required');
   }
 
-  await diaryService.deleteDiary(Number(idx));
+  // 소유자 확인 포함된 삭제
+  const result = await diaryService.deleteDiary(Number(idx), user.id);
 
-  return createSuccessResponse(res, null, '일기가 삭제되었습니다.');
+  if (!result.success) {
+    return createErrorResponse(res, 403, result.message || '일기 삭제에 실패했습니다.');
+  }
+
+  return createSuccessResponse(res, null, result.message);
 }
 
 export default withErrorHandler(handler);

@@ -1,26 +1,28 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
 import { DiaryService } from '@/services/diaryService';
 import { DiaryResponse } from '@/interfaces/diary';
-import { withErrorHandler, createErrorResponse } from '@/lib/api';
+import { withErrorHandler, createErrorResponse, AuthenticatedRequest, authenticateRequest } from '@/lib/api';
 
 const diaryService = new DiaryService();
 
 async function handler(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<DiaryResponse | { error: string }>
 ) {
   if (req.method !== 'POST') {
     return createErrorResponse(res, 405, 'Method not allowed');
   }
 
-  const { memberId, subject, content, date } = req.body;
+  const user = authenticateRequest(req);
 
-  if (!memberId || !subject || !content) {
-    return createErrorResponse(res, 400, 'memberId, subject, content는 필수입니다');
+  const { subject, content, date } = req.body;
+
+  if (!subject || !content) {
+    return createErrorResponse(res, 400, '제목과 일기를 적어주세요');
   }
 
   const result = await diaryService.registerDiary({
-    memberId,
+    memberId: user.id,
     subject,
     content,
     date: date ? new Date(date) : new Date()

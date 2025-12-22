@@ -1,19 +1,21 @@
-import { NextApiRequest, NextApiResponse } from 'next';
+import { NextApiResponse } from 'next';
 import { DiaryService } from '@/services/diaryService';
 import { DiaryListResponse } from '@/interfaces/diary';
-import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
+import { withErrorHandler, createSuccessResponse, createErrorResponse, AuthenticatedRequest, authenticateRequest } from '@/lib/api';
 
 const diaryService = new DiaryService();
 
 async function handler(
-  req: NextApiRequest,
+  req: AuthenticatedRequest,
   res: NextApiResponse<DiaryListResponse | { error: string }>
 ) {
   if (req.method !== 'GET') {
     return createErrorResponse(res, 405, 'Method not allowed');
   }
 
-  const result = await diaryService.getAllDiaries();
+  const user = authenticateRequest(req);
+  
+  const result = await diaryService.getAllDiaries(user.id);
   
   if (!result.success) {
     return createErrorResponse(res, 500, '일기 목록을 불러오는데 실패했습니다.');
