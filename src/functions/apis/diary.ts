@@ -28,9 +28,10 @@ export const getDiaryByIdx = async (idx: number): Promise<DiaryResponse> => {
 // 일기 등록
 export const createDiary = async (
   diaryData: CreateDiaryRequest
-): Promise<{ success: boolean; data: DiaryItem; message?: string }> => {
+): Promise<{ success: boolean; data: CreateDiaryRequest; message?: string }> => {
   try {
-    const { data } = await axiosInstance.post<{ success: boolean; data: DiaryItem; message?: string }>(
+    console.log(diaryData);
+    const { data } = await axiosInstance.post<{ success: boolean; data: CreateDiaryRequest; message?: string }>(
       `${DIARY_URL}/register`,
       diaryData
     );

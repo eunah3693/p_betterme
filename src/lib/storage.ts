@@ -1,5 +1,6 @@
 import type { MemberItem } from '@/interfaces/member';
 
+
 const STORAGE_KEYS = {
   USER: 'user',
 } as const;
@@ -42,7 +43,12 @@ export const removeUser = (): void => {
   }
 };
 
-//localStorage에서 user 정보가 있는지 확인
-export const isAuthenticated = (): boolean => {
-  return !!getUser();
+//localStorage에서 user 정보가 있는지 확인하고 있으면 return 
+export const isAuthenticated = (): UserData | null => {
+  const user = getUser();
+  if (!user && isBrowser) {
+    window.location.href = '/login';
+    return null;
+  }
+  return user;
 };

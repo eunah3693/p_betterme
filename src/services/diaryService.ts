@@ -1,5 +1,5 @@
 import { DiaryRepository } from '@/repositories/diaryRepository';
-import { DiaryItem, DiaryListResponse, DiaryResponse } from '@/interfaces/diary';
+import { DiaryItem, DiaryListResponse, DiaryResponse, CreateDiaryRequest, UpdateDiaryRequest } from '@/interfaces/diary';
 
 export class DiaryService {
   private diaryRepository: DiaryRepository;
@@ -51,21 +51,12 @@ export class DiaryService {
   }
   
   // 일기 등록
-  async registerDiary(data: {
-    memberId: string;
-    subject: string;
-    content: string;
-    date: Date;
-  }): Promise<DiaryItem> {
+  async registerDiary(data: CreateDiaryRequest): Promise<DiaryItem> {
     return await this.diaryRepository.createDiary(data);
   }
   
   // 일기 수정
-  async updateDiary(idx: number, data: {
-    subject?: string;
-    content?: string;
-    date?: Date;
-  }): Promise<DiaryItem> {
+  async updateDiary(idx: number, data: UpdateDiaryRequest): Promise<DiaryItem> {
     return await this.diaryRepository.updateDiary(idx, data);
   }
   

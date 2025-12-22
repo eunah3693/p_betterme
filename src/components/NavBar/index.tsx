@@ -5,7 +5,7 @@ import hamBurger from '@public/assets/hamburger.svg'
 import { useRouter } from 'next/router';
 import { commonNavData, guestNavData, authNavData } from '@/constants/strings';
 import logo from '@public/assets/logo.svg'
-import { isAuthenticated } from '@/lib/storage';
+import { getUser } from '@/lib/storage';
 
 
 function NavBar() {
@@ -14,8 +14,9 @@ function NavBar() {
   const router = useRouter();
 
   useEffect(() => {
+    const user = getUser();
     const checkLoginStatus = () => {
-      setIsLoggedIn(isAuthenticated());
+      setIsLoggedIn(!!user);
     };
 
     checkLoginStatus();

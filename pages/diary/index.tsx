@@ -9,19 +9,16 @@ import NoContent from '@/components/Empty/NoContent';
 import Card from '@/components/Cards/Card';
 import { getAllDiaries } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
-import { getUser } from '@/lib/storage';
+import { isAuthenticated } from '@/lib/storage';
+import { UserData } from '@/interfaces/member';
 
 const DiaryListPage = () => {
   const router = useRouter();
-  const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
+  const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
-    const currentUser = getUser();
+    const currentUser =  isAuthenticated();
     setUser(currentUser);
-    
-    if (!currentUser) {
-      router.push('/login');
-    }
   }, [router]);
 
   const {
@@ -53,10 +50,10 @@ const DiaryListPage = () => {
     <div className="font-notoSans min-h-screen bg-gray-50">
       <LoadingOverlay isLoading={isLoading} message="일기를 불러오는 중" />
       <NavBar />
-      <div className="flex justify-center py-8 px-4">
+      <div className="flex justify-center py-10 md:py-15 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
 
-          <div className="mb-8 flex justify-between items-end">
+          <div className="mb-8 flex justify-between items-end gap-4">
             <div>
               <h1 className="text-3xl font-bold text-main mb-2">일기</h1>
               <p className="text-gray-600 text-sm">오늘의 하루를 기록해주세요. 일기는 나만 볼 수 있습니다.</p>

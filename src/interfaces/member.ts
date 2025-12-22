@@ -8,6 +8,8 @@ export interface MemberItem {
   myBadge: string;
 }
 
+export type UserData = Omit<MemberItem, 'password'>;
+
 export interface SignupRequest {
   id: string;
   password: string;
