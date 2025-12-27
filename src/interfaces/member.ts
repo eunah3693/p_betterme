@@ -19,6 +19,7 @@ export interface SignupRequest {
   myBadge: string; // 쉼표로 구분된 배지 문자열
 }
 
+//로그인 요청
 export interface LoginRequest {
   id: string;
   password: string;
@@ -34,6 +35,7 @@ export interface MemberResponse {
   message?: string;
 }
 
+//로그인 응답 
 export interface LoginResponse {
   success: boolean;
   data: Omit<MemberItem, 'password'> | null;

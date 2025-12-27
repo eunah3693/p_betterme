@@ -1,5 +1,5 @@
 import { axiosInstance } from './axios';
-import { SignupRequest, LoginRequest, MemberResponse, CheckIdResponse } from '@/interfaces/member';
+import { SignupRequest, LoginRequest, LoginResponse, MemberResponse, CheckIdResponse } from '@/interfaces/member';
 
 const MEMBER_URL = '/api/member';
 const CHECK_ID_URL = `${MEMBER_URL}/check-id`;
@@ -29,9 +29,9 @@ export const signup = async (signupData: SignupRequest): Promise<MemberResponse>
 };
 
 // 로그인
-export const login = async (loginData: LoginRequest): Promise<MemberResponse> => {
+export const login = async (loginData: LoginRequest): Promise<LoginResponse> => {
   try {
-    const { data } = await axiosInstance.post<MemberResponse>(LOGIN_URL, loginData);
+    const { data } = await axiosInstance.post<LoginResponse>(LOGIN_URL, loginData);
     return data;
   } catch (error) {
     console.error('로그인 실패:', error);

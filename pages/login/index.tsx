@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
@@ -10,13 +11,15 @@ import ConfirmModal from '@/components/Modal/ConfirmModal';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import { login } from '@/functions/apis/member';
 import { loginSchema } from '@/lib/validation';
-import { setUser } from '@/lib/storage';
+import { useUserStore } from '@/store/user';
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const LoginPage = () => {
   const router = useRouter();
+  const setUser = useUserStore((state) => state.setUser);  // user store 
 
+  //login form 
   const {
     register,
     handleSubmit,
@@ -29,6 +32,7 @@ const LoginPage = () => {
     },
   });
 
+  // modal state
   const [modal, setModal] = useState({
     isOpen: false,
     message: '',
@@ -36,6 +40,7 @@ const LoginPage = () => {
     onConfirm: () => {},
   });
 
+  // modal 열기
   const showModal = (
     message: string,
     type: 'info' | 'success' | 'error' | 'warning' = 'info',
@@ -49,27 +54,30 @@ const LoginPage = () => {
     });
   };
 
+  // modal 닫기
   const closeModal = () => {
     setModal((prev) => ({ ...prev, isOpen: false }));
   };
 
+  // login 제출
   const onSubmit = async (data: LoginFormData) => {
     try {
       const result = await login({ id: data.id, password: data.password });
 
-      if (result.success) {
-        if (result.data) {
-          setUser(result.data);
-        }
+      // login success = true
+      if (result.success && result.data) {
+        setUser(result.data);
         showModal(
-          `${result.data?.nickname}님, 환영합니다`,
+          `${result.data.nickname}님, 환영합니다`,
           'success',
           () => router.push('/')
         );
       } else {
+        // login success = false
         showModal(result.message || '로그인에 실패했습니다.', 'error');
       }
     } catch (error) {
+      // axios error
       console.error('로그인 실패:', error);
       showModal('로그인에 실패했습니다.', 'error');
     }

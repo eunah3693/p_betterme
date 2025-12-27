@@ -6,21 +6,41 @@ import {
 } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { isProduction } from "@/functions/utils/commons";
 import { useUserStore } from '@/store/user';
 
 import '@/styles/global.css';
 
+// 로그인 없이 접근 가능한 공개 페이지 목록
+const PUBLIC_PATHS = [
+  '/login',
+  '/signup',
+  '/',  // 홈페이지도 공개
+];
+
 export default function MyApp({
   Component,
   pageProps,
 }: AppProps) {
-  const { checkAuth } = useUserStore();
+  const router = useRouter();
+  const checkAuth = useUserStore((state) => state.checkAuth);
+  const user = useUserStore((state) => state.user);
 
+  // 앱 시작 시 로그인 상태 복원
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []);
 
+  // 보호된 페이지 접근 시 로그인 체크
+  useEffect(() => {
+    const isPublicPath = PUBLIC_PATHS.includes(router.pathname);
+    
+    if (!isPublicPath && !user) {
+      // 보호된 페이지인데 로그인 안 되어 있으면
+      router.push('/login');
+    }
+  }, [router.pathname, user]);
 
   const [queryClient] = useState(
     () =>

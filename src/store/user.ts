@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { isAuthenticated, UserData } from '@/lib/storage';
+import { getUser, UserData, setUser as saveUser, removeUser } from '@/lib/storage';
 
 interface UserStore {
   user: UserData | null;
@@ -12,14 +12,22 @@ export const useUserStore = create<UserStore>((set) => ({
   user: null,
   
   // 사용자 정보 설정
-  setUser: (user) => set({ user }),
+  setUser: (user) => {
+    if (user) {
+      saveUser(user); 
+    }
+    set({ user });
+  },
   
-  // 인증 확인
+  // 인증 확인 
   checkAuth: () => {
-    const currentUser = isAuthenticated();
+    const currentUser = getUser(); 
     set({ user: currentUser });
   },
   
   // 로그아웃
-  logout: () => set({ user: null }),
+  logout: () => {
+    removeUser();  
+    set({ user: null });
+  },
 }));
