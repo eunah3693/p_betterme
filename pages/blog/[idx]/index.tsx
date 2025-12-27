@@ -7,10 +7,12 @@ import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
 import { getBlogByIdx } from '@/functions/apis/blog';
 import type { BlogItem } from '@/interfaces/blog';
+import { useUserStore } from '@/store/user';
 
 const BlogDetailPage = () => {
   const router = useRouter();
   const { idx } = router.query;
+  const user = useUserStore((state) => state.user);
 
   const {
     data: blogData,
@@ -28,7 +30,6 @@ const BlogDetailPage = () => {
         return null;
       }
 
-      // result.data가 배열인 경우와 단일 객체인 경우 처리
       if (Array.isArray(result.data)) {
         return result.data[0] || null;
       }
@@ -54,6 +55,7 @@ const BlogDetailPage = () => {
             <>
               <BlogView 
                 data={blogData}
+                type="blog"
               />
             </>
           )}

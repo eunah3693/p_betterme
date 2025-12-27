@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { BlogService } from '@/services/blogService';
-import { BlogResponse } from '@/interfaces/blog';
-import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
+import { BlogResponse, UpdateBlogRequest } from '@/interfaces/blog';
+import { withErrorHandler, createSuccessResponse, createErrorResponse, authenticateRequest  } from '@/lib/api';
 
 const blogService = new BlogService();
 
@@ -19,24 +19,28 @@ async function handler(
     return createErrorResponse(res, 400, 'idx is required');
   }
 
-  const { subject, content, date } = req.body;
+  const user = authenticateRequest(req);
 
-  const updateData: {
-    subject?: string;
-    content?: string;
-    date?: Date;
-  } = {};
+  const updateData: UpdateBlogRequest = {
+    ...req.body,
+    idx: Number(idx) 
+  };
 
-  if (subject) updateData.subject = subject;
-  if (content) updateData.content = content;
-  if (date) updateData.date = new Date(date);
+  if(user.id !== updateData.memberId) {
+    return createErrorResponse(res, 403, '권한이 없습니다.');
+  }
 
-  const result = await blogService.updateBlog(Number(idx), updateData);
+  const result = await blogService.updateBlog({ 
+    ...updateData, 
+    memberId: user.id,
+    idx: Number(idx) 
+  });
 
   return createSuccessResponse(res, result, '블로그가 수정되었습니다.');
 }
 
 export default withErrorHandler(handler);
+
 
 
 

@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { BlogItem, CreateBlogRequest, UpdateBlogRequest } from '@/interfaces/blog';
+import { BlogItem, BlogListRequest, CreateBlogRequest, UpdateBlogRequest, BlogListResponse } from '@/interfaces/blog';
 import { Prisma } from '@prisma/client';
 
 export class BlogRepository {
@@ -24,6 +24,160 @@ export class BlogRepository {
     });
 
     return blogs.map(blog => this.changeToBlogItem(blog));
+  }
+
+  // 추천 블로그 조회 (좋아요 많은 순)
+  async getRecommendedBlogs(params: BlogListRequest): Promise<BlogListResponse> {
+    const pageSize = 12;
+    const skip = params.page * pageSize;
+
+    // 전체 개수 조회
+    const totalElements = await prisma.blog.count();
+
+    // 데이터 조회 (likeCount가 문자열이므로 null이 아닌 것만 필터링)
+    const blogs = await prisma.blog.findMany({
+      where: {
+        likeCount: {
+          not: null
+        }
+      },
+      orderBy: {
+        likeCount: 'desc'
+      },
+      skip: skip,
+      take: pageSize
+    });
+
+    const totalPages = Math.ceil(totalElements / pageSize);
+
+    return {
+      success: true,
+      data: blogs.map(blog => this.changeToBlogItem(blog)),
+      page: {
+        number: params.page,
+        totalPages: totalPages,
+        totalElements: totalElements,
+        size: pageSize
+      }
+    };
+  }
+
+  // 많이본 블로그 조회 (조회수 많은 순)
+  async getMostViewedBlogs(params: BlogListRequest): Promise<BlogListResponse> {
+    const pageSize = 12;
+    const skip = params.page * pageSize;
+
+    // 전체 개수 조회
+    const totalElements = await prisma.blog.count();
+
+    // 데이터 조회 (viewCount가 문자열이므로 null이 아닌 것만 필터링)
+    const blogs = await prisma.blog.findMany({
+      where: {
+        viewCount: {
+          not: null
+        }
+      },
+      orderBy: {
+        viewCount: 'desc'
+      },
+      skip: skip,
+      take: pageSize
+    });
+
+    const totalPages = Math.ceil(totalElements / pageSize);
+
+    return {
+      success: true,
+      data: blogs.map(blog => this.changeToBlogItem(blog)),
+      page: {
+        number: params.page,
+        totalPages: totalPages,
+        totalElements: totalElements,
+        size: pageSize
+      }
+    };
+  }
+  
+  // 이달의 블로그 조회 (이번 달 작성된 글)
+  async getMonthlyBlogs(params: BlogListRequest): Promise<BlogListResponse> {
+    const pageSize = 12;
+    const skip = params.page * pageSize;
+    
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    // 이번 달 데이터 개수 조회
+    const totalElements = await prisma.blog.count({
+      where: {
+        date: {
+          gte: startOfMonth,
+          lte: endOfMonth
+        }
+      }
+    });
+
+    // 데이터 조회
+    const blogs = await prisma.blog.findMany({
+      where: {
+        date: {
+          gte: startOfMonth,
+          lte: endOfMonth
+        }
+      },
+      orderBy: {
+        date: 'desc'
+      },
+      skip: skip,
+      take: pageSize
+    });
+
+    const totalPages = Math.ceil(totalElements / pageSize);
+
+    return {
+      success: true,
+      data: blogs.map(blog => this.changeToBlogItem(blog)),
+      page: {
+        number: params.page,
+        totalPages: totalPages,
+        totalElements: totalElements,
+        size: pageSize
+      }
+    };
+  }
+
+  // 내 블로그 조회 
+  async getMyBlogs(memberId: string, params: BlogListRequest): Promise<BlogListResponse> {
+    const pageSize = 12;
+    const skip = params.page * pageSize;
+
+    // 전체 개수 조회
+    const totalElements = await prisma.blog.count({
+      where: { memberId }
+    });
+
+    // 데이터 조회
+    const blogs = await prisma.blog.findMany({
+      where: { memberId },
+      orderBy: {
+        date: 'desc'
+      },
+      skip: skip,
+      take: pageSize
+    });
+
+    const totalPages = Math.ceil(totalElements / pageSize);
+
+    return {
+      success: true,
+      data: blogs.map(blog => this.changeToBlogItem(blog)),
+      page: {
+        number: params.page,
+        totalPages,
+        totalElements,
+        size: pageSize
+      }
+    };
   }
 
   // 특정 블로그 조회
@@ -54,10 +208,14 @@ export class BlogRepository {
   }
 
   // 블로그 수정
-  async updateBlog(idx: number, data: UpdateBlogRequest): Promise<BlogItem> {
+  async updateBlog(data: UpdateBlogRequest): Promise<BlogItem> {
     const blog = await prisma.blog.update({
-      where: { idx },
-      data
+      where: { idx: data.idx },
+      data: {
+        subject: data.subject,
+        content: data.content,
+        date: data.date,
+      }
     });
 
     return this.changeToBlogItem(blog);

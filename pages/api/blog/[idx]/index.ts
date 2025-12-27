@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { BlogService } from '@/services/blogService';
 import { BlogResponse } from '@/interfaces/blog';
-import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
+import { withErrorHandler, createSuccessResponse, createErrorResponse, authenticateRequest } from '@/lib/api';
+
 
 const blogService = new BlogService();
 
@@ -18,8 +19,9 @@ async function handler(
   if (!idx) {
     return createErrorResponse(res, 400, 'idx is required');
   }
+  const user = authenticateRequest(req);
 
-  const result = await blogService.getBlogByIdx(Number(idx));
+  const result = await blogService.getBlogByIdx({ idx: Number(idx), id: user?.id || '' });
 
   if (!result.success) {
     return createErrorResponse(res, 404, result.message || '블로그를 찾을 수 없습니다.');

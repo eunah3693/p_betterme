@@ -19,7 +19,7 @@ const BlogWritePage = () => {
 
       if (result.success) {
         alert('블로그가 등록되었습니다!');
-        router.push('/blog');
+        router.push('/blog/myblog');
       } else {
         alert(result.message || '등록에 실패했습니다.');
       }

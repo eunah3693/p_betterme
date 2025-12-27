@@ -20,11 +20,14 @@ model Todo {
 }
 
 model Blog {
-  idx      Int       @id @default(autoincrement())
-  memberId String?   @map("member_id") @db.VarChar(45)
-  subject  String?   @default("블로그 제목") @db.VarChar(255)
-  content  String?   @db.Text
-  date     DateTime? @db.Date
+  idx       Int       @id @default(autoincrement())
+  memberId  String?   @map("member_id") @db.VarChar(45)
+  subject   String?   @default("블로그 제목") @db.VarChar(255)
+  content   String?   @db.Text
+  tag       String?   @db.VarChar(45)
+  viewCount String?   @map("view_count") @db.VarChar(45)
+  likeCount String?   @map("like_count") @db.VarChar(45)
+  date      DateTime? @db.Date
 
   @@map("blog")
 }

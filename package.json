@@ -57,8 +57,9 @@
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
     "cross-env": "^7.0.3",
-    "eslint": "^9",
+    "eslint": "^9.39.2",
     "eslint-config-next": "15.3.2",
+    "eslint-config-ryuwoong": "^1.0.7",
     "tailwindcss": "3",
     "typescript": "^5"
   }

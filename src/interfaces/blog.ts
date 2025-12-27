@@ -5,6 +5,7 @@ export interface BlogItem {
   subject?: string | null;
   content?: string | null;
   date?: string | null;
+  isAuthor?: boolean;
 }
 
 // Blog 등록 요청
@@ -18,9 +19,15 @@ export interface CreateBlogRequest {
 // Blog 수정 요청
 export interface UpdateBlogRequest {
   idx: number;
+  memberId?: string;
   subject?: string;
   content?: string;
   date?: Date;
+}
+
+export interface BlogRequest {
+  idx: number;
+  id: string;
 }
 
 // Blog 응답
@@ -30,15 +37,26 @@ export interface BlogResponse {
   message?: string;
 }
 
+// 내 Blog 목록 요청
+export interface MyBlogRequest {
+  memberId: string;
+}
+
 // Blog 목록 요청
 export interface BlogListRequest {
-  memberId: string;
+  page: number;
 }
 
 // Blog 목록 응답
 export interface BlogListResponse {
   success: boolean;
   data: BlogItem[];
+  page?: {
+    number: number;
+    totalPages: number;
+    totalElements: number;
+    size: number;
+  };
 }
 
 

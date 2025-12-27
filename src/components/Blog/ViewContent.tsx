@@ -6,12 +6,18 @@ import Button from '../Buttons/Button';
 
 interface BlogViewProps {
   data: DiaryItem | BlogItem;
+  type?: 'blog' | 'diary';  // ⭐ 타입 추가
 }
 
 function BlogView({
-  data
+  data,
+  type = 'diary'  // ⭐ 기본값은 diary (기존 동작 유지)
 }: BlogViewProps) {
   const router = useRouter();
+  
+  // ⭐ 타입에 따라 URL 결정
+  const baseUrl = type === 'blog' ? '/blog' : '/diary';
+  
   return (
     <article className={cn('bg-white rounded-lg shadow-sm')}>
       <div className="p-6 md:p-8">
@@ -34,6 +40,7 @@ function BlogView({
           className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap break-words"
           dangerouslySetInnerHTML={{ __html: data?.content || '' }}
         />
+        {data?.isAuthor && (
         <div className="flex gap-3 justify-end pt-4">
             <Button
               size="sm"
@@ -45,18 +52,19 @@ function BlogView({
             <Button
               size="sm"
               color="bgMain"
-              onClick={() => router.push(`/diary/${data.idx}/update`)}
+              onClick={() => router.push(`${baseUrl}/${data.idx}/update`)}
             >
               수정
             </Button>
             <Button
               size="sm"
               color="bgDanger"
-              onClick={() => router.push(`/diary/${data.idx}/delete`)}
+              onClick={() => router.push(`${baseUrl}/${data.idx}/delete`)}
             >
-              삭제
-            </Button>
-          </div>
+                삭제
+              </Button>
+            </div>
+          )}
       </div>
     </article>
   );

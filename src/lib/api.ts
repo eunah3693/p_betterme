@@ -6,6 +6,12 @@ export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
   data?: T;
+  page?: {
+    number: number;
+    totalPages: number;
+    totalElements: number;
+    size: number;
+  };
   error?: string;
   timestamp: string;
 }
@@ -35,12 +41,19 @@ export const createErrorResponse = (
 export const createSuccessResponse = <T>(
   res: NextApiResponse,
   data: T,
-  message: string = 'Success'
+  message: string = 'Success',
+  page?: {
+    number: number;
+    totalPages: number;
+    totalElements: number;
+    size: number;
+  }
 ) => {
   const response: ApiResponse<T> = {
     success: true,
     message,
     data,
+    page,
     timestamp: new Date().toISOString(),
   };
   return res.status(200).json(response);

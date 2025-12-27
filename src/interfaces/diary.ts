@@ -5,6 +5,7 @@ export interface DiaryItem {
   subject?: string | null;
   content?: string | null;
   date?: string | null;
+  isAuthor?: boolean;
 }
 
 export interface CreateDiaryRequest {

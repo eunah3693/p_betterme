@@ -5,8 +5,9 @@ import {
   HydrationBoundary,
 } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { isProduction } from "@/functions/utils/commons";
+import { useUserStore } from '@/store/user';
 
 import '@/styles/global.css';
 
@@ -14,6 +15,13 @@ export default function MyApp({
   Component,
   pageProps,
 }: AppProps) {
+  const { checkAuth } = useUserStore();
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
+
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
