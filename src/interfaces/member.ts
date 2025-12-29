@@ -29,6 +29,10 @@ export interface CheckIdRequest {
   id: string;
 }
 
+export interface GetMemberInfoRequest {
+  idx: number;
+}
+
 export interface MemberResponse {
   success: boolean;
   data: MemberItem | null;
@@ -44,6 +48,7 @@ export interface LoginResponse {
 }
 
 export interface UpdateMemberRequest {
+  idx: number;
   nickname?: string;
   job?: string;
   jobInfo?: string;

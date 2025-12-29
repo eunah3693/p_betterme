@@ -9,12 +9,9 @@ const LogoutPage = () => {
   const logout = useUserStore((state) => state.logout);
 
   useEffect(() => {
-    // 로그아웃 처리
-    logout();
-    
-    // 홈으로 리다이렉트
+    logout(); 
     router.push('/');
-  }, []); // ⭐ 빈 배열: 컴포넌트 마운트 시 한 번만 실행
+  }, []); 
 
   return (
     <div className="font-notoSans min-h-screen bg-gray-50">

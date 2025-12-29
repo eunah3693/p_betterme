@@ -1,5 +1,5 @@
 import { axiosInstance } from './axios';
-import { SignupRequest, LoginRequest, LoginResponse, MemberResponse, CheckIdResponse } from '@/interfaces/member';
+import { SignupRequest, LoginRequest, LoginResponse, MemberResponse, CheckIdResponse , GetMemberInfoRequest, UpdateMemberRequest} from '@/interfaces/member';
 
 const MEMBER_URL = '/api/member';
 const CHECK_ID_URL = `${MEMBER_URL}/check-id`;
@@ -40,9 +40,10 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
 };
 
 // 회원 정보 조회
-export const getMemberInfo = async (idx: number): Promise<MemberResponse> => {
+export const getMemberInfo = async (params: GetMemberInfoRequest): Promise<MemberResponse> => {
   try {
-    const { data } = await axiosInstance.get<MemberResponse>(`${MEMBER_URL}/${idx}`);
+    const { data } = await axiosInstance.get<MemberResponse>(`${MEMBER_URL}/${params.idx}`);
+    console.log('회원 정보 조회 성공:', data);
     return data;
   } catch (error) {
     console.error('회원 정보 조회 실패:', error);
@@ -51,12 +52,7 @@ export const getMemberInfo = async (idx: number): Promise<MemberResponse> => {
 };
 
 // 회원 정보 수정
-export const updateMemberInfo = async (updateData: {
-  idx: number;
-  job?: string;
-  jobInfo?: string;
-  myBadge?: string;
-}): Promise<MemberResponse> => {
+export const updateMemberInfo = async (updateData: UpdateMemberRequest): Promise<MemberResponse> => {
   try {
     const { idx, ...body } = updateData;
     const { data } = await axiosInstance.put<MemberResponse>(`${MEMBER_URL}/${idx}/update`, body);

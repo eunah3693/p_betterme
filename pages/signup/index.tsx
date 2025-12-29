@@ -8,11 +8,10 @@ import NavBar from '@/components/NavBar';
 import Input from '@/components/Forms/Input';
 import Textarea from '@/components/Forms/Textarea';
 import Button from '@/components/Buttons/Button';
-import Badge from '@/components/Forms/Badge';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
+import MyBadge from '@/components/Badge/MyBadge';
 import { useCheckId } from '@/functions/hooks/member/useCheckId';
-import { useBadge } from '@/functions/hooks/member/useBadge';
 import { signup } from '@/functions/apis/member';
 import { signupSchema } from '@/lib/validation';
 
@@ -21,18 +20,25 @@ type SignupFormData = z.infer<typeof signupSchema>;
 const SignupPage = () => {
   const router = useRouter();
 
+  // signup form
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     mode: 'onBlur',
+    defaultValues: {
+      myBadge: '', // 배지 필드 초기화
+    },
   });
 
+  // id 중복 체크 현재 id
   const currentId = watch('id');
 
+  // id 중복 체크 hook
   const {
     checked: idChecked,
     available: idAvailable,
@@ -41,16 +47,7 @@ const SignupPage = () => {
     handleCheck: handleCheckId,
   } = useCheckId(currentId || '');
 
-  const {
-    badgeInput,
-    setBadgeInput,
-    badges,
-    handleAddBadge,
-    handleRemoveBadge,
-    handleBadgeKeyDown,
-    getBadgeString,
-  } = useBadge();
-
+  // modal state
   const [modal, setModal] = useState({
     isOpen: false,
     message: '',
@@ -58,6 +55,7 @@ const SignupPage = () => {
     onConfirm: () => {},
   });
 
+  // modal 열기
   const showModal = (
     message: string,
     type: 'info' | 'success' | 'error' | 'warning' = 'info',
@@ -71,6 +69,7 @@ const SignupPage = () => {
     });
   };
 
+  // modal 닫기
   const closeModal = () => {
     setModal((prev) => ({ ...prev, isOpen: false }));
   };
@@ -95,7 +94,7 @@ const SignupPage = () => {
         nickname: data.nickname,
         job: data.job || '',
         jobInfo: data.jobInfo || '',
-        myBadge: getBadgeString(), 
+        myBadge: data.myBadge || '', 
       });
 
       if (result.success) {
@@ -247,47 +246,12 @@ const SignupPage = () => {
                   내 배지
                 </label>
                 
-                {/* 배지 추가 입력 */}
-                <div className="flex gap-2 items-center">
-                  <div className="flex-2 w-full">
-                      <Input
-                        color="bgray"
-                        size="md"
-                        value={badgeInput}
-                        onChange={(e) => setBadgeInput(e.target.value)}
-                        onKeyDown={handleBadgeKeyDown}
-                        placeholder="예: 성실한, 노력, 긍정"
-                        className="flex-1"
-                      />
-                  </div>
-                  <div className="flex-1">
-                    <Button
-                      type="button"
-                      onClick={handleAddBadge}
-                      color="bgMain"
-                      size="md"
-                      className="whitespace-nowrap"
-                    >
-                      추가
-                    </Button>
-                  </div>
-                </div>
-
-                {/* 배지 리스트 */}
-                {badges.length > 0 && (
-                  <div className="flex flex-wrap gap-2 p-4 bg-gray-50 rounded-lg">
-                    {badges.map((badge, index) => (
-                      <div key={index} className="flex items-center gap-1">
-                        <Badge color="bMain" size="sm">
-                          {badge}
-                          <span  onClick={() => handleRemoveBadge(badge)}
-                          className="ml-3 text-white cursor-pointer"
-                          title="삭제">✕</span>
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <MyBadge
+                  setValue={setValue}
+                  watch={watch}
+                  fieldName="myBadge"
+                  onError={(message) => showModal(message, 'error')}
+                />
               </div>
 
               {/* 제출 버튼 */}

@@ -22,6 +22,7 @@ export class MemberService {
       };
     }
 
+    // 회원가입
     const member = await this.memberRepository.createMember({
       id: data.id,
       password: data.password,
@@ -94,9 +95,9 @@ export class MemberService {
   }
 
   // 회원 정보 수정
-  async updateMemberInfo(idx: number, data: UpdateMemberRequest): Promise<MemberResponse> {
+  async updateMemberInfo(data: UpdateMemberRequest): Promise<MemberResponse> {
     try {
-      const member = await this.memberRepository.updateMember(idx, data);
+      const member = await this.memberRepository.updateMember(data);
       
       return {
         success: true,

@@ -66,9 +66,9 @@ export class MemberRepository {
   }
 
   // 회원 정보 수정
-  async updateMember(idx: number, data: UpdateMemberRequest): Promise<MemberItem> {
+  async updateMember(data: UpdateMemberRequest): Promise<MemberItem> {
     const member = await prisma.member.update({
-      where: { idx },
+      where: { idx: data.idx },
       data
     });
     return this.changeToMemberItem(member);

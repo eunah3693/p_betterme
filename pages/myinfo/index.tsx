@@ -1,151 +1,99 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useForm } from 'react-hook-form';
+import { useQuery } from '@tanstack/react-query';
+import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { GetServerSideProps } from 'next';
+import { QueryClient } from '@tanstack/react-query';
+import { dehydrate } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import Input from '@/components/Forms/Input';
 import Textarea from '@/components/Forms/Textarea';
 import Button from '@/components/Buttons/Button';
-import Badge from '@/components/Forms/Badge';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
-import { getMemberInfo, updateMemberInfo } from '@/functions/apis/member';
-import { useBadge } from '@/functions/hooks/member/useBadge';
-import { isAuthenticated, setUser } from '@/lib/storage';
-import { updateMemberSchema } from '@/lib/validation';
+import MyBadge from '@/components/Badge/MyBadge';
+import { updateMemberInfo } from '@/functions/apis/member';
+import { useModal } from '@/functions/hooks/useModal';
+import { requireAuth, redirectToLogin, redirectToHome } from '@/lib/auth';
+import { getMemberInfo } from '@/functions/apis/member';
+import { useUserStore } from '@/store/user';
 
-type UpdateMemberFormData = z.infer<typeof updateMemberSchema>;
+// 회원 정보 수정 스키마 
+const updateMemberFormSchema = z.object({
+  job: z.string()
+    .min(1, '직업을 입력해주세요')
+    .max(50, '직업은 최대 50자까지 가능합니다'),
+  jobInfo: z.string()
+    .max(500, '직업 소개는 최대 500자까지 가능합니다')
+    .optional(),
+  myBadge: z.string().optional(),
+});
+
+type UpdateMemberFormData = z.infer<typeof updateMemberFormSchema>;
+
 
 const MyInfoPage = () => {
+  const user = useUserStore((state) => state.user);
   const router = useRouter();
+  const { modal, showModal, closeModal } = useModal();
 
-  const [userIdx, setUserIdx] = useState<number | null>(null);
-  const [userId, setUserId] = useState('');
-  const [nickname, setNickname] = useState('');
+  // 서버에서 회원 정보 조회
+  const { data: userInfo, isLoading } = useQuery({
+    queryKey: ["myInfo", user?.idx],
+    queryFn: () => getMemberInfo({idx: user?.idx || 0}),
+    enabled: !!user?.idx,
+  });
 
+  // React Hook Form 설정
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    setValue,
+    watch,
   } = useForm<UpdateMemberFormData>({
-    resolver: zodResolver(updateMemberSchema),
+    resolver: zodResolver(updateMemberFormSchema),
     defaultValues: {
       job: '',
       jobInfo: '',
+      myBadge: '',
     },
   });
 
-  // 배지 hook
-  const {
-    badgeInput,
-    setBadgeInput,
-    badges,
-    setBadges,
-    handleAddBadge,
-    handleRemoveBadge,
-    handleBadgeKeyDown,
-    getBadgeString,
-  } = useBadge();
-
-  // 로딩 상태
-  const [isLoading, setIsLoading] = useState(true);
-
-  // 모달 상태
-  const [modal, setModal] = useState({
-    isOpen: false,
-    message: '',
-    type: 'info' as 'info' | 'success' | 'error' | 'warning',
-    onConfirm: () => {},
-  });
-
-  const showModal = useCallback((
-    message: string,
-    type: 'info' | 'success' | 'error' | 'warning' = 'info',
-    onConfirm?: () => void
-  ) => {
-    setModal({
-      isOpen: true,
-      message,
-      type,
-      onConfirm: onConfirm || (() => {}),
-    });
-  }, []);
-
-  const closeModal = useCallback(() => {
-    setModal((prev) => ({ ...prev, isOpen: false }));
-  }, []);
-
-  // 배지 문자열을 배열로 변환
-  const parseBadges = useCallback((badgeString: string): string[] => {
-    return badgeString
-      .split(',')
-      .map(b => b.trim())
-      .filter(b => b.length > 0);
-  }, []);
-
-  // 사용자 정보 조회
+  // userInfo가 로드되면 폼 초기화
   useEffect(() => {
-    const loadUserInfo = async () => {
-      try {
-        const user = isAuthenticated();
-        setUserIdx(user?.idx || 0);
+    if (userInfo?.data) {
+      reset({
+        job: userInfo.data.job || '',
+        jobInfo: userInfo.data.jobInfo || '',
+        myBadge: userInfo.data.myBadge || '',
+      });
+    }
+  }, [userInfo, reset]);
 
-        const result = await getMemberInfo(user?.idx || 0);
-        
-        if (result.success && result.data) {
-          setUserId(result.data.id);
-          setNickname(result.data.nickname);
-          
-          reset({
-            job: result.data.job || '',
-            jobInfo: result.data.jobInfo || '',
-          });
-          
-          if (result.data.myBadge) {
-            const badgeArray = parseBadges(result.data.myBadge);
-            setBadges(badgeArray);
-          }
-        } else {
-          showModal('회원 정보를 불러올 수 없습니다.', 'error', () => {
-            router.push('/');
-          });
-        }
-      } catch (error) {
-        console.error('회원 정보 로드 실패:', error);
-        showModal('회원 정보를 불러오는데 실패했습니다.', 'error', () => {
-          router.push('/');
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    loadUserInfo();
-  }, [router, reset, setBadges, parseBadges, showModal]);
 
   // 회원 정보 수정 제출
   const onSubmit = async (data: UpdateMemberFormData) => {
-    if (!userIdx) {
-      showModal('사용자 정보를 확인할 수 없습니다.', 'error');
-      return;
-    }
-
     try {
       const result = await updateMemberInfo({
-        idx: userIdx,
+        idx: userInfo?.data?.idx || 0,
         job: data.job || '',
         jobInfo: data.jobInfo || '',
-        myBadge: getBadgeString(),
+        myBadge: data.myBadge || '',
       });
 
       if (result.success) {
         if (result.data) {
-          setUser(result.data);
+          useUserStore.setState({ user: result.data });
         }
         
-        showModal('회원 정보가 수정되었습니다', 'success');
+        showModal('회원 정보가 수정되었습니다', 'success', () => {
+          router.push('/');
+        });
       } else {
         showModal(result.message || '회원 정보 수정에 실패했습니다.', 'error');
       }
@@ -155,11 +103,19 @@ const MyInfoPage = () => {
     }
   };
 
+  // 로딩 중이면 로딩 표시
+  if (isLoading || !userInfo?.data) {
+    return <LoadingOverlay isLoading={true} message="회원 정보 불러오는 중" />;
+  }
+
+  const userId = userInfo.data.id || '';
+  const nickname = userInfo.data.nickname || '';
+
   return (
     <>
       <LoadingOverlay 
-        isLoading={isLoading || isSubmitting} 
-        message={isLoading ? '회원 정보를 불러오는 중' : isSubmitting ? '회원 정보 수정 중' : ''}
+        isLoading={isSubmitting} 
+        message="회원 정보 수정 중"
       />
       <ConfirmModal
         isOpen={modal.isOpen}
@@ -199,10 +155,17 @@ const MyInfoPage = () => {
                 />
               </div>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 pt-4">
+                {/* 전체 폼 에러 메시지 */}
+                {errors.root && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-600 text-sm">{errors.root.message}</p>
+                  </div>
+                )}
+
                 {/* 직업 */}
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
-                    직업
+                    직업 <span className="text-red-500">*</span>
                   </label>
                   <Input
                     color="bgray"
@@ -240,52 +203,12 @@ const MyInfoPage = () => {
                     내 소개 (배지)
                   </label>
                   
-                  {/* 배지 추가 입력 */}
-                  <div className="flex gap-2 mb-4 items-center">
-                    <div className="flex-2 w-full">
-                      <Input
-                        color="bgray"
-                        size="md"
-                        value={badgeInput}
-                        onChange={(e) => setBadgeInput(e.target.value)}
-                        onKeyDown={handleBadgeKeyDown}
-                        placeholder="예: 성실한, 노력, 긍정"
-                        className="flex-1"
-                      />
-                    </div>
-                    <div className="flex-1 text-md">
-                      <Button
-                        type="button"
-                        onClick={handleAddBadge}
-                        color="bgMain"
-                        size="md"
-                        className="whitespace-nowrap"
-                      >
-                        추가
-                      </Button>
-                    </div>
-                  
-                  </div>
-
-                  {/* 배지 리스트 */}
-                  {badges.length > 0 ? (
-                    <div className="flex flex-wrap gap-2 p-4 bg-gray-50 rounded-lg">
-                      {badges.map((badge, index) => (
-                        <div key={index} className="flex items-center gap-1">
-                          <Badge color="bMain" size="sm">
-                            {badge}
-                            <span  onClick={() => handleRemoveBadge(badge)}
-                            className="ml-3 text-white cursor-pointer"
-                            title="삭제">✕</span>
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="p-4 bg-gray-50 rounded-lg text-center text-gray-400 text-sm">
-                      등록된 배지가 없습니다. 위에서 배지를 추가해보세요!
-                    </div>
-                  )}
+                  <MyBadge 
+                    setValue={setValue}
+                    watch={watch}
+                    fieldName="myBadge"
+                    onError={(message) => showModal(message, 'error')}
+                  />
                 </div>
 
                 {/* 제출 버튼 */}
@@ -318,5 +241,36 @@ const MyInfoPage = () => {
   );
 };
 
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const queryClient = new QueryClient();
+  try {
+    // 인증확인
+    const payload = requireAuth(context);
+    
+    if (!payload) {
+      return redirectToLogin();
+    }
+
+    // 회원 정보 조회 
+    await Promise.all([
+      queryClient.prefetchQuery({
+        queryKey: ["myInfo",payload.idx], 
+        queryFn: () => getMemberInfo({idx: payload.idx})
+      })
+    ]);
+    return {
+      props: {
+        dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+      },
+    };
+  } catch {
+    return {
+      props: {
+      },
+    };
+  }
+};
+
 export default MyInfoPage;
+
 

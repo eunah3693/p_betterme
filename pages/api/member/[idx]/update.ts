@@ -21,7 +21,7 @@ async function handler(
 
   const { job, jobInfo, myBadge } = req.body;
 
-  const result = await memberService.updateMemberInfo(Number(idx), { job, jobInfo, myBadge });
+  const result = await memberService.updateMemberInfo( { idx: Number(idx), job, jobInfo, myBadge } );
 
   if (!result.success) {
     return createErrorResponse(res, 400, result.message || '회원 정보 수정에 실패했습니다.');

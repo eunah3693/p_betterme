@@ -12,12 +12,14 @@ import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import { login } from '@/functions/apis/member';
 import { loginSchema } from '@/lib/validation';
 import { useUserStore } from '@/store/user';
+import { useModal } from '@/functions/hooks/useModal';
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 const LoginPage = () => {
   const router = useRouter();
   const setUser = useUserStore((state) => state.setUser);  // user store 
+  const { modal, showModal, closeModal } = useModal(); // modal hook
 
   //login form 
   const {
@@ -31,33 +33,6 @@ const LoginPage = () => {
       password: '',
     },
   });
-
-  // modal state
-  const [modal, setModal] = useState({
-    isOpen: false,
-    message: '',
-    type: 'info' as 'info' | 'success' | 'error' | 'warning',
-    onConfirm: () => {},
-  });
-
-  // modal 열기
-  const showModal = (
-    message: string,
-    type: 'info' | 'success' | 'error' | 'warning' = 'info',
-    onConfirm?: () => void
-  ) => {
-    setModal({
-      isOpen: true,
-      message,
-      type,
-      onConfirm: onConfirm || (() => {}),
-    });
-  };
-
-  // modal 닫기
-  const closeModal = () => {
-    setModal((prev) => ({ ...prev, isOpen: false }));
-  };
 
   // login 제출
   const onSubmit = async (data: LoginFormData) => {

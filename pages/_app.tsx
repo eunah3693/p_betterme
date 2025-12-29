@@ -27,17 +27,11 @@ export default function MyApp({
   const checkAuth = useUserStore((state) => state.checkAuth);
   const user = useUserStore((state) => state.user);
 
-  // 앱 시작 시 로그인 상태 복원
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
   // 보호된 페이지 접근 시 로그인 체크
   useEffect(() => {
     const isPublicPath = PUBLIC_PATHS.includes(router.pathname);
     
     if (!isPublicPath && !user) {
-      // 보호된 페이지인데 로그인 안 되어 있으면
       router.push('/login');
     }
   }, [router.pathname, user]);

@@ -14,13 +14,15 @@ async function handler(
     return createErrorResponse(res, 405, 'Method not allowed');
   }
 
+  // 유효성 검사
   const validation = signupSchema.safeParse(req.body);
-  
+  // 유효성 검사 실패 시  400 에러 반환
   if (!validation.success) {
     const errorMessage = validation.error.issues[0]?.message || 'Invalid request';
     return createErrorResponse(res, 400, errorMessage);
   }
 
+  // 회원가입
   const result = await memberService.signup({
     ...validation.data,
     job: validation.data.job || '',
@@ -28,6 +30,7 @@ async function handler(
     myBadge: validation.data.myBadge || '',
   });
 
+  // 회원가입 실패 시  400 에러 반환
   if (!result.success) {
     return createErrorResponse(res, 400, result.message || '회원가입에 실패했습니다.');
   }

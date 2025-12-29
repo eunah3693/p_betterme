@@ -14,16 +14,16 @@ export function useCheckId(id: string) {
   }, [id]);
 
   const validateIdFormat = () => {
-    if (!id || !id.trim()) return "아이디를 입력해주세요!";
-    if (id.length < 4) return "아이디는 최소 4자 이상!";
-    if (!/^[a-zA-Z0-9_]+$/.test(id)) return "영문, 숫자, 밑줄만 가능!";
+    if (!id || !id.trim()) return "아이디를 입력해주세요";
+    if (id.length < 4) return "아이디는 최소 4자 이상 입력해주세요";
+    if (!/^[a-zA-Z0-9_]+$/.test(id)) return "영문, 숫자, 밑줄만 사용가능합니다";
     return null;
   };
 
   const handleCheck = async () => {
     const validationError = validateIdFormat();
     if (validationError) {
-      alert(validationError);
+      setMessage(validationError || '');
       return;
     }
 
@@ -34,7 +34,7 @@ export function useCheckId(id: string) {
       setAvailable(true);
       setMessage(result.message || '');
     } catch (err) {
-      alert("ID 중복 체크 실패");
+      setMessage("ID 중복 체크 실패");
     } finally {
       setLoading(false);
     }
