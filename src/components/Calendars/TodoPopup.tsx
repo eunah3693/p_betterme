@@ -4,6 +4,8 @@ import Button from '@/components/Buttons/Button';
 import Input from '@/components/Forms/Input';
 import Textarea from '@/components/Forms/Textarea';
 import InputDatepicker from '@/components/Forms/InputDatepicker';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
+import { useModal } from '@/functions/hooks/useModal';
 
 interface TodoItem {
   id: number;
@@ -19,10 +21,10 @@ interface TodoPopupProps {
   selectedDate: Date | null;
   todos: TodoItem[];
   onClose: () => void;
-  onSubmit: (data: { title: string; content: string; startDate?: string; finishDate?: string }) => void;
-  onUpdate: (id: number, data: { title: string; content: string; startDate?: string; finishDate?: string }) => void;
-  onDelete: (id: number) => void;
-  onToggleComplete: (id: number) => void;
+  onSubmit: (data: { title: string; content: string; startDate?: string; finishDate?: string }) => Promise<void>;
+  onUpdate: (id: number, data: { title: string; content: string; startDate?: string; finishDate?: string }) => Promise<void>;
+  onDelete: (id: number) => Promise<void>;
+  onToggleComplete: (id: number) => Promise<void>;
 }
 
 function TodoPopup({
@@ -40,6 +42,9 @@ function TodoPopup({
   const [content, setContent] = useState('');
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [finishDate, setFinishDate] = useState<Date | null>(null);
+
+  // Modal hook
+  const { modal, showModal, closeModal } = useModal();
 
   // 팝업이 닫힐 때 폼 초기화
   useEffect(() => {
@@ -89,40 +94,46 @@ function TodoPopup({
     }
   };
 
-  const handleSubmitForm = (e: React.FormEvent) => {
+  const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim()) {
-      alert('제목을 입력해주세요!');
+      showModal('제목을 입력해주세요!', 'warning');
       return;
     }
 
     if (!startDate || !finishDate) {
-      alert('시작일과 종료일을 입력해주세요!');
+      showModal('시작일과 종료일을 입력해주세요!', 'warning');
       return;
     }
 
     if (startDate > finishDate) {
-      alert('시작일은 종료일보다 이전이어야 합니다!');
+      showModal('시작일은 종료일보다 이전이어야 합니다!', 'warning');
       return;
     }
 
     const startDateStr = startDate.toISOString().split('T')[0];
     const finishDateStr = finishDate.toISOString().split('T')[0];
 
-    if (editingTodoId) {
-      // 수정 모드
-      onUpdate(editingTodoId, { title, content, startDate: startDateStr, finishDate: finishDateStr });
-      setEditingTodoId(null);
-    } else {
-      // 등록 모드
-      onSubmit({ title, content, startDate: startDateStr, finishDate: finishDateStr });
+    try {
+      if (editingTodoId) {
+        // 수정 모드
+        await onUpdate(editingTodoId, { title, content, startDate: startDateStr, finishDate: finishDateStr });
+        setEditingTodoId(null);
+      } else {
+        // 등록 모드
+        await onSubmit({ title, content, startDate: startDateStr, finishDate: finishDateStr });
+      }
+      
+      // 성공 후에만 폼 초기화
+      setTitle('');
+      setContent('');
+      setStartDate(null);
+      setFinishDate(null);
+    } catch (error) {
+      // 에러는 부모 컴포넌트에서 처리하므로 여기서는 무시
+      console.error('Form submission error:', error);
     }
-    
-    setTitle('');
-    setContent('');
-    setStartDate(null);
-    setFinishDate(null);
   };
 
   const handleCancelEdit = () => {
@@ -316,6 +327,15 @@ function TodoPopup({
           </div>
         </div>
       </div>
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        message={modal.message}
+        type={modal.type}
+      />
     </>
   );
 }

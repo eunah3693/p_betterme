@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
-import { useRouter } from 'next/router';
 import type { TodoItem } from '@/components/Todo';
 import TodoCalendar, { type TodoCalendarEvent } from '@/components/Calendars/Calendar';
 import TodoPopup from '@/components/Calendars/TodoPopup';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { TodoItem as ApiTodoItem } from '@/interfaces/todo';
 import { getTodo, createTodo, updateTodo, deleteTodo } from '@/functions/apis/todo';
-import { getUser } from '@/lib/storage';
+import { useUserStore } from '@/store/user';
+import { useModal } from '@/functions/hooks/useModal';
 
 const Page = () => {
-  const router = useRouter();
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [user, setUser] = useState<ReturnType<typeof getUser>>(null);
+  const [currentDate, setCurrentDate] = useState(new Date()); // 현재 날짜
+  const [isPopupOpen, setIsPopupOpen] = useState(false); // 팝업 열림 여부
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null); // 선택된 날짜
 
-  useEffect(() => {
-    const currentUser = getUser();
-    setUser(currentUser);
-    
-    if (!currentUser) {
-      router.push('/login');
-    }
-  }, [router]);
+  const user = useUserStore((state) => state.user); // 사용자 정보
+  const hasHydrated = useUserStore((state) => state._hasHydrated); // 사용자 정보 hydration 완료 여부
 
+  // Modal hook 사용
+  const { modal, showModal, closeModal } = useModal();
   
   const { 
     data: todos = [], 
@@ -55,7 +50,7 @@ const Page = () => {
       }
 
       return result.data.map((item: ApiTodoItem) => ({
-        id: item.idx,
+        id: item.idx || 0,
         text: item.subject || '',
         content: item.content || '',
         completed: item.finish === '1',
@@ -64,7 +59,7 @@ const Page = () => {
         finishDate: item.finishDate || new Date().toISOString(),
       }));
     },
-    enabled: !!user?.id, // user가 있을 때만 쿼리 실행
+    enabled: hasHydrated && !!user?.id, 
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10, 
     retry: 2,
@@ -104,7 +99,7 @@ const Page = () => {
 
   // 캘린더에서 빈 날짜 클릭
   const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
-    setSelectedDate(slotInfo.start);
+    setSelectedDate(slotInfo.end);
     setIsPopupOpen(true);
   };
 
@@ -125,10 +120,10 @@ const Page = () => {
       });
       
       await refetch();
-      alert('할 일이 등록되었습니다!');
+      showModal('할 일이 등록되었습니다!', 'success');
     } catch (error) {
       console.error('할 일 등록 실패:', error);
-      alert('할 일 등록에 실패했습니다.');
+      showModal('할 일 등록에 실패했습니다.', 'error');
     }
   };
 
@@ -144,10 +139,10 @@ const Page = () => {
       });
       
       await refetch();
-      alert('할 일이 수정되었습니다!');
+      showModal('할 일이 수정되었습니다!', 'success');
     } catch (error) {
       console.error('할 일 수정 실패:', error);
-      alert('할 일 수정에 실패했습니다.');
+      showModal('할 일 수정에 실패했습니다.', 'error');
     }
   };
 
@@ -156,10 +151,10 @@ const Page = () => {
     try {
       await deleteTodo(id);
       await refetch();
-      alert('할 일이 삭제되었습니다!');
+      showModal('할 일이 삭제되었습니다!', 'success');
     } catch (error) {
       console.error('할 일 삭제 실패:', error);
-      alert('할 일 삭제에 실패했습니다.');
+      showModal('할 일 삭제에 실패했습니다.', 'error');
     }
   };
 
@@ -172,10 +167,10 @@ const Page = () => {
       });
       
       await refetch();
-      alert('할 일이 완료되었습니다!');
+      showModal('할 일이 완료되었습니다!', 'success');
     } catch (error) {
       console.error('할 일 상태 변경 실패:', error);
-      alert('할 일 상태 변경에 실패했습니다.');
+      showModal('할 일 상태 변경에 실패했습니다.', 'error');
     }
   };
 
@@ -190,32 +185,14 @@ const Page = () => {
               <h1 className="text-3xl font-bold text-main mb-2">Todo Calendar</h1>
             </div>
             <div className="mb-8">
-              {isLoading ? (
-                <div className="h-[600px] flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-main mx-auto mb-4"></div>
-                    <p className="text-gray-600">Todo 목록을 불러오는 중...</p>
-                  </div>
-                </div>
-              ) : error ? (
-                <div className="h-[600px] flex items-center justify-center">
-                  <div className="text-center">
-                    <p className="text-red-500 mb-4">데이터를 불러오는데 실패했습니다.</p>
-                    <button 
-                      onClick={() => refetch()}
-                      className="px-6 py-2 bg-main text-white rounded hover:bg-main/90 transition-colors"
-                    >
-                      다시 시도
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <TodoCalendar
-                  events={calendarEvents}
-                  onSelectEvent={handleSelectEvent}
-                  onSelectSlot={handleSelectSlot}
-                />
-              )}
+              <TodoCalendar
+                events={calendarEvents}
+                onSelectEvent={handleSelectEvent}
+                onSelectSlot={handleSelectSlot}
+                isLoading={isLoading}
+                error={error}
+                onRetry={refetch}
+              />
             </div>
 
           </div>
@@ -232,6 +209,15 @@ const Page = () => {
         onUpdate={handleUpdateTodo}
         onDelete={handleDeleteTodo}
         onToggleComplete={handleToggleComplete}
+      />
+
+      {/* Confirm Modal */}
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        message={modal.message}
+        type={modal.type}
       />
     </div>
   );

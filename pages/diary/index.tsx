@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
@@ -9,17 +9,11 @@ import NoContent from '@/components/Empty/NoContent';
 import Card from '@/components/Cards/Card';
 import { getAllDiaries } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
-import { isAuthenticated } from '@/lib/storage';
-import { UserData } from '@/interfaces/member';
+import { useUserStore } from '@/store/user';
 
 const DiaryListPage = () => {
   const router = useRouter();
-  const [user, setUser] = useState<UserData | null>(null);
-
-  useEffect(() => {
-    const currentUser = isAuthenticated();
-    setUser(currentUser);
-  }, [router]);
+  const user = useUserStore((state) => state.user);
 
   const {
     data: diaryList = [],

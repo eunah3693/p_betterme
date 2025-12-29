@@ -2,6 +2,8 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import styles from './Calendar.module.css';
+import { CalendarSkeleton } from './CalendarSkeleton';
+import ErrorMessage from '@/components/Error/ErrorMessage';
 
 export interface TodoCalendarEvent {
   id: number;
@@ -15,6 +17,9 @@ interface TodoCalendarProps {
   events: TodoCalendarEvent[];
   onSelectEvent: (evt: TodoCalendarEvent) => void;
   onSelectSlot?: (slotInfo: { start: Date; end: Date }) => void;
+  isLoading?: boolean; 
+  error?: Error | null;
+  onRetry?: () => void;
 }
 
 const DynamicTodoCalendar = dynamic(
@@ -82,11 +87,21 @@ const DynamicTodoCalendar = dynamic(
   }),
   {
     ssr: false,
-    loading: () => <div className="h-[600px] flex items-center justify-center">캘린더 로딩 중...</div>
+    loading: () => <CalendarSkeleton />
   }
 );
 
-function TodoCalendar({ events, onSelectEvent, onSelectSlot }: TodoCalendarProps) {
+function TodoCalendar({ events, onSelectEvent, onSelectSlot, isLoading = false, error = null, onRetry }: TodoCalendarProps) {
+  // 에러가 있으면 에러 메시지 표시
+  if (error) {
+    return <ErrorMessage message="데이터를 불러오는데 실패했습니다." onRetry={onRetry} />;
+  }
+
+  // 데이터 로딩 중이면 스켈레톤 표시
+  if (isLoading) {
+    return <CalendarSkeleton />;
+  }
+
   return (
     <div className={styles.calendar}>
       <DynamicTodoCalendar

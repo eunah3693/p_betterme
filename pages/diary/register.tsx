@@ -1,18 +1,12 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
 import NavBar from '@/components/NavBar';
 import BlogRegister from '@/components/Diary/RegisterContent';
 import type { DiaryFormData } from '@/components/Diary/RegisterContent';
 import { createDiary } from '@/functions/apis/diary';
-import { isAuthenticated } from '@/lib/storage';
 
 const DiaryWritePage = () => {
   const router = useRouter();
-
-  useEffect(() => {
-    isAuthenticated();
-  }, [router]);
 
   const handleSubmit = async (data: DiaryFormData) => {
     try {

@@ -1,6 +1,5 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import BlogRegister from '@/components/Diary/EditContent';
@@ -9,17 +8,12 @@ import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
 import { getDiaryByIdx, updateDiary } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
-import { isAuthenticated, UserData } from '@/lib/storage';
+import { useUserStore } from '@/store/user';
 
 const DiaryEditPage = () => {
   const router = useRouter();
   const { idx } = router.query;
-  const [user, setUser] = useState<UserData | null>(null);
-
-  useEffect(() => {
-    const currentUser = isAuthenticated();
-    setUser(currentUser);
-  }, [router]);
+  const user = useUserStore((state) => state.user);
 
   const {
     data: diaryData,

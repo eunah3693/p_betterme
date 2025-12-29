@@ -5,16 +5,16 @@ import hamBurger from '@public/assets/hamburger.svg'
 import { useRouter } from 'next/router';
 import { commonNavData, guestNavData, authNavData } from '@/constants/strings';
 import logo from '@public/assets/logo.svg'
-import { getUser } from '@/lib/storage';
+import { useUserStore } from '@/store/user';
 
 
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
 
   useEffect(() => {
-    const user = getUser();
     const checkLoginStatus = () => {
       setIsLoggedIn(!!user);
     };
@@ -38,7 +38,7 @@ function NavBar() {
         window.removeEventListener('auth-change', checkLoginStatus);
       }
     };
-  }, [router]);
+  }, [router, user]);
 
   // 로그인 상태에 따라 메뉴 데이터 결합
   const navData = useMemo(() => {

@@ -24,17 +24,20 @@ export default function MyApp({
   pageProps,
 }: AppProps) {
   const router = useRouter();
-  const checkAuth = useUserStore((state) => state.checkAuth);
   const user = useUserStore((state) => state.user);
+  const hasHydrated = useUserStore((state) => state._hasHydrated);
 
   // 보호된 페이지 접근 시 로그인 체크
   useEffect(() => {
+    // hydration이 완료될 때까지 기다림
+    if (!hasHydrated) return;
+    
     const isPublicPath = PUBLIC_PATHS.includes(router.pathname);
     
     if (!isPublicPath && !user) {
       router.push('/login');
     }
-  }, [router.pathname, user]);
+  }, [router.pathname, user, hasHydrated]);
 
   const [queryClient] = useState(
     () =>
