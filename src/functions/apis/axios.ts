@@ -27,7 +27,7 @@ axiosInstance.interceptors.response.use(
     if (err.response?.data.statusCode === 403) {
       localStorage.removeItem('session');
       delete axiosInstance.defaults.headers.common.authorization;
-      Router.push(paths.INDEX);
+      Router.push(paths.LOGIN);
     }
     if (err) return Promise.reject(err);
   },

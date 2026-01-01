@@ -1,18 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import BlogView from '@/components/Blog/ViewContent';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
-import { getBlogByIdx } from '@/functions/apis/blog';
+import { getBlogByIdx, deleteBlog } from '@/functions/apis/blog';
 import type { BlogItem } from '@/interfaces/blog';
-import { useUserStore } from '@/store/user';
+import Button from '@/components/Buttons/Button';
 
 const BlogDetailPage = () => {
   const router = useRouter();
   const { idx } = router.query;
-  const user = useUserStore((state) => state.user);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     data: blogData,
@@ -42,6 +42,28 @@ const BlogDetailPage = () => {
     retry: 2,
   });
 
+  // 삭제 핸들러
+  const handleDelete = async () => {
+    if (!idx) return;
+
+    try {
+      setIsDeleting(true);
+      const result = await deleteBlog(Number(idx));
+
+      if (result.success) {
+        alert('블로그가 삭제되었습니다.');
+        router.push('/blog');
+      } else {
+        alert(result.message || '삭제에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('블로그 삭제 중 오류:', error);
+      alert('삭제에 실패했습니다.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="font-notoSans min-h-screen bg-gray-50">
       <LoadingOverlay isLoading={isLoading} message="블로그를 불러오는 중" />
@@ -55,8 +77,33 @@ const BlogDetailPage = () => {
             <>
               <BlogView 
                 data={blogData}
-                type="blog"
               />
+              {blogData?.isAuthor && (
+                <div className="flex gap-3 justify-end pt-4">
+                  <Button
+                    size="sm"
+                    color="bMain"
+                    onClick={() => window.history.back()}
+                  >
+                    목록
+                  </Button>
+                  <Button
+                    size="sm"
+                    color="bgMain"
+                    onClick={() => router.push(`/blog/${blogData.idx}/update`)}
+                  >
+                    수정
+                  </Button>
+                  <Button
+                    size="sm"
+                    color="bgDanger"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? '삭제 중...' : '삭제'}
+                  </Button>
+                </div>
+              )}
             </>
           )}
         </div>

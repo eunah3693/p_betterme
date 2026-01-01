@@ -15,8 +15,7 @@ import '@/styles/global.css';
 // 로그인 없이 접근 가능한 공개 페이지 목록
 const PUBLIC_PATHS = [
   '/login',
-  '/signup',
-  '/',  // 홈페이지도 공개
+  '/signup'
 ];
 
 export default function MyApp({
