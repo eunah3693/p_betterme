@@ -55,7 +55,8 @@ export class MemberService {
     });
 
     // 비밀번호 제외한 정보 반환
-    const { password, ...memberWithoutPassword } = member;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...memberWithoutPassword } = member;
 
     return {
       success: true,

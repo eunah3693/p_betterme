@@ -30,7 +30,7 @@ function BlogRegister({
 }: BlogRegisterProps) {
   const [title, setTitle] = useState(initialData?.title || '');
   const [content, setContent] = useState(initialData?.content || '');
-  const [thumbnail, setThumbnail] = useState(initialData?.thumbnail || '');
+  const thumbnail = initialData?.thumbnail || '';
 
   // Quill 에디터 설정
   const modules = useMemo(() => ({

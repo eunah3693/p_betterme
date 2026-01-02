@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import type { TodoItem } from '@/components/Todo';
@@ -11,7 +11,7 @@ import { useUserStore } from '@/store/user';
 import { useModal } from '@/functions/hooks/useModal';
 
 const Page = () => {
-  const [currentDate, setCurrentDate] = useState(new Date()); // 현재 날짜
+  const currentDate = new Date(); // 현재 날짜 
   const [isPopupOpen, setIsPopupOpen] = useState(false); // 팝업 열림 여부
   const [selectedDate, setSelectedDate] = useState<Date | null>(null); // 선택된 날짜
 
@@ -66,7 +66,7 @@ const Page = () => {
   });
 
 
-  const calendarEvents: TodoCalendarEvent[] = todos.map((todo: any) => ({
+  const calendarEvents: TodoCalendarEvent[] = todos.map((todo: TodoItem) => ({
     id: todo.id,
     start: new Date(todo.startDate || new Date()),
     end: new Date(todo.finishDate || new Date()),
@@ -77,7 +77,7 @@ const Page = () => {
 
   // 선택된 날짜의 할일 필터링 (기간 포함)
   const selectedDateTodos = selectedDate 
-    ? todos.filter((todo: any) => {
+    ? todos.filter((todo: TodoItem) => {
         const todoStart = new Date(todo.startDate || new Date());
         const todoEnd = new Date(todo.finishDate || new Date());
         const selected = new Date(selectedDate);

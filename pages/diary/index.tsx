@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import Button from '@/components/Buttons/Button';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
-import ErrorMessage from '@/components/Error/ErrorMessage';
 import NoContent from '@/components/Empty/NoContent';
 import Card from '@/components/Cards/Card';
 import { getAllDiaries } from '@/functions/apis/diary';
@@ -17,8 +16,7 @@ const DiaryListPage = () => {
 
   const {
     data: diaryList = [],
-    isLoading,
-    refetch
+    isLoading
   } = useQuery<DiaryItem[], Error>({
     queryKey: ['diaries', user?.id],
     queryFn: async (): Promise<DiaryItem[]> => {

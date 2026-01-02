@@ -48,10 +48,8 @@ export interface DiaryResponse {
   message?: string;
 }
 
-// Diary 목록 요청 (더 이상 memberId 필요 없음 - JWT에서 자동 추출)
-export interface DiaryListRequest {
-  // 서버가 JWT 토큰에서 자동으로 사용자 ID를 추출하므로 파라미터 불필요
-}
+// Diary 목록 요청 
+export type DiaryListRequest = Record<string, never>;
 
 // Diary 목록 응답
 export interface DiaryListResponse {

@@ -2,8 +2,6 @@ import { cva, VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/constants/cn';
 
-type ColorVariant = 'default' | 'bMain' | 'bSub' | 'bInfo' | 'bCaution' | 'bHighlight';
-
 export const BadgeVariants = cva(
   `
   inline-flex

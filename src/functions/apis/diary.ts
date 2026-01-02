@@ -1,5 +1,5 @@
 import { axiosInstance } from './axios';
-import { DiaryItem, DiaryListResponse, DiaryResponse, CreateDiaryRequest, UpdateDiaryRequest, DiaryListRequest, CreateDiaryResponse } from '@/interfaces/diary';
+import { DiaryListResponse, DiaryResponse, CreateDiaryRequest, UpdateDiaryRequest, CreateDiaryResponse } from '@/interfaces/diary';
 
 const DIARY_URL = '/api/diary';
 

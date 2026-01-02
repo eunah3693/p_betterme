@@ -16,7 +16,7 @@ const isBrowser = typeof window !== 'undefined';
 
 export const useUserStore = create<UserStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       _hasHydrated: false,
       

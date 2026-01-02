@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { GetServerSideProps } from 'next';
@@ -16,7 +16,7 @@ import ConfirmModal from '@/components/Modal/ConfirmModal';
 import MyBadge from '@/components/Badge/MyBadge';
 import { updateMemberInfo } from '@/functions/apis/member';
 import { useModal } from '@/functions/hooks/useModal';
-import { requireAuth, redirectToLogin, redirectToHome } from '@/lib/auth';
+import { requireAuth, redirectToLogin } from '@/lib/auth';
 import { getMemberInfo } from '@/functions/apis/member';
 import { useUserStore } from '@/store/user';
 

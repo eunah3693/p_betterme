@@ -11,7 +11,7 @@ const LogoutPage = () => {
   useEffect(() => {
     logout(); 
     router.push('/');
-  }, []); 
+  }, [logout, router]); 
 
   return (
     <div className="font-notoSans min-h-screen bg-gray-50">

@@ -1,6 +1,6 @@
 import { NextApiResponse } from 'next';
 import { DiaryService } from '@/services/diaryService';
-import { DiaryResponse, UpdateDiaryData, UpdateDiaryRequest } from '@/interfaces/diary';
+import { DiaryResponse, UpdateDiaryData } from '@/interfaces/diary';
 import { withErrorHandler, createSuccessResponse, createErrorResponse, AuthenticatedRequest, authenticateRequest } from '@/lib/api';
 
 const diaryService = new DiaryService();

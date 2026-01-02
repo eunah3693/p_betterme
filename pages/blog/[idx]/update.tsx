@@ -23,9 +23,7 @@ const BlogEditPage = () => {
 
   const {
     data: blogData,
-    isLoading,
-    error,
-    refetch
+    isLoading
   } = useQuery<BlogItem | null, Error>({
     queryKey: ['blog', idx, user?.id],
     queryFn: async (): Promise<BlogItem | null> => {

@@ -33,7 +33,8 @@ export function useCheckId(id: string) {
       setChecked(true);
       setAvailable(true);
       setMessage(result.message || '');
-    } catch (err) {
+    } catch (error) {
+      console.error('ID 중복 체크 실패:', error);
       setMessage("ID 중복 체크 실패");
     } finally {
       setLoading(false);

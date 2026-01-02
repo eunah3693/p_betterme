@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { MemberService } from '@/services/memberService';
 import { MemberResponse } from '@/interfaces/member';
-import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
+import { withErrorHandler, createErrorResponse } from '@/lib/api';
 import { signupSchema } from '@/lib/validation';
 
 const memberService = new MemberService();

@@ -1,5 +1,5 @@
 import { axiosInstance } from './axios';
-import { BlogItem, MyBlogRequest, BlogListRequest, BlogListResponse, BlogResponse, CreateBlogRequest, UpdateBlogRequest } from '@/interfaces/blog';
+import { BlogItem, BlogListRequest, BlogListResponse, BlogResponse, CreateBlogRequest, UpdateBlogRequest } from '@/interfaces/blog';
 
 const BLOG_URL = '/api/blog';
 const MY_BLOG_URL = '/api/blog/myblog';

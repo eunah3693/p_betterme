@@ -1,22 +1,22 @@
 import Badge from '@/components/Forms/Badge';
 import Input from '@/components/Forms/Input';
 import Button from '@/components/Buttons/Button';
-import { UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { UseFormSetValue, UseFormWatch, FieldValues, Path, PathValue } from 'react-hook-form';
 import { useState } from 'react';
 
-interface MyBadgeProps {
-  setValue: UseFormSetValue<any>;
-  watch: UseFormWatch<any>;
-  fieldName?: string;
+interface MyBadgeProps<T extends FieldValues = FieldValues> {
+  setValue: UseFormSetValue<T>;
+  watch: UseFormWatch<T>;
+  fieldName?: Path<T>;
   onError?: (message: string) => void;
 }
 
-export default function MyBadge({ setValue, watch, fieldName = 'myBadge', onError }: MyBadgeProps) {
+export default function MyBadge<T extends FieldValues = FieldValues>({ setValue, watch, fieldName = 'myBadge' as Path<T>, onError }: MyBadgeProps<T>) {
   // 배지 입력 input
   const [badgeInput, setBadgeInput] = useState('');
 
   // 현재 배지 리스트 
-  const badges = (watch(fieldName) || '').split(',').map((b: string) => b.trim()).filter(Boolean);
+  const badges = ((watch(fieldName) as string) || '').split(',').map((b: string) => b.trim()).filter(Boolean);
 
   // 에러 표시
   const showError = (message: string) => {
@@ -40,14 +40,14 @@ export default function MyBadge({ setValue, watch, fieldName = 'myBadge', onErro
       return;
     }
 
-    setValue(fieldName, [...badges, trimmed].join(','), { shouldValidate: true });
+    setValue(fieldName, [...badges, trimmed].join(',') as PathValue<T, Path<T>>, { shouldValidate: true });
     setBadgeInput('');
   };
 
   // 배지 삭제
   const handleRemoveBadge = (badgeToRemove: string) => {
     const newBadges = badges.filter((badge: string) => badge !== badgeToRemove);
-    setValue(fieldName, newBadges.join(','), { shouldValidate: true });
+    setValue(fieldName, newBadges.join(',') as PathValue<T, Path<T>>, { shouldValidate: true });
   };
 
   // Enter 키로 배지 추가

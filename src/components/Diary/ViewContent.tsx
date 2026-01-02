@@ -1,8 +1,6 @@
 import { cn } from '@/constants/cn';
-import { useRouter } from 'next/router';
 import { DiaryItem } from '@/interfaces/diary'; 
 import { BlogItem } from '@/interfaces/blog';
-import Button from '../Buttons/Button';
 
 interface BlogViewProps {
   data: DiaryItem | BlogItem;
@@ -11,7 +9,6 @@ interface BlogViewProps {
 function BlogView({
   data
 }: BlogViewProps) {
-  const router = useRouter();
   return (
     <article className={cn('bg-white rounded-lg shadow-sm')}>
       <div className="p-6 md:p-8">
