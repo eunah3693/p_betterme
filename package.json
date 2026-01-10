@@ -1,5 +1,5 @@
 {
-  "name": "better-me",
+  "name": "art-find",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,11 @@
     "clean:build": "yarn clean && yarn build",
     "start:local": "next start",
     "start": "node_modules/next/dist/bin/next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prisma:generate": "env-cmd -f .env prisma generate",
+    "prisma:push": "env-cmd -f .env prisma db push",
+    "prisma:migrate": "env-cmd -f .env prisma migrate dev",
+    "prisma:studio": "env-cmd -f .env prisma studio"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
