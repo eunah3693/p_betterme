@@ -39,11 +39,11 @@ function Card({ data, onClick, className }: CardProps) {
       <div className="p-6">
         <h2 className="text-xl font-bold text-main mb-4 truncate flex justify-between items-end">
           {data.subject || '제목 없음'}
-          {data.date && (
+          {/* {data.date && (
             <span className="text-xs text-gray-400 font-normal">
                 {formatDate(data.date)}
             </span>
-          )}
+          )} */}
         </h2>
         <hr className="mb-4 border-gray-200" />
         <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line line-clamp-3">

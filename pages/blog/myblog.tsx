@@ -13,7 +13,7 @@ import { useUserStore } from '@/store/user';
 
 const BlogListPage = () => {
   const router = useRouter();
-  const user = useUserStore((state) => state.user);
+  const { id } = router.query;
   const loaderRef = useRef<HTMLDivElement | null>(null);
 
   const {
@@ -25,7 +25,7 @@ const BlogListPage = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteQuery<BlogListResponse>({
-    queryKey: ['myblog', user?.id],
+    queryKey: ['myblog', id],
     queryFn: ({ pageParam = 0 }) => getMyBlogs({ page: pageParam as number }),
     getNextPageParam: (lastPage) => {
       if (!lastPage.page) return undefined;
@@ -33,7 +33,7 @@ const BlogListPage = () => {
       return number + 1 < totalPages ? number + 1 : undefined;
     },
     initialPageParam: 0,
-    enabled: !!user?.id,
+    enabled: !!id,
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
     retry: 2,
@@ -74,7 +74,7 @@ const BlogListPage = () => {
 
           <div className="mb-8 flex justify-between items-end">
             <div>
-              <h1 className="text-3xl font-bold text-main mb-2">내 블로그</h1>
+              <h1 className="text-3xl font-bold text-main mb-2"> {id}님의 블로그</h1>
               <p className="text-gray-600">다양한 이야기를 공유합니다</p>
             </div>
             <Button

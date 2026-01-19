@@ -1,19 +1,23 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import BlogRegister from '@/components/Blog/RegisterContent';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { BlogFormData } from '@/components/Blog/RegisterContent';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import { getBlogByIdx, updateBlog } from '@/functions/apis/blog';
 import type { BlogItem } from '@/interfaces/blog';
 import { useUserStore } from '@/store/user';
+import { useModal } from '@/functions/hooks/useModal';
 
 const BlogEditPage = () => {
   const router = useRouter();
   const { idx } = router.query;
   const user = useUserStore((state) => state.user);
+  const queryClient = useQueryClient();
+  const { modal, showModal, closeModal } = useModal();
 
   useEffect(() => {
     if (!user) {
@@ -50,7 +54,7 @@ const BlogEditPage = () => {
   const handleSubmit = async (data: BlogFormData) => {
     try {
       if (!idx) {
-        alert('잘못된 요청입니다.');
+        showModal('잘못된 요청입니다.', 'error');
         return;
       }
 
@@ -63,14 +67,21 @@ const BlogEditPage = () => {
       });
 
       if (result.success) {
-        alert('블로그가 수정되었습니다!');
-        router.push('/blog/myblog');
+        showModal('블로그가 수정되었습니다.', 'success', () => {
+          queryClient.invalidateQueries({ 
+            queryKey: ['myblog', user?.id] 
+          });
+          queryClient.invalidateQueries({ 
+            queryKey: ['blog', idx] 
+          });
+          router.push(`/blog/myblog?id=${user?.id}`);
+        });
       } else {
-        alert(result.message || '수정에 실패했습니다.');
+        showModal(result.message || '수정에 실패했습니다.', 'error');
       }
     } catch (error) {
       console.error('블로그 수정 중 오류:', error);
-      alert('수정에 실패했습니다.');
+      showModal('수정에 실패했습니다.', 'error');
     }
   };
 
@@ -95,6 +106,13 @@ const BlogEditPage = () => {
           )}
         </div>
       </div>
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   );
 };

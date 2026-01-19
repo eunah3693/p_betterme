@@ -1,19 +1,23 @@
 import React from 'react';
 import { useRouter } from 'next/router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import BlogRegister from '@/components/Diary/EditContent';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { DiaryFormData } from '@/components/Diary/RegisterContent';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
 import { getDiaryByIdx, updateDiary } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
 import { useUserStore } from '@/store/user';
+import { useModal } from '@/functions/hooks/useModal';
 
 const DiaryEditPage = () => {
   const router = useRouter();
   const { idx } = router.query;
   const user = useUserStore((state) => state.user);
+  const queryClient = useQueryClient();
+  const { modal, showModal, closeModal } = useModal();
 
   const {
     data: diaryData,
@@ -46,7 +50,7 @@ const DiaryEditPage = () => {
   const handleSubmit = async (data: DiaryFormData) => {
     try {
       if (!idx) {
-        alert('잘못된 요청입니다.');
+        showModal('잘못된 요청입니다.', 'error');
         return;
       }
 
@@ -58,14 +62,21 @@ const DiaryEditPage = () => {
       });
 
       if (result.success) {
-        alert('일기가 수정되었습니다!');
-        router.push('/diary');
+        showModal('일기가 수정되었습니다.', 'success', () => {
+          queryClient.invalidateQueries({ 
+            queryKey: ['diary', user?.id] 
+          });
+          queryClient.invalidateQueries({ 
+            queryKey: ['diary', idx] 
+          });
+          router.push('/diary');
+        });
       } else {
-        alert(result.message || '수정에 실패했습니다.');
+        showModal(result.message || '수정에 실패했습니다.', 'error');
       }
     } catch (error) {
       console.error('일기 수정 중 오류:', error);
-      alert('수정에 실패했습니다.');
+      showModal('수정에 실패했습니다.', 'error');
     }
   };
 
@@ -92,6 +103,13 @@ const DiaryEditPage = () => {
           )}
         </div>
       </div>
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   );
 };

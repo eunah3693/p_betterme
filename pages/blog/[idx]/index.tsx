@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
 import BlogView from '@/components/Blog/ViewContent';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
 import { getBlogByIdx, deleteBlog } from '@/functions/apis/blog';
 import type { BlogItem } from '@/interfaces/blog';
 import Button from '@/components/Buttons/Button';
+import { useModal } from '@/functions/hooks/useModal';
+import { useUserStore } from '@/store/user';
 
 const BlogDetailPage = () => {
   const router = useRouter();
   const { idx } = router.query;
+  const user = useUserStore((state) => state.user);
+  const queryClient = useQueryClient();
+  const { modal, showModal, closeModal } = useModal();
   const [isDeleting, setIsDeleting] = useState(false);
 
   const {
@@ -51,14 +57,18 @@ const BlogDetailPage = () => {
       const result = await deleteBlog(Number(idx));
 
       if (result.success) {
-        alert('블로그가 삭제되었습니다.');
-        router.push('/blog');
+        showModal('블로그가 삭제되었습니다.', 'success', () => {
+          queryClient.invalidateQueries({ 
+            queryKey: ['myblog', user?.id] 
+          });
+          router.push('/blog/myblog');
+        });
       } else {
-        alert(result.message || '삭제에 실패했습니다.');
+        showModal(result.message || '삭제에 실패했습니다.', 'error');
       }
     } catch (error) {
       console.error('블로그 삭제 중 오류:', error);
-      alert('삭제에 실패했습니다.');
+      showModal('삭제에 실패했습니다.', 'error');
     } finally {
       setIsDeleting(false);
     }
@@ -96,7 +106,7 @@ const BlogDetailPage = () => {
                   </Button>
                   <Button
                     size="sm"
-                    color="bgDanger"
+                    color="bgSub"
                     onClick={handleDelete}
                     disabled={isDeleting}
                   >
@@ -108,6 +118,13 @@ const BlogDetailPage = () => {
           )}
         </div>
       </div>
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   );
 };

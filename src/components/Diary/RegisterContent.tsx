@@ -3,6 +3,8 @@ import dynamic from 'next/dynamic';
 import { cn } from '@/constants/cn';
 import Input from '@/components/Forms/Input';
 import Button from '@/components/Buttons/Button';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
+import { useModal } from '@/functions/hooks/useModal';
 import 'react-quill-new/dist/quill.snow.css';
 
 // React Quill을 동적으로 import (Next.js SSR 문제 해결)
@@ -31,6 +33,7 @@ function BlogRegister({
   const [title, setTitle] = useState(initialData?.title || '');
   const [content, setContent] = useState(initialData?.content || '');
   const thumbnail = initialData?.thumbnail || '';
+  const { modal, showModal, closeModal } = useModal();
 
   // Quill 에디터 설정
   const modules = useMemo(() => ({
@@ -48,7 +51,7 @@ function BlogRegister({
   const formats = [
     'header',
     'bold', 'italic', 'underline', 'strike',
-    'list', 'bullet',
+    'list',
     'color', 'background',
     'align',
     'link', 'image'
@@ -59,12 +62,12 @@ function BlogRegister({
     e.preventDefault();
     
     if (!title.trim()) {
-      alert('제목을 입력해주세요!');
+      showModal('제목을 입력해주세요!', 'error');
       return;
     }
     
     if (!content.trim()) {
-      alert('내용을 입력해주세요!');
+      showModal('내용을 입력해주세요!', 'error');
       return;
     }
 
@@ -78,55 +81,63 @@ function BlogRegister({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={cn('', className)}>
-      <div className="mb-6">
-        <label className="block text-sm font-bold text-gray-700 mb-2">
-          제목 <span className="text-red-500">*</span>
-        </label>
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="제목을 입력하세요"
-          size="md"
-          color="bMain"
-        />
-      </div>
-      <div className="mb-6">
-        <label className="block text-sm font-bold text-gray-700 mb-2">
-          내용 <span className="text-red-500">*</span>
-        </label>
-        <div className="bg-white border border-main rounded-md overflow-hidden">
-          <ReactQuill
-            theme="snow"
-            value={content}
-            onChange={setContent}
-            modules={modules}
-            formats={formats}
-            placeholder="내용을 입력하세요"
-            className="h-[400px]"
+    <>
+      <form onSubmit={handleSubmit} className={cn('', className)}>
+        <div className="mb-6">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            제목 <span className="text-red-500">*</span>
+          </label>
+          <Input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="제목을 입력하세요"
+            size="md"
+            color="bMain"
           />
         </div>
-      </div>
-      <div className="flex gap-3 justify-end pt-4">
-        <Button
-          type="button"
-          size="md"
-          color="bMain"
-          onClick={() => window.history.back()}
-          className="hover:bg-gray-600 transition-colors"
-        >
-          취소
-        </Button>
-        <Button
-          type="submit"
-          size="md"
-          color="bgMain"
-          className="hover:bg-main/90 transition-colors"
-        >
-          저장하기
-        </Button>
-      </div>
-    </form>
+        <div className="mb-6">
+          <label className="block text-sm font-bold text-gray-700 mb-2">
+            내용 <span className="text-red-500">*</span>
+          </label>
+          <div className="bg-white border border-main rounded-md overflow-hidden quill-editor-wrapper">
+            <ReactQuill
+              theme="snow"
+              value={content}
+              onChange={setContent}
+              modules={modules}
+              formats={formats}
+              placeholder="내용을 입력하세요"
+            />
+          </div>
+        </div>
+        <div className="flex gap-3 justify-end pt-4">
+          <Button
+            type="button"
+            size="md"
+            color="bMain"
+            onClick={() => window.history.back()}
+            className="hover:bg-gray-600 transition-colors"
+          >
+            취소
+          </Button>
+          <Button
+            type="submit"
+            size="md"
+            color="bgMain"
+            className="hover:bg-main/90 transition-colors"
+          >
+            저장하기
+          </Button>
+        </div>
+      </form>
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        message={modal.message}
+        type={modal.type}
+      />
+    </>
   );
 }
 

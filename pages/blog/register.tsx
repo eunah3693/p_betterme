@@ -1,31 +1,43 @@
 import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
+import { useUserStore } from '@/store/user';
 import NavBar from '@/components/NavBar';
 import BlogRegister from '@/components/Blog/RegisterContent';
+import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { BlogFormData } from '@/components/Blog/RegisterContent';
 import { createBlog } from '@/functions/apis/blog';
+import { useModal } from '@/functions/hooks/useModal';
+
 
 const BlogWritePage = () => {
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
+  const queryClient = useQueryClient();
+  const { modal, showModal, closeModal } = useModal(); // modal hook
 
   const handleSubmit = async (data: BlogFormData) => {
     try {
       const result = await createBlog({
-        memberId: 'test',
+        memberId: user?.id || '',
         subject: data.title,
         content: data.content,
         date: new Date() // YYYY-MM-DD
       });
 
       if (result.success) {
-        alert('블로그가 등록되었습니다!');
-        router.push('/blog/myblog');
+        showModal('블로그가 등록되었습니다.', 'success', () => {
+          queryClient.invalidateQueries({ 
+            queryKey: ['myblog', user?.id] 
+          });
+          router.push(`/blog/myblog?id=${user?.id}`);
+        });
       } else {
-        alert(result.message || '등록에 실패했습니다.');
+        showModal(result.message || '등록에 실패했습니다.', 'error');
       }
     } catch (error) {
       console.error('블로그 등록 중 오류:', error);
-      alert('등록에 실패했습니다.');
+      showModal('등록에 실패했습니다.', 'error');
     }
   };
 
@@ -39,6 +51,13 @@ const BlogWritePage = () => {
           <BlogRegister onSubmit={handleSubmit} />
         </div>
       </div>
+      <ConfirmModal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        onConfirm={modal.onConfirm}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   );
 };

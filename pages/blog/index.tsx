@@ -1,4 +1,5 @@
 import React from 'react';
+import { useUserStore } from '@/store/user';
 import { QueryClient } from '@tanstack/react-query';
 import { dehydrate } from '@tanstack/react-query';
 import { GetServerSideProps } from 'next';
@@ -7,6 +8,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
+import Button from '@/components/Buttons/Button';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import Card from '@/components/Cards/Card';
 import { getMonthlyBlogs, getRecommendedBlogs, getMostViewedBlogs } from '@/functions/apis/blog';
@@ -15,7 +17,7 @@ import moreIcon from '@assets/more.svg';
 
 const BlogListPage = () => {
   const router = useRouter();
-
+  const user = useUserStore((state) => state.user);
   const { data: monthlyBlogsData, isLoading: isMonthlyBlogsLoading } = useQuery<BlogListResponse>({
     queryKey: ["blogs","monthly"],
     queryFn: () => getMonthlyBlogs({ page: 0 }),
@@ -52,6 +54,14 @@ const BlogListPage = () => {
               <h1 className="text-3xl font-bold text-main mb-2">블로그</h1>
               <p className="text-gray-600">다양한 이야기를 공유합니다</p>
             </div>
+            <Button
+              onClick={() => router.push(`/blog/myblog?id=${user?.id}`)}
+              color="bgMain"
+              size="md"
+              className="hover:bg-main/90 transition-colors whitespace-nowrap"
+            >
+              내 블로그
+            </Button>
           </div>
             <div>
                 <div className="py-5 pb-5">
