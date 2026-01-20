@@ -9,7 +9,6 @@ import NoContent from '@/components/Empty/NoContent';
 import Card from '@/components/Cards/Card';
 import { getMyBlogs } from '@/functions/apis/blog';
 import type { BlogItem, BlogListResponse } from '@/interfaces/blog';
-import { useUserStore } from '@/store/user';
 
 const BlogListPage = () => {
   const router = useRouter();
