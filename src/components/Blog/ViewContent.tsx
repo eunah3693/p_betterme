@@ -1,7 +1,7 @@
 import { cn } from '@/constants/cn';
 import { DiaryItem } from '@/interfaces/diary'; 
 import { BlogItem } from '@/interfaces/blog';
-import 'react-quill-new/dist/quill.snow.css';
+
 
 interface BlogViewProps {
   data: DiaryItem | BlogItem;
