@@ -3,9 +3,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import { useUserStore } from '@/store/user';
 import NavBar from '@/components/NavBar';
-import BlogRegister from '@/components/Blog/RegisterContent';
+import BlogRegister from '@/components/Blog/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
-import type { BlogFormData } from '@/components/Blog/RegisterContent';
+import type { BlogFormData } from '@/components/Blog/RegisterTipTapContent';
 import { createBlog } from '@/functions/apis/blog';
 import { useModal } from '@/functions/hooks/useModal';
 

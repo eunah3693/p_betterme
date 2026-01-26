@@ -2,7 +2,7 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { useQueryClient } from '@tanstack/react-query';
 import NavBar from '@/components/NavBar';
-import BlogRegister from '@/components/Diary/RegisterContent';
+import BlogRegister from '@/components/Diary/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { DiaryFormData } from '@/components/Diary/RegisterContent';
 import { createDiary } from '@/functions/apis/diary';

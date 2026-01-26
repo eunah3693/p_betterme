@@ -153,7 +153,10 @@ export class BlogRepository {
 
     // 전체 개수 조회
     const totalElements = await prisma.blog.count({
-      where: { memberId }
+      where: { memberId },
+      orderBy: {
+        date: 'desc'
+      }
     });
 
     // 데이터 조회

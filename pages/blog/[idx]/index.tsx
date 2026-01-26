@@ -61,7 +61,7 @@ const BlogDetailPage = () => {
           queryClient.invalidateQueries({ 
             queryKey: ['myblog', user?.id] 
           });
-          router.push('/blog/myblog');
+          router.push(`/blog/myblog?id=${user?.id}`);
         });
       } else {
         showModal(result.message || '삭제에 실패했습니다.', 'error');
@@ -81,9 +81,9 @@ const BlogDetailPage = () => {
       
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
-          {error || !blogData ? (
+          {error ? (
             <ErrorMessage onRetry={() => refetch()} />
-          ) : (
+          ) : blogData && (
             <>
               <BlogView 
                 data={blogData}
