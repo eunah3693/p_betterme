@@ -1,7 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
-import NavBar from '@/components/NavBar';
 import Button from '@/components/Buttons/Button';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import NoContent from '@/components/Empty/NoContent';
@@ -39,9 +38,8 @@ const DiaryListPage = () => {
   };
 
   return (
-    <div className="font-notoSans min-h-screen bg-gray-50">
+    <>
       <LoadingOverlay isLoading={isLoading} message="일기를 불러오는 중" />
-      <NavBar />
       <div className="flex justify-center py-10 md:py-15 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
 
@@ -74,7 +72,7 @@ const DiaryListPage = () => {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

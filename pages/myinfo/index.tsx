@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { GetServerSideProps } from 'next';
 import { QueryClient } from '@tanstack/react-query';
 import { dehydrate } from '@tanstack/react-query';
-import NavBar from '@/components/NavBar';
 import Input from '@/components/Forms/Input';
 import Textarea from '@/components/Forms/Textarea';
 import Button from '@/components/Buttons/Button';
@@ -124,8 +123,6 @@ const MyInfoPage = () => {
         message={modal.message}
         type={modal.type}
       />
-      <div className="font-notoSans min-h-screen bg-gray-50">
-        <NavBar />
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[600px]">
           <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
@@ -235,7 +232,6 @@ const MyInfoPage = () => {
               </form>
           </div>
         </div>
-      </div>
       </div>
     </>
   );

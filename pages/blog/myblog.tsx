@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import NavBar from '@/components/NavBar';
 import Button from '@/components/Buttons/Button';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
@@ -65,9 +64,8 @@ const BlogListPage = () => {
   };
 
   return (
-    <div className="font-notoSans min-h-screen bg-gray-50">
+    <>
       <LoadingOverlay isLoading={isLoading} message="블로그를 불러오는 중" />
-      <NavBar />
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
 
@@ -113,7 +111,7 @@ const BlogListPage = () => {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

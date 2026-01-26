@@ -1,10 +1,9 @@
 'use client';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import NavBar from '@/components/NavBar';
 import Input from '@/components/Forms/Input';
 import Button from '@/components/Buttons/Button';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
@@ -13,6 +12,7 @@ import { login } from '@/functions/apis/member';
 import { loginSchema } from '@/lib/validation';
 import { useUserStore } from '@/store/user';
 import { useModal } from '@/functions/hooks/useModal';
+import { isLoggedIn } from '@/store/user';
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -20,6 +20,13 @@ const LoginPage = () => {
   const router = useRouter();
   const setUser = useUserStore((state) => state.setUser);  // user store 
   const { modal, showModal, closeModal } = useModal(); // modal hook
+  const isLogged = isLoggedIn();
+
+  useEffect(() => {
+    if (isLogged) {
+      router.push('/');
+    }
+  }, [isLogged, router]);
 
   //login form 
   const {
@@ -59,7 +66,7 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="font-notoSans min-h-screen bg-gray-50">
+    <>
       <LoadingOverlay isLoading={isSubmitting} message="로그인 중" />
       <ConfirmModal
         isOpen={modal.isOpen}
@@ -68,7 +75,6 @@ const LoginPage = () => {
         message={modal.message}
         type={modal.type}
       />
-      <NavBar />
       <div className="flex justify-center items-center py-16 px-4">
         <div className="w-full max-w-[450px]">
           <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
@@ -129,7 +135,7 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

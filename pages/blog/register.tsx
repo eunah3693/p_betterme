@@ -2,7 +2,6 @@ import React from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/router';
 import { useUserStore } from '@/store/user';
-import NavBar from '@/components/NavBar';
 import BlogRegister from '@/components/Blog/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { BlogFormData } from '@/components/Blog/RegisterTipTapContent';
@@ -42,9 +41,7 @@ const BlogWritePage = () => {
   };
 
   return (
-    <div className="font-notoSans min-h-screen bg-gray-50">
-      <NavBar />
-      
+    <>
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%] bg-white rounded-lg shadow-sm p-6 md:p-8">
           <h2 className="text-2xl font-bold text-main mb-6">블로그 글 작성</h2>
@@ -58,7 +55,7 @@ const BlogWritePage = () => {
         message={modal.message}
         type={modal.type}
       />
-    </div>
+    </>
   );
 };
 

@@ -78,7 +78,7 @@ export const getTokenFromCookie = (req: NextApiRequest): string | null => {
   return tokenCookie.split('=')[1];
 };
 
-// 요청에서 사용자 인증 정보 추출
+// 요청에서 사용자 인증 정보 추출 (로그인 필수)
 export const authenticateRequest = (req: AuthenticatedRequest): JwtPayload => {
   const token = getTokenFromCookie(req);
   
@@ -90,6 +90,24 @@ export const authenticateRequest = (req: AuthenticatedRequest): JwtPayload => {
   
   if (!payload) {
     throw new UnauthorizedError('유효하지 않은 토큰입니다.');
+  }
+
+  req.user = payload;
+  return payload;
+};
+
+// 요청에서 사용자 인증 정보 추출 (로그인 선택적, 에러 던지지 않음)
+export const getOptionalUser = (req: AuthenticatedRequest): JwtPayload | null => {
+  const token = getTokenFromCookie(req);
+  
+  if (!token) {
+    return null;
+  }
+
+  const payload = verifyToken(token);
+  
+  if (!payload) {
+    return null;
   }
 
   req.user = payload;

@@ -9,13 +9,16 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { isProduction } from "@/functions/utils/commons";
 import { useUserStore } from '@/store/user';
+import Layout from './layout';
 
 import '@/styles/global.css';
 
 // 로그인 없이 접근 가능한 공개 페이지 목록
 const PUBLIC_PATHS = [
   '/login',
-  '/signup'
+  '/signup',
+  '/blog',
+  '/blog/myblog'
 ];
 
 export default function MyApp({
@@ -31,7 +34,8 @@ export default function MyApp({
     // hydration이 완료될 때까지 기다림
     if (!hasHydrated) return;
     
-    const isPublicPath = PUBLIC_PATHS.includes(router.pathname);
+    // 정확히 일치하는 경로 또는 /blog로 시작하는 모든 경로는 공개
+    const isPublicPath = PUBLIC_PATHS.includes(router.pathname) || router.pathname.startsWith('/blog');
     
     if (!isPublicPath && !user) {
       router.push('/login');
@@ -54,7 +58,9 @@ export default function MyApp({
   return (
     <QueryClientProvider client={queryClient}>
       <HydrationBoundary state={pageProps.dehydratedState}>
-        <Component {...pageProps} />
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
         <ReactQueryDevtools
           initialIsOpen={!isProduction()}
         />

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import NavBar from '@/components/NavBar';
 import type { TodoItem } from '@/components/Todo';
 import TodoCalendar, { type TodoCalendarEvent } from '@/components/Calendars/Calendar';
 import TodoPopup from '@/components/Calendars/TodoPopup';
@@ -99,7 +98,7 @@ const Page = () => {
 
   // 캘린더에서 빈 날짜 클릭
   const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
-    setSelectedDate(slotInfo.end);
+    setSelectedDate(slotInfo.start);
     setIsPopupOpen(true);
   };
 
@@ -108,7 +107,6 @@ const Page = () => {
     if (!selectedDate || !user?.id) return;
 
     const dateStr = selectedDate.toISOString().split('T')[0];
-    
     try {
       await createTodo({
         memberId: user.id,
@@ -176,8 +174,7 @@ const Page = () => {
 
 
   return (
-    <div className="font-notoSans min-h-screen bg-gray-50">
-      <NavBar />
+    <>
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1920px] lg:w-[1920px] md:w-[90%] w-[90%]">
           <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
@@ -219,7 +216,7 @@ const Page = () => {
         message={modal.message}
         type={modal.type}
       />
-    </div>
+    </>
   );
 };
 

@@ -2,7 +2,6 @@ import React from 'react';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import NavBar from '@/components/NavBar';
 import BlogRegister from '@/components/Blog/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { BlogFormData } from '@/components/Blog/RegisterTipTapContent';
@@ -86,9 +85,8 @@ const BlogEditPage = () => {
   };
 
   return (
-    <div className="font-notoSans min-h-screen bg-gray-50">
+    <>
       <LoadingOverlay isLoading={isLoading} message="블로그를 불러오는 중" />
-      <NavBar />
       
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
@@ -113,7 +111,7 @@ const BlogEditPage = () => {
         message={modal.message}
         type={modal.type}
       />
-    </div>
+    </>
   );
 };
 

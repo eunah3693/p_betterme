@@ -7,7 +7,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useQuery } from '@tanstack/react-query';
-import NavBar from '@/components/NavBar';
 import Button from '@/components/Buttons/Button';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import Card from '@/components/Cards/Card';
@@ -44,9 +43,8 @@ const BlogListPage = () => {
   };
 
   return (
-    <div className="font-notoSans min-h-screen bg-gray-50">
+    <>
       <LoadingOverlay isLoading={isMonthlyBlogsLoading || isRecommendedBlogsLoading || isMostViewedBlogsLoading} message="블로그를 불러오는 중" />
-      <NavBar />
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
           <div className="mb-8 flex justify-between items-end">
@@ -54,14 +52,16 @@ const BlogListPage = () => {
               <h1 className="text-3xl font-bold text-main mb-2">블로그</h1>
               <p className="text-gray-600">다양한 이야기를 공유합니다</p>
             </div>
-            <Button
-              onClick={() => router.push(`/blog/myblog?id=${user?.id}`)}
-              color="bgMain"
-              size="md"
-              className="hover:bg-main/90 transition-colors whitespace-nowrap"
-            >
-              내 블로그
-            </Button>
+            {user && (
+              <Button
+                onClick={() => router.push(`/blog/myblog?id=${user?.id}`)}
+                color="bgMain"
+                size="md"
+                className="hover:bg-main/90 transition-colors whitespace-nowrap"
+              >
+                내 블로그
+              </Button>
+            )}
           </div>
             <div>
                 <div className="py-5 pb-5">
@@ -112,7 +112,7 @@ const BlogListPage = () => {
             </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

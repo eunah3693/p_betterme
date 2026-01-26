@@ -1,10 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import NavBar from '@/components/NavBar';
 import Input from '@/components/Forms/Input';
 import Textarea from '@/components/Forms/Textarea';
 import Button from '@/components/Buttons/Button';
@@ -14,11 +13,19 @@ import MyBadge from '@/components/Badge/MyBadge';
 import { useCheckId } from '@/functions/hooks/member/useCheckId';
 import { signup } from '@/functions/apis/member';
 import { signupSchema } from '@/lib/validation';
+import { isLoggedIn } from '@/store/user';
 
 type SignupFormData = z.infer<typeof signupSchema>;
 
 const SignupPage = () => {
   const router = useRouter();
+  const isLogged = isLoggedIn();
+
+  useEffect(() => {
+    if (isLogged) {
+      router.push('/');
+    }
+  }, [isLogged, router]);
 
   // signup form
   const {
@@ -125,8 +132,6 @@ const SignupPage = () => {
         message={modal.message}
         type={modal.type}
       />
-      <div className="font-notoSans min-h-screen bg-gray-50">
-        <NavBar />
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[600px]">
           <div className="bg-white rounded-lg shadow-lg p-6 md:p-8">
@@ -290,7 +295,6 @@ const SignupPage = () => {
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 };

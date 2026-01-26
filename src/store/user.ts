@@ -52,3 +52,18 @@ export const useUserStore = create<UserStore>()(
     }
   )
 );
+
+
+export const getUser = (): UserData | null => {
+  return useUserStore.getState().user;
+};
+
+
+export const getUserState = (): UserStore => {
+  return useUserStore.getState();
+};
+
+
+export const isLoggedIn = (): boolean => {
+  return useUserStore.getState().user !== null;
+};

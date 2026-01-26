@@ -1,7 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { useQueryClient } from '@tanstack/react-query';
-import NavBar from '@/components/NavBar';
 import BlogRegister from '@/components/Diary/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { DiaryFormData } from '@/components/Diary/RegisterContent';
@@ -40,9 +39,7 @@ const DiaryWritePage = () => {
   };
 
   return (
-    <div className="font-notoSans min-h-screen bg-gray-50">
-      <NavBar />
-      
+    <>
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%] bg-white rounded-lg shadow-sm p-6 md:p-8">
           <h2 className="text-2xl font-bold text-main mb-6">오늘 하루 일기쓰기</h2>
@@ -56,7 +53,7 @@ const DiaryWritePage = () => {
         message={modal.message}
         type={modal.type}
       />
-    </div>
+    </>
   );
 };
 

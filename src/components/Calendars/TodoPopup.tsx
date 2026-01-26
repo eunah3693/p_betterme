@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import dayjs from 'dayjs';
 import { cn } from '@/constants/cn';
 import Button from '@/components/Buttons/Button';
 import Input from '@/components/Forms/Input';
@@ -112,8 +113,8 @@ function TodoPopup({
       return;
     }
 
-    const startDateStr = startDate.toISOString().split('T')[0];
-    const finishDateStr = finishDate.toISOString().split('T')[0];
+    const startDateStr = dayjs(startDate).format('YYYY-MM-DD');
+    const finishDateStr = dayjs(finishDate).format('YYYY-MM-DD');
 
     try {
       if (editingTodoId) {
