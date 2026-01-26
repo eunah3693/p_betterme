@@ -17,7 +17,7 @@ export class TodoService {
         data: todos
       };
     } catch (error) {
-      //console.error('월간 Todo 조회 실패:', error);
+      console.error('월간 Todo 조회 실패:', error);
       return {
         success: false,
         data: []

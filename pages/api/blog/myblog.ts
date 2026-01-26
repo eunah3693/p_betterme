@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { BlogService } from '@/services/blogService';
 import { BlogListResponse } from '@/interfaces/blog';
-import { withErrorHandler, createSuccessResponse, createErrorResponse, authenticateRequest } from '@/lib/api';
+import { withErrorHandler, createSuccessResponse, createErrorResponse } from '@/lib/api';
 
 const blogService = new BlogService();
 
