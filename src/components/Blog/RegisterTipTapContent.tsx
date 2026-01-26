@@ -299,7 +299,7 @@ function BlogRegister({
                   type="button"
                   title="글머리 기호"
                 >
-                  <Image src={ol} alt="글머리 기호" width={16} height={16} />
+                    <Image src={ul} alt="번호 매기기" width={16} height={16} />
                 </button>
                 <button
                   onClick={() => editor.chain().focus().toggleOrderedList().run()}
@@ -310,7 +310,7 @@ function BlogRegister({
                   type="button"
                   title="번호 매기기"
                 >
-                  <Image src={ul} alt="번호 매기기" width={16} height={16} />
+                  <Image src={ol} alt="글머리 기호" width={16} height={16} />
                 </button>
 
                 <div className="w-px h-6 bg-gray-300 mx-1"></div>

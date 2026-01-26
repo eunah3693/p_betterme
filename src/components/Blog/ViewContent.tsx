@@ -29,8 +29,7 @@ function BlogView({
           )} */}
         </h1>
         <hr className="my-6 border-gray-200" />
-        <div 
-          className="ql-editor"
+        <div className="tiptap"
           dangerouslySetInnerHTML={{ __html: data?.content || '' }}
         />
       </div>
