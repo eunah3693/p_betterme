@@ -20,14 +20,15 @@ model Todo {
 }
 
 model Blog {
-  idx       Int       @id @default(autoincrement())
-  memberId  String?   @map("member_id") @db.VarChar(45)
-  subject   String?   @default("블로그 제목") @db.VarChar(255)
-  content   String?   @db.Text
-  tag       String?   @db.VarChar(45)
-  viewCount String?   @map("view_count") @db.VarChar(45)
-  likeCount String?   @map("like_count") @db.VarChar(45)
-  date      DateTime? @db.Date
+  idx         Int       @id @default(autoincrement())
+  memberId    String?   @map("member_id") @db.VarChar(45)
+  categoryIdx Int       @map("category_idx")
+  subject     String?   @default("블로그 제목") @db.VarChar(255)
+  content     String?   @db.Text
+  tag         String?   @db.VarChar(45)
+  viewCount   String?   @map("view_count") @db.VarChar(45)
+  likeCount   String?   @map("like_count") @db.VarChar(45)
+  date        DateTime? @db.Date
 
   @@map("blog")
 }
@@ -52,4 +53,13 @@ model Member {
   myBadge  String @default("내소개") @map("my_badge") @db.VarChar(255)
 
   @@map("member")
+}
+
+model BlogCategory {
+  idx          Int    @id @default(autoincrement())
+  memberId     String @map("member_id") @db.VarChar(25)
+  categoryName String? @map("category_name") @db.VarChar(100)
+  order        Int?
+
+  @@map("blog_category")
 }

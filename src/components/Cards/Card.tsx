@@ -27,10 +27,10 @@ function Card({ data, onClick, className }: CardProps) {
   return (
     <div
       onClick={onClick}
-      className={`bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden ${className || ''}`}
+      className={`w-full bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden ${className || ''}`}
     >
       <div className="p-6">
-        <h2 className="text-xl font-bold text-main mb-4 truncate flex justify-between items-end">
+        <h2 className="text-xl font-bold text-main mb-4 truncate">
           {data.subject || '제목 없음'}
         </h2>
         <hr className="mb-4 border-gray-200" />

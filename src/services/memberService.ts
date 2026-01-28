@@ -48,11 +48,13 @@ export class MemberService {
     }
 
     // JWT 토큰 생성
+    console.log('🔍 [로그인] JWT_SECRET:', process.env.JWT_SECRET);
     const token = generateToken({
       idx: member.idx,
       id: member.id,
       nickname: member.nickname,
     });
+    console.log('🔍 [로그인] 생성된 토큰:', token.substring(0, 50) + '...');
 
     // 비밀번호 제외한 정보 반환
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

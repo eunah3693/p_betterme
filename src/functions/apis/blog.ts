@@ -43,7 +43,7 @@ export const getMostViewedBlogs = async (params: BlogListRequest): Promise<BlogL
 // 내 블로그 조회 
 export const getMyBlogs = async ( params: BlogListRequest ): Promise<BlogListResponse> => {
   try {
-    const { data } = await axiosInstance.post<BlogListResponse>(MY_BLOG_URL, { page: params.page });
+    const { data } = await axiosInstance.post<BlogListResponse>(MY_BLOG_URL, { page: params.page, categoryIdx: params.categoryIdx });
     return data;
   } catch (error) {
     console.error('블로그 목록 조회 실패:', error);
@@ -103,6 +103,61 @@ export const deleteBlog = async (idx: number) => {
     return data;
   } catch (error) {
     console.error('블로그 삭제 실패:', error);
+    throw error;
+  }
+};
+
+
+const CATEGORY_URL = '/api/blog/category';
+
+// 카테고리 목록 조회
+export const getCategories = async (memberId: string) => {
+  try {
+    const { data } = await axiosInstance.get(`${CATEGORY_URL}?memberId=${memberId}`);
+    return data;
+  } catch (error) {
+    console.error('카테고리 조회 실패:', error);
+    throw error;
+  }
+};
+
+// 카테고리 추가
+export const createCategory = async (categoryData: {
+  memberId: string;
+  categoryName: string;
+  order: number;
+}) => {
+  try {
+    const { data } = await axiosInstance.post(`${CATEGORY_URL}/register`, categoryData);
+    return data;
+  } catch (error) {
+    console.error('카테고리 추가 실패:', error);
+    throw error;
+  }
+};
+
+// 카테고리 수정
+export const updateCategory = async (categoryData: {
+  idx: number;
+  categoryName: string;
+  order: number;
+}) => {
+  try {
+    const { data } = await axiosInstance.put(`${CATEGORY_URL}/update`, categoryData);
+    return data;
+  } catch (error) {
+    console.error('카테고리 수정 실패:', error);
+    throw error;
+  }
+};
+
+// 카테고리 삭제
+export const deleteCategory = async (idx: number) => {
+  try {
+    const { data } = await axiosInstance.delete(`${CATEGORY_URL}/delete?idx=${idx}`);
+    return data;
+  } catch (error) {
+    console.error('카테고리 삭제 실패:', error);
     throw error;
   }
 };

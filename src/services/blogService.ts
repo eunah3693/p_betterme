@@ -1,5 +1,15 @@
 import { BlogRepository } from '@/repositories/blogRepository';
-import { BlogItem, BlogListRequest, BlogRequest, BlogListResponse, BlogResponse, UpdateBlogRequest } from '@/interfaces/blog';
+import { 
+  BlogItem, 
+  BlogListRequest, 
+  BlogRequest, 
+  BlogListResponse, 
+  BlogResponse, 
+  UpdateBlogRequest,
+  BlogCategoryResponse,
+  CreateBlogCategoryRequest,
+  UpdateBlogCategoryRequest
+} from '@/interfaces/blog';
 
 export class BlogService {
   private blogRepository: BlogRepository;
@@ -158,5 +168,82 @@ export class BlogService {
   // 블로그 삭제
   async deleteBlog(idx: number): Promise<void> {
     await this.blogRepository.deleteBlog(idx);
+  }
+
+  // ========== 블로그 카테고리 관련 서비스 ==========
+
+  // 특정 사용자의 카테고리 목록 조회
+  async getCategoriesByMemberId(memberId: string): Promise<BlogCategoryResponse> {
+    try {
+      const categories = await this.blogRepository.getCategoriesByMemberId(memberId);
+      return {
+        success: true,
+        data: categories
+      };
+    } catch (error) {
+      console.error('카테고리 목록 조회 실패:', error);
+      return {
+        success: false,
+        data: [],
+        message: '카테고리 목록 조회 중 오류가 발생했습니다.'
+      };
+    }
+  }
+
+  // 카테고리 등록
+  async registerCategory(data: CreateBlogCategoryRequest): Promise<BlogCategoryResponse> {
+    try {
+      const category = await this.blogRepository.createCategory(data);
+      return {
+        success: true,
+        data: category,
+        message: '카테고리가 등록되었습니다.'
+      };
+    } catch (error) {
+      console.error('카테고리 등록 실패:', error);
+      return {
+        success: false,
+        data: [],
+        message: '카테고리 등록 중 오류가 발생했습니다.'
+      };
+    }
+  }
+
+  // 카테고리 수정
+  async updateCategory(data: UpdateBlogCategoryRequest): Promise<BlogCategoryResponse> {
+    try {
+      const category = await this.blogRepository.updateCategory(data);
+      return {
+        success: true,
+        data: category,
+        message: '카테고리가 수정되었습니다.'
+      };
+    } catch (error) {
+      console.error('카테고리 수정 실패:', error);
+      return {
+        success: false,
+        data: [],
+        message: '카테고리 수정 중 오류가 발생했습니다.'
+      };
+    }
+  }
+
+  // 카테고리 삭제
+  async deleteCategory(idx: number): Promise<BlogCategoryResponse> {
+    try {
+      await this.blogRepository.deleteCategory(idx);
+      return {
+        success: true,
+        data: [],
+        message: '카테고리가 삭제되었습니다.'
+      };
+    } catch (error) {
+      console.error('카테고리 삭제 실패:', error);
+      return {
+        success: false,
+        data: [],
+        message: '카테고리 삭제 중 오류가 발생했습니다.'
+      };
+    }
   }
 }

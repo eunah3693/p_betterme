@@ -17,6 +17,7 @@ interface TodoCalendarProps {
   events: TodoCalendarEvent[];
   onSelectEvent: (evt: TodoCalendarEvent) => void;
   onSelectSlot?: (slotInfo: { start: Date; end: Date }) => void;
+  onNavigate?: (date: Date) => void;
   isLoading?: boolean; 
   error?: Error | null;
   onRetry?: () => void;
@@ -36,7 +37,7 @@ const DynamicTodoCalendar = dynamic(
     
     const localizer = mod.momentLocalizer(moment);
     
-    const TodoCalendarComponent = ({ events, onSelectEvent, onSelectSlot }: TodoCalendarProps) => {
+    const TodoCalendarComponent = ({ events, onSelectEvent, onSelectSlot, onNavigate }: TodoCalendarProps) => {
       return React.createElement(mod.Calendar as unknown as React.ComponentType<Record<string, unknown>>, {
         localizer,
         events,
@@ -46,6 +47,11 @@ const DynamicTodoCalendar = dynamic(
         culture: 'ko',
         view: 'month',
         onView: () => {},
+        onNavigate: (date: Date) => {
+          if (onNavigate) {
+            onNavigate(date);
+          }
+        },
         formats: {
           monthHeaderFormat: 'YYYY년 MMMM',
         },
@@ -91,7 +97,7 @@ const DynamicTodoCalendar = dynamic(
   }
 );
 
-function TodoCalendar({ events, onSelectEvent, onSelectSlot, isLoading = false, error = null, onRetry }: TodoCalendarProps) {
+function TodoCalendar({ events, onSelectEvent, onSelectSlot, onNavigate, isLoading = false, error = null, onRetry }: TodoCalendarProps) {
   // 에러가 있으면 에러 메시지 표시
   if (error) {
     return <ErrorMessage message="데이터를 불러오는데 실패했습니다." onRetry={onRetry} />;
@@ -108,6 +114,7 @@ function TodoCalendar({ events, onSelectEvent, onSelectSlot, isLoading = false, 
         events={events}
         onSelectEvent={onSelectEvent}
         onSelectSlot={onSelectSlot}
+        onNavigate={onNavigate}
       />
     </div>
   );

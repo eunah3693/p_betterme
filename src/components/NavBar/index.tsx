@@ -24,6 +24,7 @@ function NavBar() {
     // 페이지 변경 시마다 로그인 상태 확인
     const handleRouteChange = () => {
       checkLoginStatus();
+      setIsOpen(false); 
     };
     
     router.events.on('routeChangeComplete', handleRouteChange);
@@ -50,7 +51,7 @@ function NavBar() {
   }, [isLoggedIn]);
 
   return (
-    <nav className="bg-white flex justify-center">
+    <nav className="bg-white flex justify-center  relative z-50">
       <div className="w-[1920px] max-w-full flex flex-wrap items-center justify-between px-4 py-2">
         <Link href="/" prefetch={false} className="flex items-center">
             <Image src={logo} alt="logo" width={120} height={40} className="h-12 w-auto max-w-[120px]" />
@@ -64,7 +65,7 @@ function NavBar() {
         >
             <Image src={hamBurger} alt="menu" width={20} height={20} className="w-5 h-5" />
         </button>
-        <div className={`${isOpen ? 'block' : 'hidden'} w-full md:block md:w-auto`} id="navbar-default">
+        <div className={`${isOpen ? 'block' : 'hidden'} md:block absolute md:relative top-full left-0 right-0 md:top-auto md:left-auto md:right-auto w-full md:w-auto bg-white shadow-lg md:shadow-none`} id="navbar-default">
           <ul className="font-medium flex flex-col p-4 md:p-0 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:bg-white">
               {navData.map((item, index) => (
                 <Link href={item.url} prefetch={true} key={index}>

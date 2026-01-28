@@ -15,10 +15,9 @@ async function handler(
 
   const { id } = req.query;
   
-  // 페이지 번호 받기 (기본값: 0)
-  const { page = 0 } = req.body;
+  const { page = 0, categoryIdx = null } = req.body;
 
-  const result = await blogService.getMyBlogs(id as string, { page });
+  const result = await blogService.getMyBlogs(id as string, { page, categoryIdx });
   
   if (!result.success) {
     return createErrorResponse(res, 500, '블로그 목록을 불러오는데 실패했습니다.');

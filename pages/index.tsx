@@ -10,7 +10,7 @@ import { useUserStore } from '@/store/user';
 import { useModal } from '@/functions/hooks/useModal';
 
 const Page = () => {
-  const currentDate = new Date(); // 현재 날짜 
+  const [currentDate, setCurrentDate] = useState(new Date()); // 현재 보고 있는 달력의 날짜
   const [isPopupOpen, setIsPopupOpen] = useState(false); // 팝업 열림 여부
   const [selectedDate, setSelectedDate] = useState<Date | null>(null); // 선택된 날짜
 
@@ -102,6 +102,11 @@ const Page = () => {
     setIsPopupOpen(true);
   };
 
+  // 캘린더에서 월 변경 (이전/다음 버튼 클릭)
+  const handleNavigate = (date: Date) => {
+    setCurrentDate(date);
+  };
+
   // 할일 생성
   const handleCreateTodo = async (data: { title: string; content: string; startDate?: string; finishDate?: string }) => {
     if (!selectedDate || !user?.id) return;
@@ -186,6 +191,7 @@ const Page = () => {
                 events={calendarEvents}
                 onSelectEvent={handleSelectEvent}
                 onSelectSlot={handleSelectSlot}
+                onNavigate={handleNavigate}
                 isLoading={isLoading}
                 error={error}
                 onRetry={refetch}

@@ -82,37 +82,42 @@ const BlogDetailPage = () => {
           {error ? (
             <ErrorMessage onRetry={() => refetch()} />
           ) : blogData && (
-            <>
-              <BlogView 
-                data={blogData}
-              />
-              {blogData?.isAuthor && (
-                <div className="flex gap-3 justify-end pt-4">
-                  <Button
-                    size="sm"
-                    color="bMain"
-                    onClick={() => window.history.back()}
-                  >
-                    목록
-                  </Button>
-                  <Button
-                    size="sm"
-                    color="bgMain"
-                    onClick={() => router.push(`/blog/${blogData.idx}/update`)}
-                  >
-                    수정
-                  </Button>
-                  <Button
-                    size="sm"
-                    color="bgSub"
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                  >
-                    {isDeleting ? '삭제 중...' : '삭제'}
-                  </Button>
-                </div>
-              )}
-            </>
+            <div>
+              <div className="flex justify-between items-center pb-4">
+                <Button
+                  size="sm"
+                  color="bgMain"
+                  onClick={() => window.history.back()}
+                >
+                  목록
+                </Button>
+                {blogData?.isAuthor && (
+                    <div className="flex gap-3 justify-end">
+                      <Button
+                        size="sm"
+                        color="bgMain"
+                        onClick={() => router.push(`/blog/${blogData.idx}/update`)}
+                      >
+                        수정
+                      </Button>
+                      <Button
+                        size="sm"
+                        color="bgSub"
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? '삭제 중...' : '삭제'}
+                      </Button>
+                    </div>
+                  )}
+              </div>
+              {/* 블로그 내용 */}
+              <div className="flex-1">
+                <BlogView 
+                  data={blogData}
+                />
+              </div>
+            </div>
           )}
         </div>
       </div>

@@ -1,5 +1,14 @@
 import { prisma } from '@/lib/prisma';
-import { BlogItem, BlogListRequest, CreateBlogRequest, UpdateBlogRequest, BlogListResponse } from '@/interfaces/blog';
+import { 
+  BlogItem, 
+  BlogListRequest, 
+  CreateBlogRequest, 
+  UpdateBlogRequest, 
+  BlogListResponse,
+  BlogCategoryItem,
+  CreateBlogCategoryRequest,
+  UpdateBlogCategoryRequest
+} from '@/interfaces/blog';
 import { Prisma } from '@prisma/client';
 
 export class BlogRepository {
@@ -151,9 +160,14 @@ export class BlogRepository {
     const pageSize = 12;
     const skip = params.page * pageSize;
 
+    const whereCondition: Prisma.BlogWhereInput = { memberId };
+    if (params.categoryIdx !== undefined && params.categoryIdx !== null) {
+      whereCondition.categoryIdx = params.categoryIdx;
+    }
+
     // 전체 개수 조회
     const totalElements = await prisma.blog.count({
-      where: { memberId },
+      where: whereCondition,
       orderBy: {
         date: 'desc'
       }
@@ -161,7 +175,7 @@ export class BlogRepository {
 
     // 데이터 조회
     const blogs = await prisma.blog.findMany({
-      where: { memberId },
+      where: whereCondition,
       orderBy: {
         date: 'desc'
       },
@@ -203,7 +217,8 @@ export class BlogRepository {
         memberId: data.memberId,
         subject: data.subject,
         content: data.content,
-        date: data.date,
+        date: data.date, 
+        categoryIdx: data.categoryIdx || 0         
       }
     });
 
@@ -227,6 +242,62 @@ export class BlogRepository {
   // 블로그 삭제
   async deleteBlog(idx: number): Promise<void> {
     await prisma.blog.delete({
+      where: { idx }
+    });
+  }
+
+
+  // DB 데이터를 BlogCategoryItem으로 변환
+  private changeToBlogCategoryItem(dbRow: Prisma.BlogCategoryGetPayload<Record<string, never>>): BlogCategoryItem {
+    return {
+      idx: dbRow.idx,
+      memberId: dbRow.memberId,
+      categoryName: dbRow.categoryName,
+      order: dbRow.order,
+    };
+  }
+
+  // 특정 사용자의 모든 카테고리 조회
+  async getCategoriesByMemberId(memberId: string): Promise<BlogCategoryItem[]> {
+    const categories = await prisma.blogCategory.findMany({
+      where: { memberId },
+      orderBy: {
+        order: 'asc' // 순서대로 정렬
+      }
+    });
+
+    return categories.map(category => this.changeToBlogCategoryItem(category));
+  }
+
+  // 카테고리 추가
+  async createCategory(data: CreateBlogCategoryRequest): Promise<BlogCategoryItem> {
+    const category = await prisma.blogCategory.create({
+      data: {
+        memberId: data.memberId,
+        categoryName: data.categoryName,
+        order: data.order,
+      }
+    });
+
+    return this.changeToBlogCategoryItem(category);
+  }
+
+  // 카테고리 수정
+  async updateCategory(data: UpdateBlogCategoryRequest): Promise<BlogCategoryItem> {
+    const category = await prisma.blogCategory.update({
+      where: { idx: data.idx },
+      data: {
+        categoryName: data.categoryName,
+        order: data.order,
+      }
+    });
+
+    return this.changeToBlogCategoryItem(category);
+  }
+
+  // 카테고리 삭제
+  async deleteCategory(idx: number): Promise<void> {
+    await prisma.blogCategory.delete({
       where: { idx }
     });
   }
