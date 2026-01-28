@@ -160,10 +160,11 @@ export class BlogRepository {
     const pageSize = 12;
     const skip = params.page * pageSize;
 
-    const whereCondition: Prisma.BlogWhereInput = { memberId };
-    if (params.categoryIdx !== undefined && params.categoryIdx !== null) {
-      whereCondition.categoryIdx = params.categoryIdx;
-    }
+    // 조건부로 where 객체 생성
+    const whereCondition: Prisma.BlogWhereInput = 
+      params.categoryIdx !== undefined && params.categoryIdx !== null
+        ? { memberId, categoryIdx: params.categoryIdx }
+        : { memberId };
 
     // 전체 개수 조회
     const totalElements = await prisma.blog.count({

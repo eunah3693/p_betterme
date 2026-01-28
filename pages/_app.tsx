@@ -40,7 +40,7 @@ export default function MyApp({
     if (!isPublicPath && !user) {
       router.push('/login');
     }
-  }, [router.pathname, user, hasHydrated]);
+  }, [router, user, hasHydrated]);
 
   const [queryClient] = useState(
     () =>
