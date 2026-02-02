@@ -6,6 +6,12 @@
 /* TipTap Editor Styles */
 .tiptap {
   outline: none;
+  /* 줄바꿈 관련 속성 추가 */
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  max-width: 100%;
 }
 
 .tiptap p.is-editor-empty:first-child::before {
@@ -23,6 +29,8 @@
   margin-top: 1.5rem;
   margin-bottom: 1rem;
   color: #1a1a1a;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .tiptap h2 {
@@ -32,6 +40,8 @@
   margin-top: 1.25rem;
   margin-bottom: 0.75rem;
   color: #2d3748;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .tiptap h3 {
@@ -41,6 +51,8 @@
   margin-top: 1rem;
   margin-bottom: 0.5rem;
   color: #4a5568;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .tiptap h4 {
@@ -48,6 +60,8 @@
   font-weight: 600;
   margin-top: 0.75rem;
   margin-bottom: 0.5rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .tiptap h5 {
@@ -55,6 +69,8 @@
   font-weight: 600;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .tiptap h6 {
@@ -62,11 +78,16 @@
   font-weight: 600;
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .tiptap p {
   line-height: 1.8;
   margin-bottom: 1rem;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
 }
 
 .tiptap strong {

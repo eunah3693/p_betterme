@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import dayjs from 'dayjs';
 import type { TodoItem } from '@/components/Todo';
 import TodoCalendar, { type TodoCalendarEvent } from '@/components/Calendars/Calendar';
 import TodoPopup from '@/components/Calendars/TodoPopup';
@@ -35,9 +36,8 @@ const Page = () => {
       const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
       const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
       
-      const startDateStr = startDate.toISOString().split('T')[0];
-      const endDateStr = endDate.toISOString().split('T')[0];
-      
+      const startDateStr = dayjs(startDate).format('YYYY-MM-DD');
+      const endDateStr = dayjs(endDate).format('YYYY-MM-DD');
       const result = await getTodo({
         memberId: user.id,
         startDate: startDateStr,
@@ -59,9 +59,8 @@ const Page = () => {
       }));
     },
     enabled: hasHydrated && !!user?.id, 
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 10, 
-    retry: 2,
+    staleTime: 0,
+    gcTime: 0, 
   });
 
 
@@ -188,6 +187,7 @@ const Page = () => {
             </div>
             <div className="mb-8">
               <TodoCalendar
+                date={currentDate}
                 events={calendarEvents}
                 onSelectEvent={handleSelectEvent}
                 onSelectSlot={handleSelectSlot}
