@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import Image from 'next/image';

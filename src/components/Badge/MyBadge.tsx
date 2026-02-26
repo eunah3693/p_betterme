@@ -1,3 +1,5 @@
+'use client';
+
 import Badge from '@/components/Forms/Badge';
 import Input from '@/components/Forms/Input';
 import Button from '@/components/Buttons/Button';

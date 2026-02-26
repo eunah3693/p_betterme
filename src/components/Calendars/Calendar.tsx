@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import dynamic from 'next/dynamic';
 import 'react-big-calendar/lib/css/react-big-calendar.css';

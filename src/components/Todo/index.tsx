@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import Checkbox from '@/components/Forms/Checkbox';
 import { cn } from '@/constants/cn';

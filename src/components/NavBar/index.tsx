@@ -1,8 +1,10 @@
+'use client';
+
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image'
 import hamBurger from '@public/assets/hamburger.svg'
-import { useRouter } from 'next/router';
+import { usePathname } from 'next/navigation';
 import { commonNavData, guestNavData, authNavData } from '@/constants/strings';
 import logo from '@public/assets/logo.svg'
 import { useUserStore } from '@/store/user';
@@ -11,7 +13,7 @@ import { useUserStore } from '@/store/user';
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const router = useRouter();
+  const pathname = usePathname();
   const user = useUserStore((state) => state.user);
 
   useEffect(() => {
@@ -21,25 +23,19 @@ function NavBar() {
 
     checkLoginStatus();
     
-    // 페이지 변경 시마다 로그인 상태 확인
-    const handleRouteChange = () => {
-      checkLoginStatus();
-      setIsOpen(false); 
-    };
-    
-    router.events.on('routeChangeComplete', handleRouteChange);
+    // 페이지 변경 시 모바일 메뉴 닫기
+    setIsOpen(false);
     
     if (typeof window !== 'undefined') {
       window.addEventListener('auth-change', checkLoginStatus);
     }
     
     return () => {
-      router.events.off('routeChangeComplete', handleRouteChange);
       if (typeof window !== 'undefined') {
         window.removeEventListener('auth-change', checkLoginStatus);
       }
     };
-  }, [router, user]);
+  }, [pathname, user]);
 
   // 로그인 상태에 따라 메뉴 데이터 결합
   const navData = useMemo(() => {

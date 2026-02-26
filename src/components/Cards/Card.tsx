@@ -1,3 +1,5 @@
+'use client';
+
 import type { DiaryItem } from '@/interfaces/diary';
 import type { BlogItem } from '@/interfaces/blog';
 
