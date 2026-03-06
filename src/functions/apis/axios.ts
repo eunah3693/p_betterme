@@ -2,8 +2,14 @@ import axios from 'axios';
 import { paths } from '@/constants/paths';
 import { useWebUtilStore } from '@/store/webUtil';
 
+
+const getBaseURL = () =>
+  typeof window !== 'undefined'
+    ? ''
+    : (process.env.NEXT_PUBLIC_API_ROOT_URL ?? 'http://localhost:3000');
+
 export const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_ROOT_URL,
+  baseURL: getBaseURL(),
 });
 
 

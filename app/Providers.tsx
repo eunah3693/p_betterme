@@ -1,11 +1,7 @@
 'use client';
 
 import React from 'react';
-import {
-  QueryClient,
-  QueryClientProvider,
-  HydrationBoundary,
-} from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import NavBar from '@/components/NavBar';
 import AuthGuard from './AuthGuard';
@@ -27,15 +23,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <HydrationBoundary>
-        <div className="font-notoSans min-h-screen bg-gray-50">
-          <NavBar />
-          <AuthGuard>
-            {children}
-          </AuthGuard>
-        </div>
-        <ReactQueryDevtools initialIsOpen={!isProduction()} />
-      </HydrationBoundary>
+      <div className="font-notoSans min-h-screen bg-gray-50">
+        <NavBar />
+        <AuthGuard>
+          {children}
+        </AuthGuard>
+      </div>
+      <ReactQueryDevtools initialIsOpen={!isProduction()} />
     </QueryClientProvider>
   );
 }
