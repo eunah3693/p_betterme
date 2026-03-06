@@ -5,10 +5,10 @@ const todoService = new TodoService();
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { idx: string } }
+  { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
-    const idx = params.idx;
+    const { idx } = await params;
     const body = await req.json();
 
     if (!idx) {
@@ -52,10 +52,10 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { idx: string } }
+  { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
-    const idx = params.idx;
+    const { idx } = await params;
 
     if (!idx) {
       return NextResponse.json(

@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -15,10 +15,10 @@ import { useModal } from '@/functions/hooks/useModal';
 export default function BlogEditPage({
   params,
 }: {
-  params: { idx: string };
+  params: Promise<{ idx: string }>;
 }) {
   const router = useRouter();
-  const idx = params.idx;
+  const { idx } = use(params);
   const user = useUserStore((state) => state.user);
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();

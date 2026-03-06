@@ -6,7 +6,7 @@ const blogService = new BlogService();
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { memberId, subject, content, date } = body;
+    const { memberId, subject, content, date, categoryIdx } = body;
 
     if (!memberId || !subject || !content) {
       return NextResponse.json(
@@ -19,7 +19,8 @@ export async function POST(req: NextRequest) {
       memberId,
       subject,
       content,
-      date: date ? new Date(date) : new Date()
+      date: date ? new Date(date) : new Date(),
+      categoryIdx: categoryIdx != null ? Number(categoryIdx) : undefined,
     });
 
     return NextResponse.json({

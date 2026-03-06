@@ -156,6 +156,7 @@ export class BlogService {
     subject: string;
     content: string;
     date: Date;
+    categoryIdx?: number | null;
   }): Promise<BlogItem> {
     return await this.blogRepository.createBlog(data);
   }

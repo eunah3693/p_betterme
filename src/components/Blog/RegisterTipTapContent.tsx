@@ -12,6 +12,7 @@ import { Color } from '@tiptap/extension-color';
 import Highlight from '@tiptap/extension-highlight';
 import { cn } from '@/constants/cn';
 import { TEXT_COLORS, BACKGROUND_COLORS, HEADING_LEVELS } from '@/constants/tiptapStyle';
+import type { BlogCategoryItem } from '@/interfaces/blog';
 import Input from '@/components/Forms/Input';
 import Button from '@/components/Buttons/Button';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
@@ -31,6 +32,12 @@ interface BlogRegisterProps {
   onSubmit?: (data: BlogFormData) => void;
   initialData?: Partial<BlogFormData>;
   className?: string;
+  /** 카테고리 목록 (있으면 제목 위에 카테고리 선택 표시) */
+  categories?: BlogCategoryItem[];
+  /** 선택된 카테고리 idx */
+  selectedCategoryIdx?: number | null;
+  /** 카테고리 선택 변경 시 호출 */
+  onCategoryChange?: (idx: number | null) => void;
 }
 
 export interface BlogFormData {
@@ -42,7 +49,10 @@ export interface BlogFormData {
 function BlogRegister({
   onSubmit,
   initialData,
-  className
+  className,
+  categories = [],
+  selectedCategoryIdx = null,
+  onCategoryChange,
 }: BlogRegisterProps) {
   const [title, setTitle] = useState(initialData?.title || '');
   const thumbnail = initialData?.thumbnail || '';
@@ -108,6 +118,28 @@ function BlogRegister({
   return (
     <>
       <form onSubmit={handleSubmit} className={cn('', className)}>
+        {categories.length > 0 && (
+          <div className="mb-6">
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              카테고리
+            </label>
+            <select
+              value={selectedCategoryIdx ?? ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                onCategoryChange?.(value === '' ? null : Number(value));
+              }}
+              className="w-full bg-white text-info border border-main rounded-sm px-3 py-2 text-gray-700"
+            >
+              <option value="">선택 안 함</option>
+              {categories.map((cat) => (
+                <option key={cat.idx} value={cat.idx}>
+                  {cat.categoryName ?? `카테고리 ${cat.idx}`}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="mb-6">
           <label className="block text-sm font-bold text-gray-700 mb-2">
             제목 <span className="text-red-500">*</span>

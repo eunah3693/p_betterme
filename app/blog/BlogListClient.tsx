@@ -15,17 +15,17 @@ export default function BlogListClient() {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
 
-  const { data: monthlyData, refetch: refetchMonthly } = useQuery<BlogListResponse>({
+  const { data: monthlyData } = useQuery<BlogListResponse>({
     queryKey: ['blogs', 'monthly', 0],
     queryFn: () => fetchMonthlyBlogs(0),
   });
 
-  const { data: recommendedData, refetch: refetchRecommended } = useQuery<BlogListResponse>({
+  const { data: recommendedData } = useQuery<BlogListResponse>({
     queryKey: ['blogs', 'recommended', 0],
     queryFn: () => fetchRecommendedBlogs(0),
   });
 
-  const { data: mostViewedData, refetch: refetchMostViewed } = useQuery<BlogListResponse>({
+  const { data: mostViewedData } = useQuery<BlogListResponse>({
     queryKey: ['blogs', 'mostviewed', 0],
     queryFn: () => fetchMostViewedBlogs(0),
   });
@@ -38,12 +38,6 @@ export default function BlogListClient() {
     router.push(`/blog/${idx}`);
   };
 
-  const handleRefreshAll = () => {
-    refetchMonthly();
-    refetchRecommended();
-    refetchMostViewed();
-  };
-
   return (
     <div className="flex justify-center py-8 px-4">
       <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
@@ -53,14 +47,6 @@ export default function BlogListClient() {
             <p className="text-gray-600">다양한 이야기를 공유합니다</p>
           </div>
           <div className="flex gap-2">
-            <Button
-              onClick={handleRefreshAll}
-              color="bgMain"
-              size="md"
-              className="hover:bg-main/90 transition-colors whitespace-nowrap"
-            >
-              새로고침
-            </Button>
             {user && (
               <Button
                 onClick={() => router.push(`/blog/myblog?id=${user?.id}`)}

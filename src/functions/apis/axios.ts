@@ -1,5 +1,4 @@
 import axios from 'axios';
-import Router from 'next/router';
 import { paths } from '@/constants/paths';
 import { useWebUtilStore } from '@/store/webUtil';
 
@@ -27,7 +26,9 @@ axiosInstance.interceptors.response.use(
     if (err.response?.data.statusCode === 403) {
       localStorage.removeItem('session');
       delete axiosInstance.defaults.headers.common.authorization;
-      Router.push(paths.LOGIN);
+      if (typeof window !== 'undefined') {
+        window.location.href = paths.LOGIN;
+      }
     }
     if (err) return Promise.reject(err);
   },

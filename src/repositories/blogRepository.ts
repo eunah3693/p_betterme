@@ -9,12 +9,15 @@ import {
   CreateBlogCategoryRequest,
   UpdateBlogCategoryRequest
 } from '@/interfaces/blog';
-import { Prisma } from '@prisma/client';
+
+
+type BlogRow = Awaited<ReturnType<typeof prisma.blog.findMany>>[number];
+type BlogCategoryRow = Awaited<ReturnType<typeof prisma.blogCategory.findMany>>[number];
 
 export class BlogRepository {
   
   // DB 데이터를 BlogItem으로 변환
-  private changeToBlogItem(dbRow: Prisma.BlogGetPayload<Record<string, never>>): BlogItem {
+  private changeToBlogItem(dbRow: BlogRow): BlogItem {
     return {
       idx: dbRow.idx,
       memberId: dbRow.memberId,
@@ -32,7 +35,7 @@ export class BlogRepository {
       }
     });
 
-    return blogs.map(blog => this.changeToBlogItem(blog));
+    return blogs.map((blog: BlogRow) => this.changeToBlogItem(blog));
   }
 
   // 추천 블로그 조회 (좋아요 많은 순)
@@ -61,7 +64,7 @@ export class BlogRepository {
 
     return {
       success: true,
-      data: blogs.map(blog => this.changeToBlogItem(blog)),
+      data: blogs.map((blog: BlogRow) => this.changeToBlogItem(blog)),
       page: {
         number: params.page,
         totalPages: totalPages,
@@ -97,7 +100,7 @@ export class BlogRepository {
 
     return {
       success: true,
-      data: blogs.map(blog => this.changeToBlogItem(blog)),
+      data: blogs.map((blog: BlogRow) => this.changeToBlogItem(blog)),
       page: {
         number: params.page,
         totalPages: totalPages,
@@ -145,7 +148,7 @@ export class BlogRepository {
 
     return {
       success: true,
-      data: blogs.map(blog => this.changeToBlogItem(blog)),
+      data: blogs.map((blog: BlogRow) => this.changeToBlogItem(blog)),
       page: {
         number: params.page,
         totalPages: totalPages,
@@ -160,8 +163,8 @@ export class BlogRepository {
     const pageSize = 12;
     const skip = params.page * pageSize;
 
-    // 조건부로 where 객체 생성
-    const whereCondition: Prisma.BlogWhereInput = 
+    // 조건부로 where 객체 생성 
+    const whereCondition =
       params.categoryIdx !== undefined && params.categoryIdx !== null
         ? { memberId, categoryIdx: params.categoryIdx }
         : { memberId };
@@ -188,7 +191,7 @@ export class BlogRepository {
 
     return {
       success: true,
-      data: blogs.map(blog => this.changeToBlogItem(blog)),
+      data: blogs.map((blog: BlogRow) => this.changeToBlogItem(blog)),
       page: {
         number: params.page,
         totalPages,
@@ -249,7 +252,7 @@ export class BlogRepository {
 
 
   // DB 데이터를 BlogCategoryItem으로 변환
-  private changeToBlogCategoryItem(dbRow: Prisma.BlogCategoryGetPayload<Record<string, never>>): BlogCategoryItem {
+  private changeToBlogCategoryItem(dbRow: BlogCategoryRow): BlogCategoryItem {
     return {
       idx: dbRow.idx,
       memberId: dbRow.memberId,
@@ -267,7 +270,7 @@ export class BlogRepository {
       }
     });
 
-    return categories.map(category => this.changeToBlogCategoryItem(category));
+    return categories.map((category: BlogCategoryRow) => this.changeToBlogCategoryItem(category));
   }
 
   // 카테고리 추가

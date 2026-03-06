@@ -25,13 +25,13 @@ export const getDiaryByIdx = async (idx: number): Promise<DiaryResponse> => {
   }
 };
 
-// 일기 등록 
+// 일기 등록
 export const createDiary = async (
   diaryData: CreateDiaryRequest
 ): Promise<CreateDiaryResponse> => {
   try {
     const { data } = await axiosInstance.post<CreateDiaryResponse>(
-      `${DIARY_URL}/register`,
+      DIARY_URL,
       diaryData 
     );
     return data;
@@ -41,14 +41,14 @@ export const createDiary = async (
   }
 };
 
-// 일기 수정
+// 일기 수정 (PUT /api/diary/:idx)
 export const updateDiary = async (
   diaryData: UpdateDiaryRequest
 ): Promise<DiaryResponse> => {
   try {
     const { idx, ...body } = diaryData;
     const { data } = await axiosInstance.put<DiaryResponse>(
-      `${DIARY_URL}/${idx}/update`,
+      `${DIARY_URL}/${idx}`,
       body
     );
     return data;
@@ -58,10 +58,10 @@ export const updateDiary = async (
   }
 };
 
-// 일기 삭제
+// 일기 삭제 (DELETE /api/diary/:idx)
 export const deleteDiary = async (idx: number) => {
   try {
-    const { data } = await axiosInstance.delete(`${DIARY_URL}/${idx}/delete`);
+    const { data } = await axiosInstance.delete(`${DIARY_URL}/${idx}`);
     return data;
   } catch (error) {
     console.error('일기 삭제 실패:', error);

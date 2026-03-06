@@ -1,5 +1,4 @@
 import { useWebUtilStore } from '@/store/webUtil';
-import Router from 'next/router';
 import { paths } from '@/constants/paths';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_ROOT_URL;
@@ -55,7 +54,7 @@ async function request<T>(
 
         if (errorData.statusCode === 403) {
           localStorage.removeItem('session');
-          Router.push(paths.LOGIN);
+          window.location.href = paths.LOGIN;
         }
       }
 

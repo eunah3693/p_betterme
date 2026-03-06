@@ -28,11 +28,11 @@ export const getRecommendedBlogs = (params: BlogListRequest) =>
 export const getMostViewedBlogs = (params: BlogListRequest) => 
   api.post<BlogListResponse>(MOST_VIEWED_BLOG_URL, { page: params.page });
 
-export const getMyBlogs = (params: BlogListRequest) => 
-  api.post<BlogListResponse>(MY_BLOG_URL, { 
-    page: params.page, 
-    categoryIdx: params.categoryIdx 
-  });
+export const getMyBlogs = (memberId: string, params: BlogListRequest) =>
+  api.post<BlogListResponse>(
+    `${MY_BLOG_URL}?id=${encodeURIComponent(memberId)}`,
+    { page: params.page, categoryIdx: params.categoryIdx }
+  );
 
 export const getBlogByIdx = (idx: number) => 
   api.get<BlogResponse>(`${BLOG_URL}/${idx}`);
@@ -46,14 +46,14 @@ export const createBlog = (blogData: CreateBlogRequest) =>
 export const updateBlog = async (blogData: UpdateBlogRequest) => {
   const { idx, ...body } = blogData;
   const result = await api.put<{ success: boolean; data: BlogItem; message?: string }>(
-    `${BLOG_URL}/${idx}/update`,
+    `${BLOG_URL}/${idx}`,
     body
   );
   return result;
 };
 
-export const deleteBlog = (idx: number) => 
-  api.delete(`${BLOG_URL}/${idx}/delete`);
+export const deleteBlog = (idx: number) =>
+  api.delete<{ success: boolean; message?: string; data?: null }>(`${BLOG_URL}/${idx}`);
 
 export const getCategories = (memberId: string): Promise<BlogCategoryResponse> => 
   api.get(`${CATEGORY_URL}`, { memberId });
@@ -62,14 +62,14 @@ export const createCategory = (categoryData: {
   memberId: string;
   categoryName: string;
   order: number;
-}) => api.post(`${CATEGORY_URL}/register`, categoryData);
+}) => api.post<BlogCategoryResponse>(CATEGORY_URL, categoryData);
 
 export const updateCategory = (categoryData: {
   idx: number;
   categoryName: string;
   order: number;
-}) => api.put(`${CATEGORY_URL}/update`, categoryData);
+}) => api.put<BlogCategoryResponse>(CATEGORY_URL, categoryData);
 
-export const deleteCategory = (idx: number) => 
-  api.delete(`${CATEGORY_URL}/delete`, { idx });
+export const deleteCategory = (idx: number) =>
+  api.delete<BlogCategoryResponse>(CATEGORY_URL, { idx });
 

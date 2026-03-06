@@ -5,10 +5,10 @@ const memberService = new MemberService();
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { idx: string } }
+  { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
-    const idx = params.idx;
+    const { idx } = await params;
 
     if (!idx) {
       return NextResponse.json(
@@ -42,10 +42,10 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { idx: string } }
+  { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
-    const idx = params.idx;
+    const { idx } = await params;
     const body = await req.json();
 
     if (!idx) {

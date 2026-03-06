@@ -6,10 +6,10 @@ import { getBlogByIdx } from '@/functions/apis/blog';
 export default async function BlogDetailPage({
   params,
 }: {
-  params: { idx: string };
+  params: Promise<{ idx: string }>;
 }) {
   const queryClient = new QueryClient();
-  const { idx } = params;
+  const { idx } = await params;
 
   await queryClient.prefetchQuery({
     queryKey: ['blog', idx],

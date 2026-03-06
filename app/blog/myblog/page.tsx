@@ -6,16 +6,16 @@ import { getMyBlogs, getCategories } from '@/functions/apis/blog';
 export default async function MyBlogPage({
   searchParams,
 }: {
-  searchParams: { id?: string; category?: string };
+  searchParams: Promise<{ id?: string; category?: string }>;
 }) {
   const queryClient = new QueryClient();
-  const { id, category } = searchParams;
+  const { id, category } = await searchParams;
 
   if (id) {
     await Promise.all([
       queryClient.prefetchInfiniteQuery({
         queryKey: ['myblog', id, category ? Number(category) : null],
-        queryFn: () => getMyBlogs({ 
+        queryFn: () => getMyBlogs(id, {
           page: 0,
           categoryIdx: category ? Number(category) : null
         }),

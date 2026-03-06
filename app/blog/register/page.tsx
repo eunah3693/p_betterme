@@ -1,20 +1,35 @@
 'use client';
-import React from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/user';
 import BlogRegister from '@/components/Blog/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { BlogFormData } from '@/components/Blog/RegisterTipTapContent';
-import { createBlog } from '@/functions/apis/blog';
+import { createBlog, getCategories } from '@/functions/apis/blog';
 import { useModal } from '@/functions/hooks/useModal';
-
+import type { BlogCategoryItem } from '@/interfaces/blog';
 
 export default function BlogWritePage() {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
   const queryClient = useQueryClient();
-  const { modal, showModal, closeModal } = useModal(); // modal hook
+  const { modal, showModal, closeModal } = useModal();
+  const [selectedCategoryIdx, setSelectedCategoryIdx] = useState<number | null>(null);
+
+  // 로그인한 사용자의 카테고리 목록 조회
+  const { data: categoryData } = useQuery({
+    queryKey: ['categories', user?.id],
+    queryFn: () => getCategories(user!.id),
+    enabled: !!user?.id,
+  });
+
+  const rawCategories = categoryData?.data;
+  const categories: BlogCategoryItem[] = Array.isArray(rawCategories)
+    ? rawCategories
+    : rawCategories != null
+      ? [rawCategories]
+      : [];
 
   const handleSubmit = async (data: BlogFormData) => {
     try {
@@ -22,13 +37,14 @@ export default function BlogWritePage() {
         memberId: user?.id || '',
         subject: data.title,
         content: data.content,
-        date: new Date() // YYYY-MM-DD
+        date: new Date(),
+        categoryIdx: selectedCategoryIdx ?? undefined,
       });
 
       if (result.success) {
         showModal('블로그가 등록되었습니다.', 'success', () => {
-          queryClient.invalidateQueries({ 
-            queryKey: ['myblog', user?.id] 
+          queryClient.invalidateQueries({
+            queryKey: ['myblog', user?.id],
           });
           router.push(`/blog/myblog?id=${user?.id}`);
         });
@@ -46,8 +62,13 @@ export default function BlogWritePage() {
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%] bg-white rounded-lg shadow-sm p-6 md:p-8">
           <h2 className="text-2xl font-bold text-main mb-6">블로그 글 작성</h2>
-          
-          <BlogRegister onSubmit={handleSubmit} />
+
+          <BlogRegister
+            onSubmit={handleSubmit}
+            categories={categories}
+            selectedCategoryIdx={selectedCategoryIdx}
+            onCategoryChange={setSelectedCategoryIdx}
+          />
         </div>
       </div>
       <ConfirmModal

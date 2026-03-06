@@ -38,7 +38,7 @@ export default function BlogDetailClient({ idx }: { idx: string }) {
       if (Array.isArray(result.data)) {
         return result.data[0] || null;
       }
-
+      
       return result.data as BlogItem;
     },
     enabled: !!idx, 
@@ -46,6 +46,10 @@ export default function BlogDetailClient({ idx }: { idx: string }) {
     gcTime: 1000 * 60 * 10, 
     retry: 2,
   });
+  
+  const isAuthor =
+    (blogData?.memberId != null && user?.id != null && blogData.memberId === user.id) ||
+    Boolean(blogData?.isAuthor);
 
   const handleDelete = async () => {
     if (!idx) return;
@@ -90,7 +94,7 @@ export default function BlogDetailClient({ idx }: { idx: string }) {
                 >
                   목록
                 </Button>
-                {blogData?.isAuthor && (
+                {isAuthor && (
                     <div className="flex gap-3 justify-end">
                       <Button
                         size="sm"

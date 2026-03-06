@@ -1,27 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DiaryService } from '@/services/diaryService';
-import { authenticateRequest } from '@/lib/api';
+import { verifyToken } from '@/lib/jwt';
 import { cookies } from 'next/headers';
 
 const diaryService = new DiaryService();
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { idx: string } }
+  { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
+    const { idx } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
-    
-    if (!token) {
+
+    if (!token?.value) {
       return NextResponse.json(
         { success: false, error: '인증이 필요합니다.' },
         { status: 401 }
       );
     }
 
-    const user = authenticateRequest(req);
-    const idx = params.idx;
+    const user = verifyToken(token.value);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: '유효하지 않은 토큰입니다.' },
+        { status: 401 }
+      );
+    }
 
     if (!idx) {
       return NextResponse.json(
@@ -55,21 +61,27 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { idx: string } }
+  { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
+    const { idx } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
-    
-    if (!token) {
+
+    if (!token?.value) {
       return NextResponse.json(
         { success: false, error: '인증이 필요합니다.' },
         { status: 401 }
       );
     }
 
-    const user = authenticateRequest(req);
-    const idx = params.idx;
+    const user = verifyToken(token.value);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: '유효하지 않은 토큰입니다.' },
+        { status: 401 }
+      );
+    }
     const body = await req.json();
 
     if (!idx) {
@@ -114,21 +126,27 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { idx: string } }
+  { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
+    const { idx } = await params;
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
-    
-    if (!token) {
+
+    if (!token?.value) {
       return NextResponse.json(
         { success: false, error: '인증이 필요합니다.' },
         { status: 401 }
       );
     }
 
-    const user = authenticateRequest(req);
-    const idx = params.idx;
+    const user = verifyToken(token.value);
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: '유효하지 않은 토큰입니다.' },
+        { status: 401 }
+      );
+    }
 
     if (!idx) {
       return NextResponse.json(

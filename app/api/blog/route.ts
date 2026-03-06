@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { BlogService } from '@/services/blogService';
 
 const blogService = new BlogService();
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const result = await blogService.getAllBlogs();
     

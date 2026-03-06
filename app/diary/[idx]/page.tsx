@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import BlogView from '@/components/Diary/ViewContent';
@@ -15,10 +15,10 @@ import { useUserStore } from '@/store/user';
 export default function DiaryDetailPage({
   params,
 }: {
-  params: { idx: string };
+  params: Promise<{ idx: string }>;
 }) {
   const router = useRouter();
-  const idx = params.idx;
+  const { idx } = use(params);
   const user = useUserStore((state) => state.user);
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();

@@ -9,7 +9,7 @@ import NoContent from '@/components/Empty/NoContent';
 import Card from '@/components/Cards/Card';
 import CategoryList from '@/components/Blog/CategoryList';
 import { getMyBlogs, getCategories } from '@/functions/apis/blog';
-import type { BlogItem, BlogListResponse } from '@/interfaces/blog';
+import type { BlogItem, BlogCategoryItem, BlogListResponse } from '@/interfaces/blog';
 
 export default function MyBlogClient() {
   const router = useRouter();
@@ -33,7 +33,12 @@ export default function MyBlogClient() {
     enabled: !!id,
   });
 
-  const categories = categoryData?.data || [];
+  const rawCategories = categoryData?.data;
+  const categories: BlogCategoryItem[] = Array.isArray(rawCategories)
+    ? rawCategories
+    : rawCategories != null
+      ? [rawCategories]
+      : [];
 
   const {
     data: blogListData,
@@ -45,7 +50,7 @@ export default function MyBlogClient() {
     isFetchingNextPage,
   } = useInfiniteQuery<BlogListResponse>({
     queryKey: ['myblog', id, selectedCategory],
-    queryFn: ({ pageParam = 0 }) => getMyBlogs({ 
+    queryFn: ({ pageParam = 0 }) => getMyBlogs(id as string, {
       page: pageParam as number,
       categoryIdx: selectedCategory
     }),

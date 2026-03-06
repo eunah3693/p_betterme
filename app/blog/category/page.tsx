@@ -39,7 +39,12 @@ export default function BlogCategoryPage() {
     enabled: !!user?.id, 
   });
 
-  const categories: BlogCategoryItem[] = categoriesData?.data || [];
+  const rawCategories = categoriesData?.data;
+  const categories: BlogCategoryItem[] = Array.isArray(rawCategories)
+    ? rawCategories
+    : rawCategories != null
+      ? [rawCategories]
+      : [];
 
   // 카테고리 추가 
   const addCategoryMutation = useMutation({

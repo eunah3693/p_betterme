@@ -64,8 +64,8 @@ const CategoryAddForm: React.FC<CategoryAddFormProps> = ({
           </Button>
         </div>
       </div>
-      <p className="text-xs text-gray-500 mt-2">
-        💡 순서 숫자가 작을수록 먼저 표시됩니다.
+      <p className="text-xs text-info mt-2">
+        순서 숫자가 작을수록 먼저 표시됩니다.
       </p>
     </div>
   );
