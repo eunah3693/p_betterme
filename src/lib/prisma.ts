@@ -2,8 +2,9 @@ import { PrismaClient } from '@prisma/client';
 
 const rawUrl = process.env.DATABASE_URL ?? '';
 const isPostgres = rawUrl.startsWith('postgresql://') || rawUrl.startsWith('postgres://');
+// Supabase(PostgreSQL)는 SSL 필수. MySQL 로컬만 sslmode=disable
 const databaseUrl = isPostgres
-  ? rawUrl
+  ? (rawUrl.includes('?') ? `${rawUrl}&sslmode=require` : `${rawUrl}?sslmode=require`)
   : rawUrl.includes('?')
     ? `${rawUrl}&sslmode=disable`
     : `${rawUrl}?sslmode=disable`;
