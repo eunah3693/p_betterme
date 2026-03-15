@@ -1,7 +1,7 @@
+@import 'react-quill-new/dist/quill.snow.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import 'react-quill-new/dist/quill.snow.css';
 
 /* TipTap Editor Styles */
 .tiptap {
