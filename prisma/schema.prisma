@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Todo {
@@ -24,7 +25,7 @@ model Blog {
   memberId    String?   @map("member_id") @db.VarChar(45)
   categoryIdx Int       @map("category_idx")
   subject     String?   @default("블로그 제목") @db.VarChar(255)
-  content     String?   @db.Text
+  content     String?
   tag         String?   @db.VarChar(45)
   viewCount   String?   @map("view_count") @db.VarChar(45)
   likeCount   String?   @map("like_count") @db.VarChar(45)
@@ -37,7 +38,7 @@ model Diary {
   idx      Int       @id @default(autoincrement())
   memberId String?   @default("아이디") @map("member_id") @db.VarChar(45)
   subject  String?   @default("일기제목") @db.VarChar(255)
-  content  String?   @db.Text
+  content  String?
   date     DateTime? @db.Date
 
   @@map("diary")
@@ -56,8 +57,8 @@ model Member {
 }
 
 model BlogCategory {
-  idx          Int    @id @default(autoincrement())
-  memberId     String @map("member_id") @db.VarChar(25)
+  idx          Int     @id @default(autoincrement())
+  memberId     String  @map("member_id") @db.VarChar(25)
   categoryName String? @map("category_name") @db.VarChar(100)
   order        Int?
 
