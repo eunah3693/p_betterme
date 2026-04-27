@@ -5,12 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/user';
 
 // 로그인 없이 접근 가능한 공개 페이지 목록
-const PUBLIC_PATHS = [
-  '/login',
-  '/signup',
-  '/blog',
-  '/blog/myblog'
-];
+const PUBLIC_PATHS = ['/login',  '/signup', '/blog', '/blog/myblog'];
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();

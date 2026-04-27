@@ -10,7 +10,7 @@
     "clean:build": "yarn clean && yarn build",
     "start:local": "next start",
     "start": "node_modules/next/dist/bin/next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "prisma:generate": "env-cmd -f .env prisma generate",
     "prisma:push": "env-cmd -f .env prisma db push",
     "prisma:migrate": "env-cmd -f .env prisma migrate dev",
