@@ -1,5 +1,12 @@
 import { api } from './fetch';
-import { DiaryListResponse, DiaryResponse, CreateDiaryRequest, UpdateDiaryRequest, CreateDiaryResponse } from '@/interfaces/diary';
+import {
+  DiaryListResponse,
+  DiaryResponse,
+  CreateDiaryRequest,
+  UpdateDiaryRequest,
+  CreateDiaryResponse,
+  DeleteDiaryResponse,
+} from '@/interfaces/diary';
 
 const DIARY_URL = '/api/diary';
 
@@ -55,9 +62,11 @@ export const updateDiary = async (
 };
 
 // 일기 삭제 (DELETE /api/diary/:idx)
-export const deleteDiary = async (idx: number) => {
+export const deleteDiary = async (
+  idx: number
+): Promise<DeleteDiaryResponse> => {
   try {
-    return await api.delete(`${DIARY_URL}/${idx}`);
+    return await api.delete<DeleteDiaryResponse>(`${DIARY_URL}/${idx}`);
   } catch (error) {
     console.error('일기 삭제 실패:', error);
     throw error;

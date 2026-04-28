@@ -14,11 +14,8 @@ export default function DiaryListPage() {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
 
-  const {
-    data: diaryList = [],
-    isLoading
-  } = useQuery<DiaryItem[], Error>({
-    queryKey: ['diaries', user?.id],
+  const { data: diaryList = [], isLoading } = useQuery<DiaryItem[], Error>({
+    queryKey: ['diary', user?.id],
     queryFn: async (): Promise<DiaryItem[]> => {
       const result = await getAllDiaries();
       if (!result.success || !result.data) {
@@ -30,13 +27,9 @@ export default function DiaryListPage() {
     enabled: !!user,
     refetchOnMount: 'always',
     staleTime: 0,
-    gcTime: 1000 * 60 * 10, 
-    retry: 2, 
+    gcTime: 1000 * 60 * 10,
+    retry: 2,
   });
-
-  const handleCardClick = (idx: number) => {
-    router.push(`/diary/${idx}`);
-  };
 
   return (
     <>
@@ -66,7 +59,7 @@ export default function DiaryListPage() {
                 <Card
                   key={diary.idx}
                   data={diary}
-                  onClick={() => handleCardClick(diary.idx)}
+                  url={'/diary/'+diary.idx}
                 />
               ))}
             </div>

@@ -6,9 +6,10 @@ import type { BlogItem } from '@/interfaces/blog';
 interface CardProps {
   data: DiaryItem | BlogItem;
   className?: string;
+  url?:string;
 }
 
-function Card({ data, className }: CardProps) {
+function Card({ data, className, url }: CardProps) {
   const stripHtml = (html: string) => {
     return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
   };
@@ -26,7 +27,7 @@ function Card({ data, className }: CardProps) {
 
 
   return (
-    <Link href={`/blog/${data.idx}`}
+    <Link href={url||'/'}
       className={`w-full bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden ${className || ''}`}
     >
       <div className="p-6">

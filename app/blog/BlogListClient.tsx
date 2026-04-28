@@ -55,12 +55,14 @@ export default function BlogListClient() {
             )}
           </div>
         </div>
-        
+
         <div>
           {/* 이달의 블로그 섹션 */}
           <div className="py-5 pb-5">
             <div className="flex items-center justify-between">
-              <h1 className="text-xl font-bold text-main mb-2">이달의 블로그</h1>
+              <h1 className="text-xl font-bold text-main mb-2">
+                이달의 블로그
+              </h1>
               <Link href="/blog/list?type=monthly">
                 <Image src={moreIcon} alt="더보기" width={50} />
               </Link>
@@ -68,10 +70,7 @@ export default function BlogListClient() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {monthlyBlogs.map((blog: BlogItem) => (
-              <Card
-                key={blog.idx}
-                data={blog}
-              />
+              <Card key={blog.idx} data={blog} url={'/blog/' + blog.idx} />
             ))}
           </div>
 
@@ -86,17 +85,16 @@ export default function BlogListClient() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {recommendedBlogs.map((blog: BlogItem) => (
-              <Card
-                key={blog.idx}
-                data={blog}
-              />
+              <Card key={blog.idx} data={blog} url={'/blog/' + blog.idx} />
             ))}
           </div>
 
           {/* 많이 본 블로그 섹션 */}
           <div className="py-10 pb-5">
             <div className="flex items-center justify-between">
-              <h1 className="text-xl font-bold text-main mb-2">많이 본 블로그</h1>
+              <h1 className="text-xl font-bold text-main mb-2">
+                많이 본 블로그
+              </h1>
               <Link href="/blog/list?type=mostviewed">
                 <Image src={moreIcon} alt="더보기" width={50} />
               </Link>
@@ -104,10 +102,7 @@ export default function BlogListClient() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {mostViewedBlogs.map((blog: BlogItem) => (
-              <Card
-                key={blog.idx}
-                data={blog}
-              />
+              <Card key={blog.idx} data={blog} url={'/blog/' + blog.idx} />
             ))}
           </div>
         </div>

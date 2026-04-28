@@ -58,3 +58,8 @@ export interface DiaryListResponse {
   message?: string;
 }
 
+export interface DeleteDiaryResponse {
+  success: boolean;
+  data: null;
+  message?: string;
+}

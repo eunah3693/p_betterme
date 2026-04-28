@@ -153,7 +153,11 @@ export default function MyBlogClient() {
               <div className="w-full md:w-[70%]">
                 <div className="w-full flex flex-col gap-6">
                   {blogList.map((blog: BlogItem) => (
-                    <Card key={blog.idx} data={blog} />
+                    <Card
+                      key={blog.idx}
+                      data={blog}
+                      url={'/blog/' + blog.idx}
+                    />
                   ))}
                 </div>
 
