@@ -1,5 +1,11 @@
 import { TodoRepository } from '@/repositories/todotRepository';
-import { TodoItem, TodoResponse } from '@/interfaces/todo';
+import {
+  CreateTodoRequest,
+  TodoItem,
+  TodoRequest,
+  TodoResponse,
+  UpdateTodoRequest,
+} from '@/interfaces/todo';
 
 export class TodoService {
   private todoRepository: TodoRepository;
@@ -9,7 +15,7 @@ export class TodoService {
   }
   
   // Todo 조회
-  async viewTodo(memberId: string, startDate: string, endDate: string): Promise<TodoResponse> {
+  async viewTodo({ memberId, startDate, endDate }: TodoRequest): Promise<TodoResponse> {
     try {
       const todos = await this.todoRepository.getTodos(memberId, startDate, endDate);
       return {
@@ -26,25 +32,12 @@ export class TodoService {
   }
   
   // Todo 추가
-  async createTodo(data: {
-    memberId: string;
-    subject: string;
-    content?: string;
-    finish?: string;
-    startDate: string;
-    finishDate: string;
-  }): Promise<TodoItem> {
+  async createTodo(data: CreateTodoRequest): Promise<TodoItem> {
     return await this.todoRepository.createTodo(data);
   }
   
   // Todo 수정
-  async updateTodo(idx: number, data: {
-    subject?: string;
-    content?: string;
-    finish?: string;
-    startDate?: string;
-    finishDate?: string;
-  }): Promise<TodoItem> {
+  async updateTodo(idx: number, data: UpdateTodoRequest): Promise<TodoItem> {
     return await this.todoRepository.updateTodo(idx, data);
   }
   

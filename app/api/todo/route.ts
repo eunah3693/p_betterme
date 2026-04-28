@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const result = await todoService.viewTodo(memberId, startDate, endDate);
+    const result = await todoService.viewTodo({memberId, startDate, endDate});
 
     if (!result.success) {
       return NextResponse.json(
