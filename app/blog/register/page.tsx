@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/user';
@@ -13,9 +13,18 @@ import type { BlogCategoryItem } from '@/interfaces/blog';
 export default function BlogWritePage() {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
+  const hasHydrated = useUserStore((state) => state._hasHydrated);
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();
   const [selectedCategoryIdx, setSelectedCategoryIdx] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!hasHydrated) return;
+    if (!user) {
+      router.push('/login');
+    }
+  }, [hasHydrated, user, router]);
+
 
   // 로그인한 사용자의 카테고리 목록 조회
   const { data: categoryData } = useQuery({
@@ -33,8 +42,12 @@ export default function BlogWritePage() {
 
   const handleSubmit = async (data: BlogFormData) => {
     try {
+      if(!user?.id){
+        showModal('로그인을 시도해주세요.', 'error');
+        return;
+      }
       const result = await createBlog({
-        memberId: user?.id || '',
+        memberId: user?.id,
         subject: data.title,
         content: data.content,
         date: new Date(),

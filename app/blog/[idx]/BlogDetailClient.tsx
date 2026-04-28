@@ -6,6 +6,7 @@ import BlogView from '@/components/Blog/ViewContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
+import NoContent from '@/components/Empty/NoContent';
 import { getBlogByIdx, deleteBlog } from '@/functions/apis/blog';
 import type { BlogItem } from '@/interfaces/blog';
 import Button from '@/components/Buttons/Button';
@@ -84,6 +85,8 @@ export default function BlogDetailClient({ idx }: { idx: string }) {
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
           {error ? (
             <ErrorMessage onRetry={() => refetch()} />
+          ) : !isLoading && !blogData ? (
+            <NoContent message="게시글을 찾을 수 없습니다." />
           ) : blogData && (
             <div>
               <div className="flex justify-between items-center pb-4">

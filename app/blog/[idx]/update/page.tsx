@@ -1,12 +1,12 @@
 'use client';
-import React, { use } from 'react';
+import React, { use, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import BlogRegister from '@/components/Blog/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { BlogFormData } from '@/components/Blog/RegisterTipTapContent';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
+import NoContent from '@/components/Empty/NoContent';
 import { getBlogByIdx, updateBlog } from '@/functions/apis/blog';
 import type { BlogItem } from '@/interfaces/blog';
 import { useUserStore } from '@/store/user';
@@ -20,14 +20,17 @@ export default function BlogEditPage({
   const router = useRouter();
   const { idx } = use(params);
   const user = useUserStore((state) => state.user);
+  const hasHydrated = useUserStore((state) => state._hasHydrated);
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();
+  const hasShownUnauthorizedRef = useRef(false);
 
   useEffect(() => {
+    if (!hasHydrated) return;
     if (!user) {
       router.push('/login');
     }
-  }, [user, router]);
+  }, [hasHydrated, user, router]);
 
   const {
     data: blogData,
@@ -55,16 +58,36 @@ export default function BlogEditPage({
     retry: 2,
   });
 
+  const isAuthor =
+    (blogData?.memberId != null && user?.id != null && blogData.memberId === user.id) ||
+    Boolean(blogData?.isAuthor);
+
+  useEffect(() => {
+    if (isLoading || !blogData || !user?.id || isAuthor || hasShownUnauthorizedRef.current) {
+      return;
+    }
+
+    hasShownUnauthorizedRef.current = true;
+    showModal('작성자가 아닙니다.', 'error', () => {
+      router.replace(`/blog/${idx}`);
+    });
+  }, [blogData, idx, isAuthor, isLoading, router, showModal, user?.id]);
+
   const handleSubmit = async (data: BlogFormData) => {
     try {
-      if (!idx) {
+      if (!idx || !user?.id) {
         showModal('잘못된 요청입니다.', 'error');
+        return;
+      }
+
+      if (!blogData || !isAuthor) {
+        showModal('작성자가 아닙니다.', 'error');
         return;
       }
 
       const result = await updateBlog({
         idx: Number(idx),
-        memberId: user?.id || '',
+        memberId: user.id,
         subject: data.title,
         content: data.content,
         date: new Date()
@@ -95,7 +118,9 @@ export default function BlogEditPage({
       
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
-          {blogData &&(
+          {!isLoading && !blogData ? (
+            <NoContent message="게시글을 찾을 수 없습니다." />
+          ) : blogData && isAuthor ? (
             <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
               <h2 className="text-2xl font-bold text-main mb-6">블로그 수정</h2>
               <BlogRegister 
@@ -106,7 +131,7 @@ export default function BlogEditPage({
                 }}
               />
             </div>
-          )}
+          ) : null}
         </div>
       </div>
       <ConfirmModal
