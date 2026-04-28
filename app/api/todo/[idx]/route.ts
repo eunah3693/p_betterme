@@ -24,15 +24,15 @@ export async function PUT(
       subject?: string;
       content?: string;
       finish?: string;
-      startDate?: Date;
-      finishDate?: Date;
+      startDate?: string;
+      finishDate?: string;
     } = {};
 
     if (subject) updateData.subject = subject;
     if (content) updateData.content = content;
     if (finish) updateData.finish = finish;
-    if (startDate) updateData.startDate = new Date(startDate);
-    if (finishDate) updateData.finishDate = new Date(finishDate);
+    if (startDate) updateData.startDate = startDate;
+    if (finishDate) updateData.finishDate = finishDate;
 
     const result = await todoService.updateTodo(Number(idx), updateData);
 

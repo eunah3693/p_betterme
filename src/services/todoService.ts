@@ -31,8 +31,8 @@ export class TodoService {
     subject: string;
     content?: string;
     finish?: string;
-    startDate: Date;
-    finishDate: Date;
+    startDate: string;
+    finishDate: string;
   }): Promise<TodoItem> {
     return await this.todoRepository.createTodo(data);
   }
@@ -42,8 +42,8 @@ export class TodoService {
     subject?: string;
     content?: string;
     finish?: string;
-    startDate?: Date;
-    finishDate?: Date;
+    startDate?: string;
+    finishDate?: string;
   }): Promise<TodoItem> {
     return await this.todoRepository.updateTodo(idx, data);
   }

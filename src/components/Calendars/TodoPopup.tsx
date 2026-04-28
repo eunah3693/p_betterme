@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
+import 'dayjs/locale/ko';
 import { cn } from '@/constants/cn';
 import Button from '@/components/Buttons/Button';
 import Input from '@/components/Forms/Input';
@@ -21,7 +22,7 @@ interface TodoItem {
 
 interface TodoPopupProps {
   isOpen: boolean;
-  selectedDate: Date | null;
+  selectedDate: Dayjs | null;
   todos: TodoItem[];
   onClose: () => void;
   onSubmit: (data: { title: string; content: string; startDate?: string; finishDate?: string }) => Promise<void>;
@@ -43,8 +44,8 @@ function TodoPopup({
   const [editingTodoId, setEditingTodoId] = useState<number | null>(null);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [finishDate, setFinishDate] = useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<Dayjs | null>(null);
+  const [finishDate, setFinishDate] = useState<Dayjs | null>(null);
 
   // Modal hook
   const { modal, showModal, closeModal } = useModal();
@@ -74,8 +75,8 @@ function TodoPopup({
     setEditingTodoId(todo.id);
     setTitle(todo.text);
     setContent(todo.content || '');
-    setStartDate(todo.startDate ? new Date(todo.startDate) : null);
-    setFinishDate(todo.finishDate ? new Date(todo.finishDate) : null);
+    setStartDate(todo.startDate ? dayjs(todo.startDate) : null);
+    setFinishDate(todo.finishDate ? dayjs(todo.finishDate) : null);
   };
 
   const handleEditClick = (todo: TodoItem, e: React.MouseEvent) => {
@@ -110,7 +111,7 @@ function TodoPopup({
       return;
     }
 
-    if (startDate > finishDate) {
+    if (startDate.isAfter(finishDate, 'day')) {
       showModal('시작일은 종료일보다 이전이어야 합니다!', 'warning');
       return;
     }
@@ -149,13 +150,8 @@ function TodoPopup({
     }
   };
 
-  const formatDate = (date: Date) => {
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      weekday: 'long',
-    });
+  const formatDate = (date: Dayjs) => {
+    return date.locale('ko').format('YYYY년 M월 D일 dddd');
   };
 
   return (
@@ -285,8 +281,8 @@ function TodoPopup({
                     시작일 <span className="text-red-500">*</span>
                   </label>
                   <InputDatepicker
-                    value={startDate}
-                    onChange={(date) => setStartDate(date)}
+                    value={startDate?.toDate() ?? null}
+                    onChange={(date) => setStartDate(date ? dayjs(date) : null)}
                     color="bgray"
                     size="md"
                     placeholder="시작일을 선택하세요"
@@ -297,8 +293,8 @@ function TodoPopup({
                     종료일 <span className="text-red-500">*</span>
                   </label>
                   <InputDatepicker
-                    value={finishDate}
-                    onChange={(date) => setFinishDate(date)}
+                    value={finishDate?.toDate() ?? null}
+                    onChange={(date) => setFinishDate(date ? dayjs(date) : null)}
                     color="bgray"
                     size="md"
                     placeholder="종료일을 선택하세요"
@@ -344,4 +340,3 @@ function TodoPopup({
 }
 
 export default TodoPopup;
-

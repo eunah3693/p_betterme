@@ -11,8 +11,8 @@ export interface CreateTodoRequest {
   subject: string;
   content?: string;
   finish?: string;
-  startDate: Date;
-  finishDate: Date;
+  startDate: string;
+  finishDate: string;
 }
 
 // Todo 수정 요청
@@ -20,8 +20,8 @@ export interface UpdateTodoRequest {
   subject?: string;
   content?: string;
   finish?: string;
-  startDate?: Date;
-  finishDate?: Date;
+  startDate?: string;
+  finishDate?: string;
 }
 
 // Todo 아이템

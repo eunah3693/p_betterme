@@ -57,8 +57,8 @@ export async function POST(req: NextRequest) {
       subject,
       content,
       finish: finish || '0',
-      startDate: new Date(startDate),
-      finishDate: new Date(finishDate)
+      startDate,
+      finishDate
     });
 
     return NextResponse.json({
