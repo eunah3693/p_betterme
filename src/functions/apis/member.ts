@@ -40,7 +40,6 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
 export const getMemberInfo = async (params: GetMemberInfoRequest): Promise<MemberResponse> => {
   try {
     const data = await api.get<MemberResponse>(`${MEMBER_URL}/${params.idx}`);
-    console.log('회원 정보 조회 성공:', data);
     return data;
   } catch (error) {
     console.error('회원 정보 조회 실패:', error);

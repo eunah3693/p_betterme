@@ -50,10 +50,11 @@ export default function MyBlogClient() {
     isFetchingNextPage,
   } = useInfiniteQuery<BlogListResponse>({
     queryKey: ['myblog', id, selectedCategory],
-    queryFn: ({ pageParam = 0 }) => getMyBlogs(id as string, {
-      page: pageParam as number,
-      categoryIdx: selectedCategory
-    }),
+    queryFn: ({ pageParam = 0 }) =>
+      getMyBlogs(id as string, {
+        page: pageParam as number,
+        categoryIdx: selectedCategory,
+      }),
     getNextPageParam: (lastPage) => {
       if (!lastPage.page) return undefined;
       const { number, totalPages } = lastPage.page;
@@ -70,7 +71,7 @@ export default function MyBlogClient() {
   useEffect(() => {
     const el = loaderRef.current;
     if (!el) return;
-    
+
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
@@ -78,14 +79,26 @@ export default function MyBlogClient() {
           fetchNextPage();
         }
       },
-      { root: null, rootMargin: '200px', threshold: 0 }
+      { root: null, rootMargin: '200px', threshold: 0 },
     );
-    
+
     observer.observe(el);
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  const blogList = blogListData?.pages.flatMap(page => page.data) || [];
+  //data 중복방지
+  const blogList =
+    blogListData?.pages
+      .flatMap((page) => page.data)
+      .reduce(
+        (acc, blog) => {
+          if (!acc.some((item) => item.idx === blog.idx)) {
+            acc.push(blog);
+          }
+          return acc;
+        },
+        [] as (typeof blogListData.pages)[number]['data'],
+      ) || [];
 
   const handleCategoryClick = (categoryIdx: number | null) => {
     setSelectedCategory(categoryIdx);
@@ -96,10 +109,12 @@ export default function MyBlogClient() {
       <LoadingOverlay isLoading={isLoading} message="블로그를 불러오는 중" />
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
-
           <div className="mb-8 md:flex justify-between items-end pt-10 md:pt-0">
             <div className="mb-4 md:mb-0">
-              <h1 className="text-3xl font-bold text-main mb-2"> {id}님의 블로그</h1>
+              <h1 className="text-3xl font-bold text-main mb-2">
+                {' '}
+                {id}님의 블로그
+              </h1>
               <p className="text-gray-600">다양한 이야기를 공유합니다</p>
             </div>
             <div className="flex justify-end ">
@@ -138,18 +153,17 @@ export default function MyBlogClient() {
               <div className="w-full md:w-[70%]">
                 <div className="w-full flex flex-col gap-6">
                   {blogList.map((blog: BlogItem) => (
-                    <Card
-                      key={blog.idx}
-                      data={blog}
-                    />
+                    <Card key={blog.idx} data={blog} />
                   ))}
                 </div>
-                
+
                 {/* 무한스크롤 로딩 표시 */}
                 {isFetchingNextPage && (
-                  <div className="py-20 text-center text-gray-500">불러오는 중...</div>
+                  <div className="py-20 text-center text-gray-500">
+                    불러오는 중...
+                  </div>
                 )}
-                
+
                 {/* 무한스크롤 감지 영역 */}
                 <div ref={loaderRef} className="h-8" />
               </div>

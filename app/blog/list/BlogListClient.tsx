@@ -34,6 +34,9 @@ const isBlogListType = (value?: string | null): value is BlogListType =>
 export default function BlogListClient() {
   const searchParams = useSearchParams();
   const loaderRef = useRef<HTMLDivElement | null>(null);
+  const hasNextPageRef = useRef(false);
+  const isFetchingNextPageRef = useRef(false);
+  const isFetchingNextPageLockedRef = useRef(false);
   const typeParam = searchParams.get('type');
   const blogType: BlogListType = isBlogListType(typeParam) ? typeParam : 'monthly';
 
@@ -60,24 +63,42 @@ export default function BlogListClient() {
   });
 
   useEffect(() => {
+    hasNextPageRef.current = Boolean(hasNextPage);
+    isFetchingNextPageRef.current = isFetchingNextPage;
+  }, [hasNextPage, isFetchingNextPage]);
+
+  //스크롤시 fetch
+  useEffect(() => {
     const el = loaderRef.current;
     if (!el) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
+        if (
+          !entry.isIntersecting ||
+          !hasNextPageRef.current ||
+          isFetchingNextPageRef.current ||
+          isFetchingNextPageLockedRef.current
+        ) {
+          return;
         }
+
+        isFetchingNextPageLockedRef.current = true;
+        void fetchNextPage().finally(() => {
+          isFetchingNextPageLockedRef.current = false;
+        });
       },
       { root: null, rootMargin: '200px', threshold: 0 }
     );
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage]);
 
+  //data 중복방지
   const blogList = blogListData?.pages.flatMap((page) => page.data) || [];
+
 
   return (
     <>

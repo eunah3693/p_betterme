@@ -53,9 +53,14 @@ export class BlogRepository {
           not: null
         }
       },
-      orderBy: {
-        likeCount: 'desc'
-      },
+      orderBy: [
+        {
+          likeCount: 'desc'
+        },
+        {
+          idx: 'desc'
+        }
+      ],
       skip: skip,
       take: pageSize
     });
@@ -89,9 +94,14 @@ export class BlogRepository {
           not: null
         }
       },
-      orderBy: {
-        viewCount: 'desc'
-      },
+      orderBy: [
+        {
+          viewCount: 'desc'
+        },
+        {
+          idx: 'desc'
+        }
+      ],
       skip: skip,
       take: pageSize
     });
@@ -137,9 +147,14 @@ export class BlogRepository {
           lte: endOfMonth
         }
       },
-      orderBy: {
-        date: 'desc'
-      },
+      orderBy: [
+        {
+          date: 'desc'
+        },
+        {
+          idx: 'desc'
+        }
+      ],
       skip: skip,
       take: pageSize
     });
@@ -180,9 +195,14 @@ export class BlogRepository {
     // 데이터 조회
     const blogs = await prisma.blog.findMany({
       where: whereCondition,
-      orderBy: {
-        date: 'desc'
-      },
+      orderBy: [
+        {
+          date: 'desc'
+        },
+        {
+          idx: 'desc'
+        }
+      ],
       skip: skip,
       take: pageSize
     });
