@@ -1,8 +1,37 @@
 import { prisma } from '@/lib/prisma';
 import { TodoItem, CreateTodoRequest, UpdateTodoRequest } from '@/interfaces/todo';
 import { Prisma } from '@prisma/client';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+
+dayjs.extend(utc);
 
 export class TodoRepository {
+  private parseDate(value: string): Date {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      throw new Error(`Invalid todo date: ${value}`);
+    }
+
+    const parsed = dayjs.utc(`${value}T00:00:00Z`);
+
+    if (!parsed.isValid()) {
+      throw new Error(`Invalid todo date: ${value}`);
+    }
+
+    return parsed.toDate();
+  }
+
+  private formatDate(value: Date): string {
+    return dayjs.utc(value).format('YYYY-MM-DD');
+  }
+
+  private parseOptionalDate(value?: string): Date | undefined {
+    if (!value) {
+      return undefined;
+    }
+
+    return this.parseDate(value);
+  }
   
   // DB 데이터를 TodoItem으로 변환
   private changeToTodoItem(dbRow: Prisma.TodoGetPayload<Record<string, never>>): TodoItem {
@@ -12,8 +41,8 @@ export class TodoRepository {
       subject: dbRow.subject,
       content: dbRow.content,
       finish: dbRow.finish,
-      startDate: dbRow.startDate ? dbRow.startDate.toISOString().split('T')[0] : null,
-      finishDate: dbRow.finishDate ? dbRow.finishDate.toISOString().split('T')[0] : null,
+      startDate: dbRow.startDate ? this.formatDate(dbRow.startDate) : null,
+      finishDate: dbRow.finishDate ? this.formatDate(dbRow.finishDate) : null,
     };
   }
 
@@ -26,12 +55,12 @@ export class TodoRepository {
         AND: [
           {
             startDate: {
-              lte: new Date(endDate), // Todo 시작일이 조회 종료일보다 작거나 같음
+              lte: this.parseDate(endDate), // Todo 시작일이 조회 종료일보다 작거나 같음
             }
           },
           {
             finishDate: {
-              gte: new Date(startDate), // Todo 종료일이 조회 시작일보다 크거나 같음
+              gte: this.parseDate(startDate), // Todo 종료일이 조회 시작일보다 크거나 같음
             }
           }
         ]
@@ -52,8 +81,8 @@ export class TodoRepository {
         subject: data.subject,
         content: data.content || null,
         finish: data.finish || '0',
-        startDate: data.startDate,
-        finishDate: data.finishDate,
+        startDate: this.parseDate(data.startDate),
+        finishDate: this.parseDate(data.finishDate),
       }
     });
 
@@ -64,7 +93,11 @@ export class TodoRepository {
   async updateTodo(idx: number, data: UpdateTodoRequest): Promise<TodoItem> {
     const todo = await prisma.todo.update({
       where: { idx },
-      data
+      data: {
+        ...data,
+        startDate: this.parseOptionalDate(data.startDate),
+        finishDate: this.parseOptionalDate(data.finishDate),
+      }
     });
 
     return this.changeToTodoItem(todo);

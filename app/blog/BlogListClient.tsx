@@ -34,10 +34,6 @@ export default function BlogListClient() {
   const recommendedBlogs = recommendedData?.data || [];
   const mostViewedBlogs = mostViewedData?.data || [];
 
-  const handleCardClick = (idx: number) => {
-    router.push(`/blog/${idx}`);
-  };
-
   return (
     <div className="flex justify-center py-8 px-4">
       <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
@@ -75,7 +71,6 @@ export default function BlogListClient() {
               <Card
                 key={blog.idx}
                 data={blog}
-                onClick={() => handleCardClick(blog.idx)}
               />
             ))}
           </div>
@@ -94,7 +89,6 @@ export default function BlogListClient() {
               <Card
                 key={blog.idx}
                 data={blog}
-                onClick={() => handleCardClick(blog.idx)}
               />
             ))}
           </div>
@@ -113,7 +107,6 @@ export default function BlogListClient() {
               <Card
                 key={blog.idx}
                 data={blog}
-                onClick={() => handleCardClick(blog.idx)}
               />
             ))}
           </div>

@@ -87,10 +87,6 @@ export default function MyBlogClient() {
 
   const blogList = blogListData?.pages.flatMap(page => page.data) || [];
 
-  const handleCardClick = (idx: number) => {
-    router.push(`/blog/${idx}`);
-  };
-
   const handleCategoryClick = (categoryIdx: number | null) => {
     setSelectedCategory(categoryIdx);
   };
@@ -145,7 +141,6 @@ export default function MyBlogClient() {
                     <Card
                       key={blog.idx}
                       data={blog}
-                      onClick={() => handleCardClick(blog.idx)}
                     />
                   ))}
                 </div>

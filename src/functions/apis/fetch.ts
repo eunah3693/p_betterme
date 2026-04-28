@@ -1,27 +1,52 @@
 import { useWebUtilStore } from '@/store/webUtil';
 import { paths } from '@/constants/paths';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_ROOT_URL;
-
 interface FetchOptions extends RequestInit {
-  params?: Record<string, string | number>;
+  params?: object;
   noCache?: boolean;
 }
+
+const getBaseURL = () =>
+  typeof window !== 'undefined'
+    ? ''
+    : (process.env.NEXT_PUBLIC_API_ROOT_URL ?? 'http://localhost:3000');
+
+const buildUrl = (
+  endpoint: string,
+  params?: object
+) => {
+  const baseUrl = getBaseURL();
+
+  if (!params) {
+    return `${baseUrl}${endpoint}`;
+  }
+
+  const searchParams = new URLSearchParams();
+
+  Object.entries(params as Record<string, unknown>).forEach(([key, value]) => {
+    if (value === undefined || value === null) {
+      return;
+    }
+
+    searchParams.set(key, String(value));
+  });
+
+  const queryString = searchParams.toString();
+
+  if (!queryString) {
+    return `${baseUrl}${endpoint}`;
+  }
+
+  const separator = endpoint.includes('?') ? '&' : '?';
+  return `${baseUrl}${endpoint}${separator}${queryString}`;
+};
 
 async function request<T>(
   endpoint: string,
   options: FetchOptions = {}
 ): Promise<T> {
   const { params, noCache, ...fetchOptions } = options;
-
-  let url = `${API_BASE_URL}${endpoint}`;
-  
-  if (params) {
-    const queryString = new URLSearchParams(
-      Object.entries(params).map(([key, value]) => [key, String(value)])
-    ).toString();
-    url += `?${queryString}`;
-  }
+  const url = buildUrl(endpoint, params);
 
   const config: RequestInit = {
     ...fetchOptions,
@@ -34,34 +59,54 @@ async function request<T>(
 
   try {
     const response = await fetch(url, config);
+    const contentType = response.headers.get('content-type') ?? '';
+    const isJsonResponse = contentType.includes('application/json');
+    const responseData = isJsonResponse
+      ? await response.json().catch(() => ({}))
+      : await response.text().catch(() => '');
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData =
+        responseData && typeof responseData === 'object'
+          ? responseData
+          : {};
+      const statusCode = 'statusCode' in errorData
+        ? Number(errorData.statusCode)
+        : response.status;
       
       if (typeof window !== 'undefined') {
         const { setSnackBar } = useWebUtilStore.getState();
 
         if (
-          errorData.statusCode !== 404 &&
-          errorData.statusCode !== 400 &&
-          errorData.statusCode !== 500
+          statusCode !== 404 &&
+          statusCode !== 400 &&
+          statusCode !== 500
         ) {
           setSnackBar({
-            message: errorData.translate || errorData.message || '오류가 발생했습니다',
+            message:
+              errorData.translate ||
+              errorData.error ||
+              errorData.message ||
+              '오류가 발생했습니다',
             icon: 'error',
           });
         }
 
-        if (errorData.statusCode === 403) {
+        if (statusCode === 403) {
           localStorage.removeItem('session');
           window.location.href = paths.LOGIN;
         }
       }
 
-      throw new Error(errorData.message || `HTTP Error: ${response.status}`);
+      throw new Error(
+        errorData.error ||
+        errorData.message ||
+        (typeof responseData === 'string' && responseData) ||
+        `HTTP Error: ${response.status}`
+      );
     }
 
-    return response.json();
+    return responseData as T;
   } catch (error) {
     console.error('API 요청 실패:', error);
     throw error;
@@ -69,7 +114,7 @@ async function request<T>(
 }
 
 export const api = {
-  get: <T>(endpoint: string, params?: Record<string, string | number>) =>
+  get: <T>(endpoint: string, params?: object) =>
     request<T>(endpoint, { method: 'GET', params }),
 
   post: <T>(endpoint: string, data?: unknown, noCache?: boolean) =>
@@ -85,6 +130,6 @@ export const api = {
       body: data ? JSON.stringify(data) : undefined,
     }),
 
-  delete: <T>(endpoint: string, params?: Record<string, string | number>) =>
+  delete: <T>(endpoint: string, params?: object) =>
     request<T>(endpoint, { method: 'DELETE', params }),
 };

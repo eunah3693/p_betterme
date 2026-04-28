@@ -1,4 +1,4 @@
-import { axiosInstance } from './axios';
+import { api } from './fetch';
 import { SignupRequest, LoginRequest, LoginResponse, MemberResponse, CheckIdResponse , GetMemberInfoRequest, UpdateMemberRequest} from '@/interfaces/member';
 
 const MEMBER_URL = '/api/member';
@@ -9,8 +9,7 @@ const LOGIN_URL = `${MEMBER_URL}/login`;
 // 아이디 중복 체크
 export const checkId = async (id: string): Promise<CheckIdResponse> => {
   try {
-    const { data } = await axiosInstance.get<CheckIdResponse>(`${CHECK_ID_URL}?id=${id}`);
-    return data;
+    return await api.get<CheckIdResponse>(CHECK_ID_URL, { id });
   } catch (error) {
     console.error('아이디 중복 체크 실패:', error);
     throw error;
@@ -20,8 +19,7 @@ export const checkId = async (id: string): Promise<CheckIdResponse> => {
 // 회원가입
 export const signup = async (signupData: SignupRequest): Promise<MemberResponse> => {
   try {
-    const { data } = await axiosInstance.post<MemberResponse>(SIGNUP_URL, signupData);
-    return data;
+    return await api.post<MemberResponse>(SIGNUP_URL, signupData);
   } catch (error) {
     console.error('회원가입 실패:', error);
     throw error;
@@ -31,8 +29,7 @@ export const signup = async (signupData: SignupRequest): Promise<MemberResponse>
 // 로그인
 export const login = async (loginData: LoginRequest): Promise<LoginResponse> => {
   try {
-    const { data } = await axiosInstance.post<LoginResponse>(LOGIN_URL, loginData);
-    return data;
+    return await api.post<LoginResponse>(LOGIN_URL, loginData);
   } catch (error) {
     console.error('로그인 실패:', error);
     throw error;
@@ -42,7 +39,7 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
 // 회원 정보 조회
 export const getMemberInfo = async (params: GetMemberInfoRequest): Promise<MemberResponse> => {
   try {
-    const { data } = await axiosInstance.get<MemberResponse>(`${MEMBER_URL}/${params.idx}`);
+    const data = await api.get<MemberResponse>(`${MEMBER_URL}/${params.idx}`);
     console.log('회원 정보 조회 성공:', data);
     return data;
   } catch (error) {
@@ -55,11 +52,9 @@ export const getMemberInfo = async (params: GetMemberInfoRequest): Promise<Membe
 export const updateMemberInfo = async (updateData: UpdateMemberRequest): Promise<MemberResponse> => {
   try {
     const { idx, ...body } = updateData;
-    const { data } = await axiosInstance.put<MemberResponse>(`${MEMBER_URL}/${idx}`, body);
-    return data;
+    return await api.put<MemberResponse>(`${MEMBER_URL}/${idx}`, body);
   } catch (error) {
     console.error('회원 정보 수정 실패:', error);
     throw error;
   }
 };
-

@@ -1,15 +1,14 @@
 'use client';
-
+import Link from 'next/link';
 import type { DiaryItem } from '@/interfaces/diary';
 import type { BlogItem } from '@/interfaces/blog';
 
 interface CardProps {
   data: DiaryItem | BlogItem;
-  onClick?: () => void;
   className?: string;
 }
 
-function Card({ data, onClick, className }: CardProps) {
+function Card({ data, className }: CardProps) {
   const stripHtml = (html: string) => {
     return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
   };
@@ -27,8 +26,7 @@ function Card({ data, onClick, className }: CardProps) {
 
 
   return (
-    <div
-      onClick={onClick}
+    <Link href={`/blog/${data.idx}`}
       className={`w-full bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow cursor-pointer overflow-hidden ${className || ''}`}
     >
       <div className="p-6">
@@ -40,7 +38,7 @@ function Card({ data, onClick, className }: CardProps) {
           {getTruncatedContent(data.content || '')}
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
 

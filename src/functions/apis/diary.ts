@@ -1,4 +1,4 @@
-import { axiosInstance } from './axios';
+import { api } from './fetch';
 import { DiaryListResponse, DiaryResponse, CreateDiaryRequest, UpdateDiaryRequest, CreateDiaryResponse } from '@/interfaces/diary';
 
 const DIARY_URL = '/api/diary';
@@ -6,8 +6,7 @@ const DIARY_URL = '/api/diary';
 // 일기 조회
 export const getAllDiaries = async (): Promise<DiaryListResponse> => {
   try {
-    const { data } = await axiosInstance.get<DiaryListResponse>(DIARY_URL);
-    return data;
+    return await api.get<DiaryListResponse>(DIARY_URL);
   } catch (error) {
     console.error('일기 목록 조회 실패:', error);
     throw error;
@@ -17,8 +16,7 @@ export const getAllDiaries = async (): Promise<DiaryListResponse> => {
 // 특정 일기 조회
 export const getDiaryByIdx = async (idx: number): Promise<DiaryResponse> => {
   try {
-    const { data } = await axiosInstance.get<DiaryResponse>(`${DIARY_URL}/${idx}`);
-    return data;
+    return await api.get<DiaryResponse>(`${DIARY_URL}/${idx}`);
   } catch (error) {
     console.error('일기 조회 실패:', error);
     throw error;
@@ -30,11 +28,10 @@ export const createDiary = async (
   diaryData: CreateDiaryRequest
 ): Promise<CreateDiaryResponse> => {
   try {
-    const { data } = await axiosInstance.post<CreateDiaryResponse>(
+    return await api.post<CreateDiaryResponse>(
       DIARY_URL,
       diaryData 
     );
-    return data;
   } catch (error) {
     console.error('일기 등록 실패:', error);
     throw error;
@@ -47,11 +44,10 @@ export const updateDiary = async (
 ): Promise<DiaryResponse> => {
   try {
     const { idx, ...body } = diaryData;
-    const { data } = await axiosInstance.put<DiaryResponse>(
+    return await api.put<DiaryResponse>(
       `${DIARY_URL}/${idx}`,
       body
     );
-    return data;
   } catch (error) {
     console.error('일기 수정 실패:', error);
     throw error;
@@ -61,11 +57,9 @@ export const updateDiary = async (
 // 일기 삭제 (DELETE /api/diary/:idx)
 export const deleteDiary = async (idx: number) => {
   try {
-    const { data } = await axiosInstance.delete(`${DIARY_URL}/${idx}`);
-    return data;
+    return await api.delete(`${DIARY_URL}/${idx}`);
   } catch (error) {
     console.error('일기 삭제 실패:', error);
     throw error;
   }
 };
-
