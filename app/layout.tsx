@@ -16,11 +16,9 @@ export const metadata: Metadata = {
   description: 'Better Me - 자기개발 사이트',
   icons: {
     icon: '/assets/favicon.ico',
-    apple: [
-      { url: '/apple-icon-180x180.png', sizes: '180x180' },
-    ],
+    apple: [{ url: '/assets/favicon.png', sizes: '180x180' }],
     other: [
-      { url: '/android-icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/assets/favicon.png', sizes: '192x192', type: 'image/png' },
     ],
   },
   other: {
