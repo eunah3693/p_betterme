@@ -35,14 +35,14 @@ export interface GetMemberInfoRequest {
 
 export interface MemberResponse {
   success: boolean;
-  data: MemberItem | null;
+  data: UserData | null;
   message?: string;
 }
 
 //로그인 응답 
 export interface LoginResponse {
   success: boolean;
-  data: Omit<MemberItem, 'password'> | null;
+  data: UserData | null;
   token?: string;
   message?: string;
 }

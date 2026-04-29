@@ -32,12 +32,14 @@ export default function DiaryDetailPage({
   } = useQuery<DiaryItem | null, Error>({
     queryKey: ['diary', idx],
     queryFn: async (): Promise<DiaryItem | null> => {
-      if (!idx) return null;
+      if (!idx){
+        throw new Error('Failed to fetch diaries');
+      }
 
       const result = await getDiaryByIdx(Number(idx));
 
       if (!result.success || !result.data) {
-        return null;
+        throw new Error('Failed to fetch diaries');
       }
 
       if (Array.isArray(result.data)) {

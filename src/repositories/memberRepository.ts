@@ -31,6 +31,14 @@ export class MemberRepository {
     return member ? this.changeToMemberItem(member) : null;
   }
 
+  // idx와 id로 회원 조회
+  async getMemberByIdxAndId(idx: number, id: string): Promise<MemberItem | null> {
+    const member = await prisma.member.findFirst({
+      where: { idx, id }
+    });
+    return member ? this.changeToMemberItem(member) : null;
+  }
+
   // ID 중복 체크
   async checkIdExists(id: string): Promise<boolean> {
     const count = await prisma.member.count({
@@ -74,6 +82,28 @@ export class MemberRepository {
     return this.changeToMemberItem(member);
   }
 
+  // 본인 회원 정보 수정
+  async updateMemberByIdxAndId(
+    idx: number,
+    id: string,
+    data: Omit<UpdateMemberRequest, 'idx'>
+  ): Promise<MemberItem | null> {
+    const member = await prisma.member.findFirst({
+      where: { idx, id }
+    });
+
+    if (!member) {
+      return null;
+    }
+
+    const updatedMember = await prisma.member.update({
+      where: { idx },
+      data
+    });
+
+    return this.changeToMemberItem(updatedMember);
+  }
+
   // 회원 삭제
   async deleteMember(idx: number): Promise<void> {
     await prisma.member.delete({
@@ -81,4 +111,3 @@ export class MemberRepository {
     });
   }
 }
-

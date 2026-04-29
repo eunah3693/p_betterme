@@ -1,13 +1,35 @@
 import { MemberRepository } from '@/repositories/memberRepository';
 import { MemberResponse, CheckIdResponse, SignupRequest, LoginRequest, UpdateMemberRequest, LoginResponse } from '@/interfaces/member';
-import { generateToken } from '@/lib/jwt';
-import { UnauthorizedError } from '@/lib/errors';
+import { generateToken, verifyToken } from '@/lib/jwt';
+import { ForbiddenError, UnauthorizedError } from '@/lib/errors';
 
 export class MemberService {
   private memberRepository: MemberRepository;
 
   constructor() {
     this.memberRepository = new MemberRepository();
+  }
+
+  private async validateMemberToken(token: string, memberIdx: number) {
+    if (!token) {
+      throw new UnauthorizedError('인증이 필요합니다.');
+    }
+
+    const payload = verifyToken(token);
+    if (!payload) {
+      throw new UnauthorizedError('유효하지 않은 토큰입니다.');
+    }
+
+    if (payload.idx !== memberIdx) {
+      throw new ForbiddenError('본인 정보만 조회/수정할 수 있습니다.');
+    }
+
+    const member = await this.memberRepository.getMemberByIdxAndId(memberIdx, payload.id);
+    if (!member) {
+      throw new ForbiddenError('본인 정보만 조회/수정할 수 있습니다.');
+    }
+
+    return payload;
   }
 
   // 회원가입
@@ -32,10 +54,12 @@ export class MemberService {
       myBadge: data.myBadge,
     });
 
+    const { password, ...memberWithoutPassword } = member;
+    void password;
     return {
       success: true,
-      data: member,
-      message: '회원가입이 완료되었습니다.'
+      data: memberWithoutPassword,
+      message: '회원가입이 완료되었습니다.',
     };
   }
 
@@ -48,23 +72,21 @@ export class MemberService {
     }
 
     // JWT 토큰 생성
-    console.log('🔍 [로그인] JWT_SECRET:', process.env.JWT_SECRET);
     const token = generateToken({
       idx: member.idx,
       id: member.id,
       nickname: member.nickname,
     });
-    console.log('🔍 [로그인] 생성된 토큰:', token.substring(0, 50) + '...');
 
     // 비밀번호 제외한 정보 반환
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _password, ...memberWithoutPassword } = member;
+    const { password, ...memberWithoutPassword } = member;
+    void password;
 
     return {
       success: true,
       data: memberWithoutPassword,
-      token,
-      message: '로그인에 성공했습니다.'
+      token: token,
+      message: '로그인에 성공했습니다.',
     };
   }
 
@@ -80,34 +102,79 @@ export class MemberService {
   }
 
   // 회원 정보 조회
-  async getMemberByIdx(idx: number): Promise<MemberResponse> {
-    const member = await this.memberRepository.getMemberByIdx(idx);
-    
-    if (!member) {
+  async getMemberByIdx(idx: number, token: string): Promise<MemberResponse> {
+    try {
+      const payload = await this.validateMemberToken(token, idx);
+      const member = await this.memberRepository.getMemberByIdxAndId(idx, payload.id);
+
+      if (!member) {
+        return {
+          success: false,
+          data: null,
+          message: '회원을 찾을 수 없습니다.'
+        };
+      }
+
+      const { password, ...memberWithoutPassword } = member;
+      void password;
+
+      return {
+        success: true,
+        data: memberWithoutPassword,
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {
+        return {
+          success: false,
+          data: null,
+          message: error.message
+        };
+      }
+
       return {
         success: false,
         data: null,
-        message: '회원을 찾을 수 없습니다.'
+        message: '회원 정보를 불러오는데 실패했습니다.'
       };
     }
-
-    return {
-      success: true,
-      data: member
-    };
   }
 
   // 회원 정보 수정
-  async updateMemberInfo(data: UpdateMemberRequest): Promise<MemberResponse> {
+  async updateMemberInfo(data: UpdateMemberRequest, token: string): Promise<MemberResponse> {
     try {
-      const member = await this.memberRepository.updateMember(data);
-      
+      const payload = await this.validateMemberToken(token, data.idx);
+      const member = await this.memberRepository.updateMemberByIdxAndId(data.idx, payload.id, {
+        nickname: data.nickname,
+        job: data.job,
+        jobInfo: data.jobInfo,
+        myBadge: data.myBadge,
+      });
+
+      if (!member) {
+        return {
+          success: false,
+          data: null,
+          message: '회원 정보를 찾을 수 없거나 수정 권한이 없습니다.'
+        };
+      }
+
+      const { password, ...memberWithoutPassword } = member;
+      void password;
+
       return {
         success: true,
-        data: member,
+        data: memberWithoutPassword,
         message: '회원 정보가 수정되었습니다.'
       };
     } catch (error) {
+      if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {
+        return {
+          success: false,
+          data: null,
+          message: error.message
+        };
+      }
+
       console.error('회원 정보 수정 실패:', error);
       return {
         success: false,
@@ -117,4 +184,3 @@ export class MemberService {
     }
   }
 }
-
