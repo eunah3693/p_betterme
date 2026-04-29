@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { TodoService } from '@/services/todoService';
+import { requireAuthUserFromCookies } from '@/lib/auth';
+import { UnauthorizedError } from '@/lib/errors';
 
 const todoService = new TodoService();
 
@@ -8,6 +10,7 @@ export async function PUT(
   { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
+    const user = await requireAuthUserFromCookies();
     const { idx } = await params;
     const body = await req.json();
 
@@ -34,7 +37,14 @@ export async function PUT(
     if (startDate) updateData.startDate = startDate;
     if (finishDate) updateData.finishDate = finishDate;
 
-    const result = await todoService.updateTodo(Number(idx), updateData);
+    const result = await todoService.updateTodo(Number(idx), user.id, updateData);
+
+    if (!result) {
+      return NextResponse.json(
+        { success: false, error: 'Todo를 찾을 수 없거나 수정 권한이 없습니다.' },
+        { status: 403 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -42,6 +52,13 @@ export async function PUT(
       data: result,
     });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 401 }
+      );
+    }
+
     console.error('Update todo error:', error);
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다.' },
@@ -55,6 +72,7 @@ export async function DELETE(
   { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
+    const user = await requireAuthUserFromCookies();
     const { idx } = await params;
 
     if (!idx) {
@@ -64,7 +82,14 @@ export async function DELETE(
       );
     }
 
-    await todoService.deleteTodo(Number(idx));
+    const deleted = await todoService.deleteTodo(Number(idx), user.id);
+
+    if (!deleted) {
+      return NextResponse.json(
+        { success: false, error: 'Todo를 찾을 수 없거나 삭제 권한이 없습니다.' },
+        { status: 403 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -72,6 +97,13 @@ export async function DELETE(
       data: null,
     });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 401 }
+      );
+    }
+
     console.error('Delete todo error:', error);
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다.' },

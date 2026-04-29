@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { MemberItem, SignupRequest, LoginRequest, UpdateMemberRequest } from '@/interfaces/member';
+import { MemberItem, SignupRequest, UpdateMemberRequest } from '@/interfaces/member';
 import { Prisma } from '@prisma/client';
 
 export class MemberRepository {
@@ -19,14 +19,6 @@ export class MemberRepository {
   async getMemberById(id: string): Promise<MemberItem | null> {
     const member = await prisma.member.findFirst({
       where: { id }
-    });
-    return member ? this.changeToMemberItem(member) : null;
-  }
-
-  // idx로 회원 조회
-  async getMemberByIdx(idx: number): Promise<MemberItem | null> {
-    const member = await prisma.member.findUnique({
-      where: { idx }
     });
     return member ? this.changeToMemberItem(member) : null;
   }
@@ -62,26 +54,6 @@ export class MemberRepository {
     return this.changeToMemberItem(member);
   }
 
-  // 로그인 (ID와 비밀번호로 조회)
-  async login(data: LoginRequest): Promise<MemberItem | null> {
-    const member = await prisma.member.findFirst({
-      where: {
-        id: data.id,
-        password: data.password
-      }
-    });
-    return member ? this.changeToMemberItem(member) : null;
-  }
-
-  // 회원 정보 수정
-  async updateMember(data: UpdateMemberRequest): Promise<MemberItem> {
-    const member = await prisma.member.update({
-      where: { idx: data.idx },
-      data
-    });
-    return this.changeToMemberItem(member);
-  }
-
   // 본인 회원 정보 수정
   async updateMemberByIdxAndId(
     idx: number,
@@ -104,10 +76,11 @@ export class MemberRepository {
     return this.changeToMemberItem(updatedMember);
   }
 
-  // 회원 삭제
-  async deleteMember(idx: number): Promise<void> {
-    await prisma.member.delete({
-      where: { idx }
+  async updatePasswordByIdx(idx: number, password: string): Promise<void> {
+    await prisma.member.update({
+      where: { idx },
+      data: { password }
     });
   }
+
 }

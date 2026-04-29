@@ -47,7 +47,7 @@ model Diary {
 model Member {
   idx      Int    @id @default(autoincrement())
   id       String @default("아이디") @db.VarChar(45)
-  password String @default("비밀번호") @db.VarChar(45)
+  password String @default("비밀번호") @db.VarChar(255)
   nickname String @default("닉네임") @db.VarChar(45)
   job      String @default("직업") @db.VarChar(45)
   jobInfo  String @default("직업소개") @map("job_info") @db.VarChar(255)

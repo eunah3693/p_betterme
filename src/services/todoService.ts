@@ -37,17 +37,12 @@ export class TodoService {
   }
   
   // Todo 수정
-  async updateTodo(idx: number, data: UpdateTodoRequest): Promise<TodoItem> {
-    return await this.todoRepository.updateTodo(idx, data);
+  async updateTodo(idx: number, memberId: string, data: UpdateTodoRequest): Promise<TodoItem | null> {
+    return await this.todoRepository.updateTodoByIdxAndMemberId(idx, memberId, data);
   }
   
   // Todo 삭제
-  async deleteTodo(idx: number): Promise<void> {
-    await this.todoRepository.deleteTodo(idx);
-  }
-  
-  // Todo 완료 상태 토글
-  async toggleTodoFinish(idx: number): Promise<TodoItem> {
-    return await this.todoRepository.toggleTodoFinish(idx);
+  async deleteTodo(idx: number, memberId: string): Promise<boolean> {
+    return await this.todoRepository.deleteTodoByIdxAndMemberId(idx, memberId);
   }
 }

@@ -2,6 +2,7 @@ import { MemberRepository } from '@/repositories/memberRepository';
 import { MemberResponse, CheckIdResponse, SignupRequest, LoginRequest, UpdateMemberRequest, LoginResponse } from '@/interfaces/member';
 import { generateToken, verifyToken } from '@/lib/jwt';
 import { ForbiddenError, UnauthorizedError } from '@/lib/errors';
+import { hashPassword, verifyPassword } from '@/lib/password';
 
 export class MemberService {
   private memberRepository: MemberRepository;
@@ -47,7 +48,7 @@ export class MemberService {
     // 회원가입
     const member = await this.memberRepository.createMember({
       id: data.id,
-      password: data.password,
+      password: await hashPassword(data.password),
       nickname: data.nickname,
       job: data.job,
       jobInfo: data.jobInfo,
@@ -65,10 +66,26 @@ export class MemberService {
 
   // 로그인
   async login(data: LoginRequest): Promise<LoginResponse> {
-    const member = await this.memberRepository.login(data);
-    
+    const member = await this.memberRepository.getMemberById(data.id);
+
     if (!member) {
       throw new UnauthorizedError('아이디 또는 비밀번호가 일치하지 않습니다.');
+    }
+
+    const isLegacyPlaintextPassword = !member.password.includes(':');
+    const isValidPassword = isLegacyPlaintextPassword
+      ? member.password === data.password
+      : await verifyPassword(data.password, member.password);
+
+    if (!isValidPassword) {
+      throw new UnauthorizedError('아이디 또는 비밀번호가 일치하지 않습니다.');
+    }
+
+    if (isLegacyPlaintextPassword) {
+      await this.memberRepository.updatePasswordByIdx(
+        member.idx,
+        await hashPassword(data.password)
+      );
     }
 
     // JWT 토큰 생성

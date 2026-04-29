@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BlogService } from '@/services/blogService';
+import { requireAuthUserFromCookies } from '@/lib/auth';
 import { verifyToken } from '@/lib/jwt';
 import { cookies } from 'next/headers';
+import { UnauthorizedError } from '@/lib/errors';
 
 const blogService = new BlogService();
 
@@ -55,6 +57,7 @@ export async function PUT(
   { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
+    const user = await requireAuthUserFromCookies();
     const { idx } = await params;
     const body = await req.json();
 
@@ -65,37 +68,34 @@ export async function PUT(
       );
     }
 
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token?.value) {
-      return NextResponse.json(
-        { success: false, error: '인증이 필요합니다.' },
-        { status: 401 }
-      );
-    }
-
-    const user = verifyToken(token.value);
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: '유효하지 않은 토큰입니다.' },
-        { status: 401 }
-      );
-    }
-
     const updateData = {
       ...body,
-      idx: Number(idx) 
+      idx: Number(idx),
+      memberId: user.id
     };
 
     const result = await blogService.updateBlog(updateData);
 
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.message || '블로그 수정에 실패했습니다.' },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json({
       success: true,
-      message: '블로그가 수정되었습니다.',
-      data: result,
+      message: result.message,
+      data: result.data,
     });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 401 }
+      );
+    }
+
     console.error('Update blog error:', error);
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다.' },
@@ -109,6 +109,7 @@ export async function DELETE(
   { params }: { params: Promise<{ idx: string }> }
 ) {
   try {
+    const user = await requireAuthUserFromCookies();
     const { idx } = await params;
 
     if (!idx) {
@@ -118,14 +119,28 @@ export async function DELETE(
       );
     }
 
-    await blogService.deleteBlog(Number(idx));
+    const result = await blogService.deleteBlog(Number(idx), user.id);
+
+    if (!result.success) {
+      return NextResponse.json(
+        { success: false, error: result.message || '블로그 삭제에 실패했습니다.' },
+        { status: 403 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
-      message: '블로그가 삭제되었습니다.',
+      message: result.message,
       data: null,
     });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 401 }
+      );
+    }
+
     console.error('Delete blog error:', error);
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다.' },

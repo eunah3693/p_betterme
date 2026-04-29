@@ -89,9 +89,20 @@ export class TodoRepository {
     return this.changeToTodoItem(todo);
   }
 
-  // Todo 수정
-  async updateTodo(idx: number, data: UpdateTodoRequest): Promise<TodoItem> {
-    const todo = await prisma.todo.update({
+  async updateTodoByIdxAndMemberId(
+    idx: number,
+    memberId: string,
+    data: UpdateTodoRequest
+  ): Promise<TodoItem | null> {
+    const todo = await prisma.todo.findFirst({
+      where: { idx, memberId }
+    });
+
+    if (!todo) {
+      return null;
+    }
+
+    const updatedTodo = await prisma.todo.update({
       where: { idx },
       data: {
         ...data,
@@ -100,33 +111,23 @@ export class TodoRepository {
       }
     });
 
-    return this.changeToTodoItem(todo);
+    return this.changeToTodoItem(updatedTodo);
   }
 
-  // Todo 삭제
-  async deleteTodo(idx: number): Promise<void> {
-    await prisma.todo.delete({
-      where: { idx }
-    });
-  }
-
-  // Todo 완료 상태 토글
-  async toggleTodoFinish(idx: number): Promise<TodoItem> {
-    const todo = await prisma.todo.findUnique({
-      where: { idx }
+  async deleteTodoByIdxAndMemberId(idx: number, memberId: string): Promise<boolean> {
+    const todo = await prisma.todo.findFirst({
+      where: { idx, memberId }
     });
 
     if (!todo) {
-      throw new Error('Todo not found');
+      return false;
     }
 
-    const updatedTodo = await prisma.todo.update({
-      where: { idx },
-      data: {
-        finish: todo.finish === '1' ? '0' : '1'
-      }
+    await prisma.todo.delete({
+      where: { idx }
     });
 
-    return this.changeToTodoItem(updatedTodo);
+    return true;
   }
+
 }

@@ -162,13 +162,59 @@ export class BlogService {
   }
   
   // 블로그 수정
-  async updateBlog(data: UpdateBlogRequest): Promise<BlogItem> {
-    return await this.blogRepository.updateBlog(data);
+  async updateBlog(data: UpdateBlogRequest & { memberId: string }): Promise<BlogResponse> {
+    try {
+      const blog = await this.blogRepository.updateBlogByIdxAndMemberId(data);
+
+      if (!blog) {
+        return {
+          success: false,
+          data: [],
+          message: '블로그를 찾을 수 없거나 수정 권한이 없습니다.'
+        };
+      }
+
+      return {
+        success: true,
+        data: blog,
+        message: '블로그가 수정되었습니다.'
+      };
+    } catch (error) {
+      console.error('블로그 수정 실패:', error);
+      return {
+        success: false,
+        data: [],
+        message: '블로그 수정 중 오류가 발생했습니다.'
+      };
+    }
   }
   
   // 블로그 삭제
-  async deleteBlog(idx: number): Promise<void> {
-    await this.blogRepository.deleteBlog(idx);
+  async deleteBlog(idx: number, memberId: string): Promise<BlogResponse> {
+    try {
+      const deleted = await this.blogRepository.deleteBlogByIdxAndMemberId(idx, memberId);
+
+      if (!deleted) {
+        return {
+          success: false,
+          data: [],
+          message: '블로그를 찾을 수 없거나 삭제 권한이 없습니다.'
+        };
+      }
+
+      return {
+        success: true,
+        data: [],
+        message: '블로그가 삭제되었습니다.'
+      };
+    } catch (error) {
+      console.error('블로그 삭제 실패:', error);
+      return {
+        success: false,
+        data: [],
+        message: '블로그 삭제 중 오류가 발생했습니다.'
+      };
+    }
   }
 
   // ========== 블로그 카테고리 관련 서비스 ==========
@@ -210,10 +256,18 @@ export class BlogService {
     }
   }
 
-  // 카테고리 수정
-  async updateCategory(data: UpdateBlogCategoryRequest): Promise<BlogCategoryResponse> {
+  async updateCategoryByMemberId(memberId: string, data: UpdateBlogCategoryRequest): Promise<BlogCategoryResponse> {
     try {
-      const category = await this.blogRepository.updateCategory(data);
+      const category = await this.blogRepository.updateCategoryByIdxAndMemberId(memberId, data);
+
+      if (!category) {
+        return {
+          success: false,
+          data: [],
+          message: '카테고리를 찾을 수 없거나 수정 권한이 없습니다.'
+        };
+      }
+
       return {
         success: true,
         data: category,
@@ -230,9 +284,18 @@ export class BlogService {
   }
 
   // 카테고리 삭제
-  async deleteCategory(idx: number): Promise<BlogCategoryResponse> {
+  async deleteCategoryByMemberId(idx: number, memberId: string): Promise<BlogCategoryResponse> {
     try {
-      await this.blogRepository.deleteCategory(idx);
+      const deleted = await this.blogRepository.deleteCategoryByIdxAndMemberId(idx, memberId);
+
+      if (!deleted) {
+        return {
+          success: false,
+          data: [],
+          message: '카테고리를 찾을 수 없거나 삭제 권한이 없습니다.'
+        };
+      }
+
       return {
         success: true,
         data: [],

@@ -249,9 +249,16 @@ export class BlogRepository {
     return this.changeToBlogItem(blog);
   }
 
-  // 블로그 수정
-  async updateBlog(data: UpdateBlogRequest): Promise<BlogItem> {
-    const blog = await prisma.blog.update({
+  async updateBlogByIdxAndMemberId(data: UpdateBlogRequest & { memberId: string }): Promise<BlogItem | null> {
+    const blog = await prisma.blog.findFirst({
+      where: { idx: data.idx, memberId: data.memberId }
+    });
+
+    if (!blog) {
+      return null;
+    }
+
+    const updatedBlog = await prisma.blog.update({
       where: { idx: data.idx },
       data: {
         subject: data.subject,
@@ -260,14 +267,23 @@ export class BlogRepository {
       }
     });
 
-    return this.changeToBlogItem(blog);
+    return this.changeToBlogItem(updatedBlog);
   }
 
-  // 블로그 삭제
-  async deleteBlog(idx: number): Promise<void> {
+  async deleteBlogByIdxAndMemberId(idx: number, memberId: string): Promise<boolean> {
+    const blog = await prisma.blog.findFirst({
+      where: { idx, memberId }
+    });
+
+    if (!blog) {
+      return false;
+    }
+
     await prisma.blog.delete({
       where: { idx }
     });
+
+    return true;
   }
 
 
@@ -306,9 +322,19 @@ export class BlogRepository {
     return this.changeToBlogCategoryItem(category);
   }
 
-  // 카테고리 수정
-  async updateCategory(data: UpdateBlogCategoryRequest): Promise<BlogCategoryItem> {
-    const category = await prisma.blogCategory.update({
+  async updateCategoryByIdxAndMemberId(
+    memberId: string,
+    data: UpdateBlogCategoryRequest
+  ): Promise<BlogCategoryItem | null> {
+    const category = await prisma.blogCategory.findFirst({
+      where: { idx: data.idx, memberId }
+    });
+
+    if (!category) {
+      return null;
+    }
+
+    const updatedCategory = await prisma.blogCategory.update({
       where: { idx: data.idx },
       data: {
         categoryName: data.categoryName,
@@ -316,13 +342,22 @@ export class BlogRepository {
       }
     });
 
-    return this.changeToBlogCategoryItem(category);
+    return this.changeToBlogCategoryItem(updatedCategory);
   }
 
-  // 카테고리 삭제
-  async deleteCategory(idx: number): Promise<void> {
+  async deleteCategoryByIdxAndMemberId(idx: number, memberId: string): Promise<boolean> {
+    const category = await prisma.blogCategory.findFirst({
+      where: { idx, memberId }
+    });
+
+    if (!category) {
+      return false;
+    }
+
     await prisma.blogCategory.delete({
       where: { idx }
     });
+
+    return true;
   }
 }

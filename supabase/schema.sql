@@ -9,7 +9,7 @@
 CREATE TABLE IF NOT EXISTS member (
   idx         SERIAL PRIMARY KEY,
   id          VARCHAR(45) NOT NULL DEFAULT '아이디',
-  password    VARCHAR(45) NOT NULL DEFAULT '비밀번호',
+  password    VARCHAR(255) NOT NULL DEFAULT '비밀번호',
   nickname    VARCHAR(45) NOT NULL DEFAULT '닉네임',
   job         VARCHAR(45) NOT NULL DEFAULT '직업',
   job_info    VARCHAR(255) NOT NULL DEFAULT '직업소개',

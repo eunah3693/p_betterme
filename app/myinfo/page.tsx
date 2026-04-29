@@ -41,7 +41,6 @@ export default function MyInfoPage() {
     enabled: !!user?.idx,
   });
 
-  console.log(user);
 
   // React Hook Form 설정
   const {

@@ -1,7 +1,7 @@
-'use server';
-
 import { GetServerSidePropsContext } from 'next';
+import { cookies } from 'next/headers';
 import { verifyToken, JwtPayload } from '@/lib/jwt';
+import { UnauthorizedError } from '@/lib/errors';
 
 // 서버에서 헤어 쿠키가져오기기
 export const getCookieFromContext = (context: GetServerSidePropsContext, name: string): string | null => {
@@ -32,6 +32,23 @@ export const requireAuth = (context: GetServerSidePropsContext): JwtPayload | nu
   return payload;
 };
 
+// App Router에서 쿠키 기반 인증 사용자 조회
+export const requireAuthUserFromCookies = async (): Promise<JwtPayload> => {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token');
+
+  if (!token?.value) {
+    throw new UnauthorizedError('인증이 필요합니다.');
+  }
+
+  const payload = verifyToken(token.value);
+  if (!payload) {
+    throw new UnauthorizedError('유효하지 않은 토큰입니다.');
+  }
+
+  return payload;
+};
+
 // 인증실패시 로그인페이지로
 export const redirectToLogin = () => ({
   redirect: {
@@ -47,4 +64,3 @@ export const redirectToHome = () => ({
     permanent: false,
   },
 });
-
