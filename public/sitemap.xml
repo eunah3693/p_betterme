@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-
+    <url>
+        <loc>https://www.better-me.site</loc>
+    </url>
+    <url>
+        <loc>https://www.better-me.site/blog</loc>
+    </url>
+    <url>
+        <loc>https://www.better-me.site/calendar</loc>
+    </url>
+    <url>
+        <loc>https://www.better-me.site/diary</loc>
+    </url>
 </urlset>

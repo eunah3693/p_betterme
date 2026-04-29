@@ -12,6 +12,7 @@ const notoSansKR = Noto_Sans_KR({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.better-me.site'),
   title: 'Better Me',
   description: 'Better Me - 자기개발 사이트',
   icons: {
@@ -21,9 +22,21 @@ export const metadata: Metadata = {
       { url: '/assets/favicon.png', sizes: '192x192', type: 'image/png' },
     ],
   },
+  openGraph: {
+    title: 'Better Me',
+    description: '나를 발전시키는 자기개발 서비스',
+    url: 'https://www.better-me.site',
+    siteName: 'Better Me',
+    locale: 'ko_KR',
+    type: 'website',
+  },
+  verification: {
+    google:
+      'google-site-verification=_NFGyCLXNUPZT1BNPB_Bz7Ag7PLM9urKHDsOdlZ2xl4',
+  },
   other: {
     'msapplication-TileColor': '#ffffff',
-    'msapplication-TileImage': '/ms-icon-144x144.png',
+    'msapplication-TileImage': '/assets/favicon.png',
   },
 };
 
