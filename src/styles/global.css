@@ -84,7 +84,6 @@
 
 .tiptap p {
   line-height: 1.8;
-  margin-bottom: 1rem;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
@@ -141,13 +140,13 @@
 }
 
 .tiptap ul {
-  list-style-type: decimal;
+  list-style-type: disc;
   padding-left: 1.5rem;
   margin: 1rem 0;
 }
 
 .tiptap ol {
-  list-style-type: disc;
+  list-style-type: decimal;
   padding-left: 1.5rem;
   margin: 1rem 0;
 }
@@ -326,5 +325,4 @@
     }
     
   }
-
 

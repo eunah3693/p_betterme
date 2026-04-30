@@ -10,8 +10,18 @@ interface CardProps {
 }
 
 function Card({ data, className, url }: CardProps) {
+  const decodeHtmlEntities = (value: string) => {
+    return value
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;|&apos;/g, "'")
+      .replace(/&amp;/g, '&');
+  };
+
   const stripHtml = (html: string) => {
-    return html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim();
+    return decodeHtmlEntities(html).replace(/<[^>]*>/g, '').trim();
   };
 
   const getTruncatedContent = (content: string) => {
