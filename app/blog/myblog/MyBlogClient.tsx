@@ -18,12 +18,11 @@ export default function MyBlogClient() {
   const category = searchParams.get('category');
   const loaderRef = useRef<HTMLDivElement | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   // URL에서 category 파라미터가 있으면 초기 선택 상태 설정
   useEffect(() => {
-    if (category) {
-      setSelectedCategory(Number(category));
-    }
+    setSelectedCategory(category ? Number(category) : null);
   }, [category]);
 
   // 카테고리 목록 조회
@@ -66,6 +65,12 @@ export default function MyBlogClient() {
     gcTime: 1000 * 60 * 10,
     retry: 2,
   });
+
+  useEffect(() => {
+    if (blogListData) {
+      setIsCategoryOpen(false);
+    }
+  }, [blogListData]);
 
   // 무한스크롤 감지
   useEffect(() => {
@@ -142,8 +147,10 @@ export default function MyBlogClient() {
               {/* 카테고리 사이드바 */}
               <CategoryList
                 categories={categories}
-                id={id||''}
+                id={id || ''}
                 selectedCategory={selectedCategory}
+                isOpen={isCategoryOpen}
+                onOpenChange={setIsCategoryOpen}
               />
               {/* 블로그 목록 */}
               <div className="w-full md:w-[70%]">

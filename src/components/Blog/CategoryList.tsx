@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useEffect, useId, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { BlogCategoryItem } from '@/interfaces/blog';
@@ -8,16 +8,19 @@ import hanburgerIcon from '@assets/hamburger.svg';
 
 interface CategoryListProps {
   categories: BlogCategoryItem[];
-  id:string;
+  id: string;
   selectedCategory: number | null;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
 }
 
 const CategoryList: React.FC<CategoryListProps> = ({
   categories,
   id,
   selectedCategory,
+  isOpen,
+  onOpenChange,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const panelId = useId();
 
@@ -26,14 +29,14 @@ const CategoryList: React.FC<CategoryListProps> = ({
     const mediaQuery = window.matchMedia('(min-width: 768px)');
     const handleChange = () => {
       if (mediaQuery.matches) {
-        setIsOpen(false);
+        onOpenChange(false);
       }
     };
     mediaQuery.addEventListener('change', handleChange);
     return () => {
       mediaQuery.removeEventListener('change', handleChange);
     };
-  }, []);
+  }, [onOpenChange]);
 
   // 스크롤 이벤트 감지
   useEffect(() => {
@@ -68,7 +71,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
           type="button"
           aria-expanded={isOpen}
           aria-controls={panelId}
-          onClick={() => setIsOpen((v) => !v)}
+          onClick={() => onOpenChange(!isOpen)}
           className={`fixed ${isScrolled ? 'top-[10px]' : 'top-20'} right-4 z-0 flex items-center gap-2 rounded-full bg-white border border-main border-[2px] text-main shadow-lg px-4 py-2`}
         >
           {/* 햄버거 아이콘 */}
@@ -83,7 +86,7 @@ const CategoryList: React.FC<CategoryListProps> = ({
             <button
               type="button"
               aria-label="카테고리 닫기"
-              onClick={() => setIsOpen(false)}
+              onClick={() => onOpenChange(false)}
               className="fixed inset-0 z-40 bg-black/20"
             />
             <div
@@ -93,7 +96,6 @@ const CategoryList: React.FC<CategoryListProps> = ({
               <Link
                 href={'/blog/myblog?id=' + id}
                 className={getItemClass(selectedCategory === null)}
-                onClick={() => setIsOpen(false)}
               >
                 전체 보기
               </Link>
@@ -102,7 +104,6 @@ const CategoryList: React.FC<CategoryListProps> = ({
                   href={'/blog/myblog?id=' + id + '&category=' + category.idx}
                   key={category.idx}
                   className={getItemClass(selectedCategory === category.idx)}
-                  onClick={() => setIsOpen(false)}
                 >
                   {category.categoryName}
                 </Link>
