@@ -1,7 +1,9 @@
+'use client';
+
 import { cn } from '@/constants/cn';
 import { DiaryItem } from '@/interfaces/diary';
-import { useMemo } from 'react';
-import DOMPurify from 'dompurify';
+import { useEffect, useState } from 'react';
+import createDOMPurify from 'dompurify';
 
 interface BlogViewProps {
   data: DiaryItem;
@@ -10,10 +12,11 @@ interface BlogViewProps {
 function BlogView({
   data
 }: BlogViewProps) {
-  const sanitizedContent = useMemo(
-    ()=>DOMPurify.sanitize(data?.content || ''),
-    [data?.content]
-  );
+  const [sanitizedContent, setSanitizedContent] = useState('');
+
+  useEffect(() => {
+    setSanitizedContent(createDOMPurify(window).sanitize(data?.content || ''));
+  }, [data?.content]);
 
   return (
     <article className={cn('bg-white rounded-lg shadow-sm')}>
