@@ -1,20 +1,21 @@
 'use client';
 
-import React, { useEffect, useId, useState } from 'react';
+import React, { use, useEffect, useId, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { BlogCategoryItem } from '@/interfaces/blog';
 import hanburgerIcon from '@assets/hamburger.svg';
 
 interface CategoryListProps {
   categories: BlogCategoryItem[];
+  id:string;
   selectedCategory: number | null;
-  onCategoryClick: (categoryIdx: number | null) => void;
 }
 
 const CategoryList: React.FC<CategoryListProps> = ({
   categories,
+  id,
   selectedCategory,
-  onCategoryClick,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -54,15 +55,11 @@ const CategoryList: React.FC<CategoryListProps> = ({
   if (categories.length === 0) return null;
 
   const baseItemClass =
-    'w-full text-left px-4 py-2 rounded-lg mb-2 transition-colors';
+    'w-full text-left px-4 py-2 rounded-lg mb-2 transition-colors block';
 
   const getItemClass = (active: boolean) =>
     `${baseItemClass} ${active ? 'bg-main text-white font-semibold' : 'hover:bg-gray-100 text-gray-700'}`;
 
-  const handleSelect = (categoryIdx: number | null) => {
-    onCategoryClick(categoryIdx);
-    setIsOpen(false); // 선택 후 자동으로 닫기
-  };
 
   return (
     <div className="w-full md:w-[30%] md:flex-shrink-0">
@@ -93,46 +90,48 @@ const CategoryList: React.FC<CategoryListProps> = ({
               id={panelId}
               className="fixed top-32 left-4 right-4 z-50 bg-white rounded-lg shadow-md p-4 max-h-[60vh] overflow-auto"
             >
-              <button
-                type="button"
-                onClick={() => handleSelect(null)}
+              <Link
+                href={'/blog/myblog?id=' + id}
                 className={getItemClass(selectedCategory === null)}
+                onClick={() => setIsOpen(false)}
               >
                 전체 보기
-              </button>
-
+              </Link>
               {categories.map((category: BlogCategoryItem) => (
-                <button
-                  type="button"
+                <Link
+                  href={'/blog/myblog?id=' + id + '&category=' + category.idx}
                   key={category.idx}
-                  onClick={() => handleSelect(category.idx)}
                   className={getItemClass(selectedCategory === category.idx)}
+                  onClick={() => setIsOpen(false)}
                 >
                   {category.categoryName}
-                </button>
+                </Link>
               ))}
             </div>
           </>
         )}
       </div>
       <div className="hidden md:block md:sticky md:top-7 bg-white rounded-lg shadow-md p-4">
-        <button
-          type="button"
-          onClick={() => onCategoryClick(null)}
+        <Link
+          href={'/blog/myblog?id=' + id}
           className={getItemClass(selectedCategory === null)}
         >
           전체 보기
-        </button>
+        </Link>
 
         {categories.map((category: BlogCategoryItem) => (
-          <button
-            type="button"
+          <Link
+            href={
+              '/blog/myblog?id=' +
+              category.memberId +
+              '&category=' +
+              category.idx
+            }
             key={category.idx}
-            onClick={() => onCategoryClick(category.idx)}
             className={getItemClass(selectedCategory === category.idx)}
           >
             {category.categoryName}
-          </button>
+          </Link>
         ))}
       </div>
     </div>

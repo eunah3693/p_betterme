@@ -100,10 +100,6 @@ export default function MyBlogClient() {
         [] as (typeof blogListData.pages)[number]['data'],
       ) || [];
 
-  const handleCategoryClick = (categoryIdx: number | null) => {
-    setSelectedCategory(categoryIdx);
-  };
-
   return (
     <>
       <LoadingOverlay isLoading={isLoading} message="블로그를 불러오는 중" />
@@ -146,8 +142,8 @@ export default function MyBlogClient() {
               {/* 카테고리 사이드바 */}
               <CategoryList
                 categories={categories}
+                id={id||''}
                 selectedCategory={selectedCategory}
-                onCategoryClick={handleCategoryClick}
               />
               {/* 블로그 목록 */}
               <div className="w-full md:w-[70%]">
