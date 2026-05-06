@@ -39,6 +39,7 @@
     "class-variance-authority": "0.7.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
+    "dompurify": "^3.4.2",
     "env-cmd": "^10.1.0",
     "framer-motion": "^12.23.25",
     "jsonwebtoken": "^9.0.3",

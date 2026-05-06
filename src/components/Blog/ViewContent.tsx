@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+import DOMPurify from 'dompurify';
 import { cn } from '@/constants/cn';
 import { DiaryItem } from '@/interfaces/diary'; 
 import { BlogItem } from '@/interfaces/blog';
@@ -10,6 +12,10 @@ interface BlogViewProps {
 function BlogView({
   data,
 }: BlogViewProps) {
+  const sanitizedContent = useMemo(
+    () => DOMPurify.sanitize(data?.content || ''),
+    [data?.content],
+  );
   
   return (
     <article className={cn('bg-white rounded-lg shadow-sm')}>
@@ -19,7 +25,7 @@ function BlogView({
         </h1>
         <hr className="my-6 border-gray-200" />
         <div className="tiptap"
-          dangerouslySetInnerHTML={{ __html: data?.content || '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
         />
       </div>
     </article>

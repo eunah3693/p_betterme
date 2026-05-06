@@ -1,14 +1,20 @@
 import { cn } from '@/constants/cn';
-import { DiaryItem } from '@/interfaces/diary'; 
-import { BlogItem } from '@/interfaces/blog';
+import { DiaryItem } from '@/interfaces/diary';
+import { useMemo } from 'react';
+import DOMPurify from 'dompurify';
 
 interface BlogViewProps {
-  data: DiaryItem | BlogItem;
+  data: DiaryItem;
 }
 
 function BlogView({
   data
 }: BlogViewProps) {
+  const sanitizedContent = useMemo(
+    ()=>DOMPurify.sanitize(data?.content || ''),
+    [data?.content]
+  );
+
   return (
     <article className={cn('bg-white rounded-lg shadow-sm')}>
       <div className="p-6 md:p-8">
@@ -17,7 +23,8 @@ function BlogView({
           {data?.date && (
             <div className="mt-4 text-center">
               <span className="text-sm text-gray-500 font-normal">
-                작성일: {new Date(data?.date).toLocaleDateString('ko-KR', {
+                작성일:{' '}
+                {new Date(data?.date).toLocaleDateString('ko-KR', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
@@ -27,9 +34,9 @@ function BlogView({
           )}
         </h1>
         <hr className="my-6 border-gray-200" />
-        <div 
+        <div
           className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap break-words"
-          dangerouslySetInnerHTML={{ __html: data?.content || '' }}
+          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
         />
       </div>
     </article>

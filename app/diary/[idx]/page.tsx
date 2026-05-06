@@ -85,7 +85,7 @@ export default function DiaryDetailPage({
       <LoadingOverlay isLoading={isLoading} message="일기를 불러오는 중" />
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
-          {error || !diaryData ? (
+          {isLoading ? null : error || !diaryData ? (
             <ErrorMessage onRetry={() => refetch()} />
           ) : (
             <>
