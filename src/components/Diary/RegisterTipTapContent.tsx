@@ -124,10 +124,10 @@ function BlogRegister({
           <label className="block text-sm font-bold text-gray-700 mb-2">
             내용 <span className="text-red-500">*</span>
           </label>
-          <div className="bg-white border border-main rounded-md overflow-hidden">
+          <div className="bg-white border border-main rounded-md overflow-visible">
             {/* TipTap Toolbar */}
             {editor && (
-              <div className="border-b border-gray-300 p-2 flex flex-wrap gap-1 bg-gray-50">
+              <div className="sticky top-0 z-20 border-b border-gray-300 rounded-t-md p-2 flex flex-wrap gap-1 bg-gray-50">
                 {/* 헤딩 */}
                 <select
                   onChange={(e) => {
