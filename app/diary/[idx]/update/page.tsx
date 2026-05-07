@@ -2,9 +2,8 @@
 import React, { use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import BlogRegister from '@/components/Diary/RegisterTipTapContent';
+import BlogRegister, { type DiaryFormData } from '@/components/Diary/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
-import type { DiaryFormData } from '@/components/Diary/RegisterContent';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
 import { getDiaryByIdx, updateDiary } from '@/functions/apis/diary';

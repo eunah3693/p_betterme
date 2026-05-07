@@ -2,9 +2,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import BlogRegister from '@/components/Diary/RegisterTipTapContent';
+import BlogRegister, { type DiaryFormData } from '@/components/Diary/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
-import type { DiaryFormData } from '@/components/Diary/RegisterContent';
 import { createDiary } from '@/functions/apis/diary';
 import { useModal } from '@/functions/hooks/useModal';
 import { useUserStore } from '@/store/user';
