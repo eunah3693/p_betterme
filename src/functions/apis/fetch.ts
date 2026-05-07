@@ -1,9 +1,18 @@
-import { useWebUtilStore } from '@/store/webUtil';
-import { paths } from '@/constants/paths';
-
 interface FetchOptions extends RequestInit {
   params?: object;
   noCache?: boolean;
+}
+
+export class ApiError extends Error {
+  statusCode: number;
+  data: unknown;
+
+  constructor(message: string, statusCode: number, data?: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.statusCode = statusCode;
+    this.data = data;
+  }
 }
 
 const getBaseURL = () =>
@@ -57,60 +66,32 @@ async function request<T>(
     ...(noCache && { cache: 'no-store' }),
   };
 
-  try {
-    const response = await fetch(url, config);
-    const contentType = response.headers.get('content-type') ?? '';
-    const isJsonResponse = contentType.includes('application/json');
-    const responseData = isJsonResponse
-      ? await response.json().catch(() => ({}))
-      : await response.text().catch(() => '');
+  const response = await fetch(url, config);
+  const contentType = response.headers.get('content-type') ?? '';
+  const isJsonResponse = contentType.includes('application/json');
+  const responseData = isJsonResponse
+    ? await response.json().catch(() => ({}))
+    : await response.text().catch(() => '');
 
-    if (!response.ok) {
-      const errorData =
-        responseData && typeof responseData === 'object'
-          ? responseData
-          : {};
-      const statusCode = 'statusCode' in errorData
-        ? Number(errorData.statusCode)
-        : response.status;
-      
-      if (typeof window !== 'undefined') {
-        const { setSnackBar } = useWebUtilStore.getState();
+  if (!response.ok) {
+    const errorData =
+      responseData && typeof responseData === 'object'
+        ? responseData as Record<string, unknown>
+        : {};
+    const statusCode = 'statusCode' in errorData
+      ? Number(errorData.statusCode)
+      : response.status;
+    const errorMessage = errorData.error ?? errorData.message;
+    const message =
+      typeof errorMessage === 'string'
+        ? errorMessage
+        : (typeof responseData === 'string' && responseData) ||
+          `HTTP Error: ${response.status}`;
 
-        if (
-          statusCode !== 404 &&
-          statusCode !== 400 &&
-          statusCode !== 500
-        ) {
-          setSnackBar({
-            message:
-              errorData.translate ||
-              errorData.error ||
-              errorData.message ||
-              '오류가 발생했습니다',
-            icon: 'error',
-          });
-        }
-
-        if (statusCode === 403) {
-          localStorage.removeItem('session');
-          window.location.href = paths.LOGIN;
-        }
-      }
-
-      throw new Error(
-        errorData.error ||
-        errorData.message ||
-        (typeof responseData === 'string' && responseData) ||
-        `HTTP Error: ${response.status}`
-      );
-    }
-
-    return responseData as T;
-  } catch (error) {
-    console.error('API 요청 실패:', error);
-    throw error;
+    throw new ApiError(message, statusCode, responseData);
   }
+
+  return responseData as T;
 }
 
 export const api = {
@@ -120,14 +101,14 @@ export const api = {
   post: <T>(endpoint: string, data?: unknown, noCache?: boolean) =>
     request<T>(endpoint, { 
       method: 'POST', 
-      body: data ? JSON.stringify(data) : undefined,
+      body: data !== undefined ? JSON.stringify(data) : undefined,
       noCache,
     }),
 
   put: <T>(endpoint: string, data?: unknown) =>
     request<T>(endpoint, { 
       method: 'PUT', 
-      body: data ? JSON.stringify(data) : undefined,
+      body: data !== undefined ? JSON.stringify(data) : undefined,
     }),
 
   delete: <T>(endpoint: string, params?: object) =>
