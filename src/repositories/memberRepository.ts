@@ -58,7 +58,7 @@ export class MemberRepository {
   async updateMemberByIdxAndId(
     idx: number,
     id: string,
-    data: Omit<UpdateMemberRequest, 'idx'>
+    data: Omit<UpdateMemberRequest, 'idx' | 'csrfToken'>
   ): Promise<MemberItem | null> {
     const member = await prisma.member.findFirst({
       where: { idx, id }

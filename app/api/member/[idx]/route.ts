@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { MemberService } from '@/services/memberService';
+import { timingSafeEqual } from 'crypto';
 
 const memberService = new MemberService();
+const CSRF_COOKIE_NAME = 'csrfToken';
+
+const isSameToken = (tokenA?: string, tokenB?: string) => {
+  if (!tokenA || !tokenB) {
+    return false;
+  }
+
+  const bufferA = Buffer.from(tokenA);
+  const bufferB = Buffer.from(tokenB);
+
+  return bufferA.length === bufferB.length && timingSafeEqual(bufferA, bufferB);
+};
 
 export async function GET(
   req: NextRequest,
@@ -36,11 +49,24 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: result.message,
       data: result.data,
+      csrfToken: result.csrfToken,
     });
+
+    if (result.csrfToken) {
+      response.cookies.set(CSRF_COOKIE_NAME, result.csrfToken, {
+        httpOnly: true,
+        path: '/',
+        maxAge: 60 * 30,
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production',
+      });
+    }
+
+    return response;
   } catch (error) {
     console.error('Get member error:', error);
     return NextResponse.json(
@@ -59,6 +85,7 @@ export async function PUT(
     const body = await req.json();
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
+    const csrfToken = cookieStore.get(CSRF_COOKIE_NAME);
 
     if (!idx) {
       return NextResponse.json(
@@ -67,14 +94,30 @@ export async function PUT(
       );
     }
 
+    const requestCsrfToken =
+      typeof body.csrfToken === 'string'
+        ? body.csrfToken
+        : req.headers.get('x-csrf-token') || undefined;
+
+    if (!isSameToken(requestCsrfToken, csrfToken?.value)) {
+      return NextResponse.json(
+        { success: false, error: '유효하지 않은 CSRF 토큰입니다.' },
+        { status: 403 }
+      );
+    }
+
     const { job, jobInfo, myBadge } = body;
 
-    const result = await memberService.updateMemberInfo({ 
-      idx: Number(idx), 
-      job, 
-      jobInfo, 
-      myBadge 
-    }, token?.value || '');
+    const result = await memberService.updateMemberInfo(
+      {
+        idx: Number(idx),
+        job,
+        jobInfo,
+        myBadge,
+        csrfToken: requestCsrfToken,
+      },
+      token?.value || '',
+    );
 
     if (!result.success) {
       const status =

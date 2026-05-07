@@ -36,6 +36,7 @@ export interface GetMemberInfoRequest {
 export interface MemberResponse {
   success: boolean;
   data: UserData | null;
+  csrfToken?: string;
   message?: string;
 }
 
@@ -53,6 +54,7 @@ export interface UpdateMemberRequest {
   job?: string;
   jobInfo?: string;
   myBadge?: string;
+  csrfToken?: string;
 }
 
 export interface CheckIdResponse {
@@ -60,4 +62,3 @@ export interface CheckIdResponse {
   available: boolean;
   message?: string;
 }
-

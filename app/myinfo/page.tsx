@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -32,6 +32,7 @@ type UpdateMemberFormData = z.infer<typeof updateMemberFormSchema>;
 export default function MyInfoPage() {
   const user = useUserStore((state) => state.user);
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();
 
   // 서버에서 회원 정보 조회
@@ -46,7 +47,7 @@ export default function MyInfoPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
     reset,
     setValue,
     watch,
@@ -71,32 +72,38 @@ export default function MyInfoPage() {
   }, [userInfo, reset]);
 
 
-
-  // 회원 정보 수정 제출
-  const onSubmit = async (data: UpdateMemberFormData) => {
-    try {
-      const result = await updateMemberInfo({
-        idx: userInfo?.data?.idx || 0,
-        job: data.job || '',
-        jobInfo: data.jobInfo || '',
-        myBadge: data.myBadge || '',
-      });
-
+  // 회원 정보 수정 Mutation
+  const updateMemberMutation = useMutation({
+    mutationFn: updateMemberInfo,
+    onSuccess: (result) => {
       if (result.success) {
         if (result.data) {
           useUserStore.setState({ user: result.data });
         }
-        
-        showModal('회원 정보가 수정되었습니다', 'success', () => {
+
+        showModal('회원 정보가 수정되었습니다', 'success', async () => {
+          await queryClient.invalidateQueries({ queryKey: ["myInfo", user?.idx] });
           router.push('/');
         });
       } else {
         showModal(result.message || '회원 정보 수정에 실패했습니다.', 'error');
       }
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('회원 정보 수정 실패:', error);
       showModal('회원 정보 수정에 실패했습니다.', 'error');
-    }
+    },
+  });
+
+  // 회원 정보 수정 제출
+  const onSubmit = (data: UpdateMemberFormData) => {
+    updateMemberMutation.mutate({
+      idx: userInfo?.data?.idx || 0,
+      job: data.job || '',
+      jobInfo: data.jobInfo || '',
+      myBadge: data.myBadge || '',
+      csrfToken: userInfo?.csrfToken || ''
+    });
   };
 
   // 로딩 중이면 로딩 표시
@@ -110,7 +117,7 @@ export default function MyInfoPage() {
   return (
     <>
       <LoadingOverlay 
-        isLoading={isSubmitting} 
+        isLoading={updateMemberMutation.isPending} 
         message="회원 정보 수정 중"
       />
       <ConfirmModal
@@ -212,7 +219,7 @@ export default function MyInfoPage() {
                     color="bgMain"
                     size="lg"
                     className="flex-1"
-                    disabled={isSubmitting}
+                    disabled={updateMemberMutation.isPending}
                   >
                     수정하기
                   </Button>

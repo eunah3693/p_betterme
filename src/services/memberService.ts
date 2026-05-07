@@ -3,12 +3,17 @@ import { MemberResponse, CheckIdResponse, SignupRequest, LoginRequest, UpdateMem
 import { generateToken, verifyToken } from '@/lib/jwt';
 import { ForbiddenError, UnauthorizedError } from '@/lib/errors';
 import { hashPassword, verifyPassword } from '@/lib/password';
+import { randomBytes } from 'crypto';
 
 export class MemberService {
   private memberRepository: MemberRepository;
 
   constructor() {
     this.memberRepository = new MemberRepository();
+  }
+
+  private generateCsrfToken(): string {
+    return randomBytes(32).toString('hex');
   }
 
   private async validateMemberToken(token: string, memberIdx: number) {
@@ -138,6 +143,7 @@ export class MemberService {
       return {
         success: true,
         data: memberWithoutPassword,
+        csrfToken: this.generateCsrfToken(),
       };
     } catch (error) {
       if (error instanceof UnauthorizedError || error instanceof ForbiddenError) {

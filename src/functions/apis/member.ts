@@ -48,7 +48,9 @@ export const getMemberInfo = async (params: GetMemberInfoRequest): Promise<Membe
 };
 
 // 회원 정보 수정 (PUT /api/member/:idx)
-export const updateMemberInfo = async (updateData: UpdateMemberRequest): Promise<MemberResponse> => {
+export const updateMemberInfo = async (
+  updateData: UpdateMemberRequest
+): Promise<MemberResponse> => {
   try {
     const { idx, ...body } = updateData;
     return await api.put<MemberResponse>(`${MEMBER_URL}/${idx}`, body);
