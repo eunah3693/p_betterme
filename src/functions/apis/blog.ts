@@ -37,6 +37,9 @@ export const getMyBlogs = (memberId: string, params: BlogListRequest) =>
 export const getBlogByIdx = (idx: number) => 
   api.get<BlogResponse>(`${BLOG_URL}/${idx}`);
 
+export const increaseBlogViewCount = (idx: number) =>
+  api.post<BlogResponse>(`${BLOG_URL}/${idx}/view`);
+
 export const createBlog = (blogData: CreateBlogRequest) => 
   api.post<{ success: boolean; data: BlogItem; message?: string }>(
     `${BLOG_URL}/register`,
@@ -72,4 +75,3 @@ export const updateCategory = (categoryData: {
 
 export const deleteCategory = (idx: number) =>
   api.delete<BlogCategoryResponse>(CATEGORY_URL, { idx });
-

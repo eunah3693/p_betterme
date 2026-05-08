@@ -149,6 +149,33 @@ export class BlogService {
       };
     }
   }
+
+  async incrementBlogViewCount(idx: number): Promise<BlogResponse> {
+    try {
+      const blog = await this.blogRepository.incrementBlogViewCount(idx);
+
+      if (!blog) {
+        return {
+          success: false,
+          data: [],
+          message: '블로그를 찾을 수 없습니다.'
+        };
+      }
+
+      return {
+        success: true,
+        data: blog,
+        message: '조회수가 증가되었습니다.'
+      };
+    } catch (error) {
+      console.error('블로그 조회수 증가 실패:', error);
+      return {
+        success: false,
+        data: [],
+        message: '블로그 조회수 증가 중 오류가 발생했습니다.'
+      };
+    }
+  }
   
   // 블로그 등록
   async registerBlog(data: {

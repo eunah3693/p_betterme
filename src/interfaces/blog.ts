@@ -5,6 +5,7 @@ export interface BlogItem {
   subject?: string | null;
   content?: string | null;
   date?: string | null;
+  viewCount?: string | null;
   isAuthor?: boolean;
   categoryIdx?: number | null;
 }
@@ -90,7 +91,6 @@ export interface BlogCategoryResponse {
   data: BlogCategoryItem | BlogCategoryItem[];
   message?: string;
 }
-
 
 
 

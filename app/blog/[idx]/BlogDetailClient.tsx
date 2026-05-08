@@ -1,13 +1,13 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import BlogView from '@/components/Blog/ViewContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
 import NoContent from '@/components/Empty/NoContent';
-import { getBlogByIdx, deleteBlog } from '@/functions/apis/blog';
+import { getBlogByIdx, deleteBlog, increaseBlogViewCount } from '@/functions/apis/blog';
 import type { BlogItem } from '@/interfaces/blog';
 import Button from '@/components/Buttons/Button';
 import { useModal } from '@/functions/hooks/useModal';
@@ -19,6 +19,7 @@ export default function BlogDetailClient({ idx }: { idx: string }) {
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();
   const [isDeleting, setIsDeleting] = useState(false);
+  const hasIncreasedViewCount = useRef(false);
 
   const {
     data: blogData,
@@ -51,6 +52,20 @@ export default function BlogDetailClient({ idx }: { idx: string }) {
   const isAuthor =
     (blogData?.memberId != null && user?.id != null && blogData.memberId === user.id) ||
     Boolean(blogData?.isAuthor);
+
+  const { mutate: increaseViewCount } = useMutation({
+    mutationFn: () => increaseBlogViewCount(Number(idx)),
+    onError: (error) => {
+      console.error('블로그 조회수 증가 중 오류:', error);
+    },
+  });
+
+  useEffect(() => {
+    if (!idx || hasIncreasedViewCount.current) return;
+
+    hasIncreasedViewCount.current = true;
+    increaseViewCount();
+  }, [idx, increaseViewCount]);
 
   const handleDelete = async () => {
     if (!idx) return;

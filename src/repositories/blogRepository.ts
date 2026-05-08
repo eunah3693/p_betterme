@@ -24,6 +24,7 @@ export class BlogRepository {
       subject: dbRow.subject,
       content: dbRow.content,
       date: dbRow.date ? dbRow.date.toISOString().split('T')[0] : null,
+      viewCount: dbRow.viewCount,
     };
   }
 
@@ -232,6 +233,21 @@ export class BlogRepository {
     }
 
     return this.changeToBlogItem(blog);
+  }
+
+  async incrementBlogViewCount(idx: number): Promise<BlogItem | null> {
+    await prisma.$executeRaw`
+      UPDATE blog
+      SET view_count = (
+        CASE
+          WHEN view_count ~ '^[0-9]+$' THEN view_count::integer
+          ELSE 0
+        END + 1
+      )::text
+      WHERE idx = ${idx}
+    `;
+
+    return this.getBlogByIdx(idx);
   }
 
   // 블로그 추가
