@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -7,10 +8,11 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Input from '@/components/Forms/Input';
 import Textarea from '@/components/Forms/Textarea';
-import Button from '@/components/Buttons/Button';
+import Button, { ButtonVariants } from '@/components/Buttons/Button';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import MyBadge from '@/components/Badge/MyBadge';
+import { cn } from '@/constants/cn';
 import { updateMemberInfo } from '@/functions/apis/member';
 import { useModal } from '@/functions/hooks/useModal';
 import { getMemberInfo } from '@/functions/apis/member';
@@ -223,15 +225,15 @@ export default function MyInfoPage() {
                   >
                     수정하기
                   </Button>
-                  <Button
-                    type="button"
-                    onClick={() => router.push('/')}
-                    color="bgGray"
-                    size="lg"
-                    className="flex-1"
+                  <Link
+                    href="/"
+                    className={cn(
+                      ButtonVariants({ color: 'bgGray', size: 'lg' }),
+                      'inline-block flex-1 text-center',
+                    )}
                   >
                     취소
-                  </Button>
+                  </Link>
                 </div>
               </form>
           </div>

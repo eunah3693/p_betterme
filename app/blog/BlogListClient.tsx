@@ -3,16 +3,15 @@ import React from 'react';
 import { useUserStore } from '@/store/user';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import Button from '@/components/Buttons/Button';
+import { ButtonVariants } from '@/components/Buttons/Button';
 import Card from '@/components/Cards/Card';
+import { cn } from '@/constants/cn';
 import type { BlogItem, BlogListResponse } from '@/interfaces/blog';
 import moreIcon from '@assets/more.svg';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMonthlyBlogs, fetchRecommendedBlogs, fetchMostViewedBlogs } from '@/functions/apis/blog';
 
 export default function BlogListClient() {
-  const router = useRouter();
   const user = useUserStore((state) => state.user);
 
   const { data: monthlyData } = useQuery<BlogListResponse>({
@@ -44,14 +43,15 @@ export default function BlogListClient() {
           </div>
           <div className="flex gap-2">
             {user && (
-              <Button
-                onClick={() => router.push(`/blog/myblog?id=${user?.id}`)}
-                color="bgMain"
-                size="md"
-                className="hover:bg-main/90 transition-colors whitespace-nowrap"
+              <Link
+                href={`/blog/myblog?id=${user.id}`}
+                className={cn(
+                  ButtonVariants({ color: 'bgMain', size: 'md' }),
+                  'inline-block text-center hover:bg-main/90 transition-colors whitespace-nowrap',
+                )}
               >
                 내 블로그
-              </Button>
+              </Link>
             )}
           </div>
         </div>

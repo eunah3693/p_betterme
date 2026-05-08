@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, use } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import BlogView from '@/components/Diary/ViewContent';
@@ -8,9 +9,10 @@ import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
 import { getDiaryByIdx, deleteDiary } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
-import Button from '@/components/Buttons/Button';
+import Button, { ButtonVariants } from '@/components/Buttons/Button';
 import { useModal } from '@/functions/hooks/useModal';
 import { useUserStore } from '@/store/user';
+import { cn } from '@/constants/cn';
 
 export default function DiaryDetailPage({
   params,
@@ -100,13 +102,15 @@ export default function DiaryDetailPage({
                   >
                     목록
                   </Button>
-                  <Button
-                    size="sm"
-                    color="bgMain"
-                    onClick={() => router.push(`/diary/${diaryData.idx}/update`)}
+                  <Link
+                    href={`/diary/${diaryData.idx}/update`}
+                    className={cn(
+                      ButtonVariants({ color: 'bgMain', size: 'sm' }),
+                      'inline-block text-center',
+                    )}
                   >
                     수정
-                  </Button>
+                  </Link>
                   <Button
                     size="sm"
                     color="bgDanger"

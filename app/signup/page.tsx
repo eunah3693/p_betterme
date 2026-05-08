@@ -1,15 +1,17 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Input from '@/components/Forms/Input';
 import Textarea from '@/components/Forms/Textarea';
-import Button from '@/components/Buttons/Button';
+import Button, { ButtonVariants } from '@/components/Buttons/Button';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import MyBadge from '@/components/Badge/MyBadge';
+import { cn } from '@/constants/cn';
 import { useCheckId } from '@/functions/hooks/member/useCheckId';
 import { signup } from '@/functions/apis/member';
 import { signupSchema } from '@/lib/validation';
@@ -270,27 +272,24 @@ export default function SignupPage() {
                 >
                   회원가입
                 </Button>
-                <Button
-                  type="button"
-                  onClick={() => router.push('/login')}
-                  color="bgGray"
-                  size="lg"
-                  className="flex-1"
+                <Link
+                  href="/login"
+                  className={cn(
+                    ButtonVariants({ color: 'bgGray', size: 'lg' }),
+                    'inline-block flex-1 text-center',
+                  )}
                 >
                   취소
-                </Button>
+                </Link>
               </div>
             </form>
 
             {/* 로그인 링크 */}
             <div className="mt-6 text-center text-sm text-gray-600">
               이미 계정이 있으신가요?{' '}
-              <button
-                onClick={() => router.push('/login')}
-                className="text-main font-bold hover:underline"
-              >
+              <Link href="/login" className="text-main font-bold hover:underline">
                 로그인하기
-              </button>
+              </Link>
             </div>
           </div>
         </div>

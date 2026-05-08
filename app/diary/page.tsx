@@ -1,17 +1,17 @@
 'use client';
 import React from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
-import Button from '@/components/Buttons/Button';
+import { ButtonVariants } from '@/components/Buttons/Button';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import NoContent from '@/components/Empty/NoContent';
 import Card from '@/components/Cards/Card';
+import { cn } from '@/constants/cn';
 import { getAllDiaries } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
 import { useUserStore } from '@/store/user';
 
 export default function DiaryListPage() {
-  const router = useRouter();
   const user = useUserStore((state) => state.user);
 
   const { data: diaryList = [], isLoading } = useQuery<DiaryItem[], Error>({
@@ -42,14 +42,15 @@ export default function DiaryListPage() {
               <h1 className="text-3xl font-bold text-main mb-2">일기</h1>
               <p className="text-gray-600 text-sm">오늘의 하루를 기록해주세요. 일기는 나만 볼 수 있습니다.</p>
             </div>
-            <Button
-              onClick={() => router.push('/diary/register')}
-              color="bgMain"
-              size="md"
-              className="hover:bg-main/90 transition-colors whitespace-nowrap"
+            <Link
+              href="/diary/register"
+              className={cn(
+                ButtonVariants({ color: 'bgMain', size: 'md' }),
+                'inline-block text-center hover:bg-main/90 transition-colors whitespace-nowrap',
+              )}
             >
               글쓰기
-            </Button>
+            </Link>
           </div>
           {diaryList.length === 0 ? (
             <NoContent message="작성된 일기가 없습니다." />

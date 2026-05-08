@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import BlogView from '@/components/Blog/ViewContent';
@@ -9,9 +10,10 @@ import ErrorMessage from '@/components/Error/ErrorMessage';
 import NoContent from '@/components/Empty/NoContent';
 import { getBlogByIdx, deleteBlog, increaseBlogViewCount } from '@/functions/apis/blog';
 import type { BlogItem } from '@/interfaces/blog';
-import Button from '@/components/Buttons/Button';
+import Button, { ButtonVariants } from '@/components/Buttons/Button';
 import { useModal } from '@/functions/hooks/useModal';
 import { useUserStore } from '@/store/user';
+import { cn } from '@/constants/cn';
 
 export default function BlogDetailClient({ idx }: { idx: string }) {
   const router = useRouter();
@@ -113,13 +115,15 @@ export default function BlogDetailClient({ idx }: { idx: string }) {
                 </Button>
                 {isAuthor && (
                     <div className="flex gap-3 justify-end">
-                      <Button
-                        size="sm"
-                        color="bgMain"
-                        onClick={() => router.push(`/blog/${blogData.idx}/update`)}
+                      <Link
+                        href={`/blog/${blogData.idx}/update`}
+                        className={cn(
+                          ButtonVariants({ color: 'bgMain', size: 'sm' }),
+                          'inline-block text-center',
+                        )}
                       >
                         수정
-                      </Button>
+                      </Link>
                       <Button
                         size="sm"
                         color="bgSub"

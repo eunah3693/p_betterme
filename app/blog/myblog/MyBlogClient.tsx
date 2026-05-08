@@ -1,18 +1,19 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import Button from '@/components/Buttons/Button';
+import { ButtonVariants } from '@/components/Buttons/Button';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
 import NoContent from '@/components/Empty/NoContent';
 import Card from '@/components/Cards/Card';
 import CategoryList from '@/components/Blog/CategoryList';
+import { cn } from '@/constants/cn';
 import { getMyBlogs, getCategories } from '@/functions/apis/blog';
 import type { BlogItem, BlogCategoryItem, BlogListResponse } from '@/interfaces/blog';
 
 export default function MyBlogClient() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const category = searchParams.get('category');
@@ -119,22 +120,24 @@ export default function MyBlogClient() {
               <p className="text-gray-600">다양한 이야기를 공유합니다</p>
             </div>
             <div className="flex justify-end ">
-              <Button
-                onClick={() => router.push('/blog/register')}
-                color="bgMain"
-                size="md"
-                className="hover:bg-main/90 transition-colors whitespace-nowrap mr-2"
+              <Link
+                href="/blog/register"
+                className={cn(
+                  ButtonVariants({ color: 'bgMain', size: 'md' }),
+                  'inline-block text-center hover:bg-main/90 transition-colors whitespace-nowrap mr-2',
+                )}
               >
                 글쓰기
-              </Button>
-              <Button
-                onClick={() => router.push('/blog/category')}
-                color="bgMain"
-                size="md"
-                className="hover:bg-main/90 transition-colors whitespace-nowrap"
+              </Link>
+              <Link
+                href="/blog/category"
+                className={cn(
+                  ButtonVariants({ color: 'bgMain', size: 'md' }),
+                  'inline-block text-center hover:bg-main/90 transition-colors whitespace-nowrap',
+                )}
               >
                 카테고리 관리
-              </Button>
+              </Link>
             </div>
           </div>
 

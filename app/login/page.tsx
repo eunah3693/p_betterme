@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -125,12 +126,9 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center text-sm text-gray-600">
               계정이 없으신가요?
-              <button
-                onClick={() => router.push('/signup')}
-                className="text-main font-bold hover:underline ml-1"
-              >
+              <Link href="/signup" className="text-main font-bold hover:underline ml-1">
                 회원가입하기
-              </button>
+              </Link>
             </div>
           </div>
         </div>
