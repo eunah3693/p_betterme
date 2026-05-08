@@ -81,6 +81,23 @@ export class BlogService {
     }
   }
 
+  async getBlogsByMinViewCount(minViewCount: number): Promise<BlogListResponse> {
+    try {
+      const blogs = await this.blogRepository.getBlogsByMinViewCount(minViewCount);
+
+      return {
+        success: true,
+        data: blogs
+      };
+    } catch (error) {
+      console.error('조회수 기준 블로그 목록 조회 실패:', error);
+      return {
+        success: false,
+        data: []
+      };
+    }
+  }
+
   // 이달의 블로그 조회
   async getMonthlyBlogs(params: BlogListRequest): Promise<BlogListResponse> {
     try {
@@ -135,10 +152,7 @@ export class BlogService {
       }
       return {
         success: true,
-        data: {
-          ...blog,
-          isAuthor: blog.memberId === params.id
-        }
+        data: blog
       };
     } catch (error) {
       console.error('블로그 조회 실패:', error);

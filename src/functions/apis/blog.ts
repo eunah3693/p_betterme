@@ -37,6 +37,9 @@ export const getMyBlogs = (memberId: string, params: BlogListRequest) =>
 export const getBlogByIdx = (idx: number) => 
   api.get<BlogResponse>(`${BLOG_URL}/${idx}`);
 
+export const getBlogsByMinViewCount = (minViewCount: number) =>
+  api.get<BlogListResponse>(`${BLOG_URL}/static-params`, { minViewCount });
+
 export const increaseBlogViewCount = (idx: number) =>
   api.post<BlogResponse>(`${BLOG_URL}/${idx}/view`);
 

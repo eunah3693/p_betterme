@@ -50,8 +50,7 @@ export default function BlogDetailClient({ idx }: { idx: string }) {
   });
   
   const isAuthor =
-    (blogData?.memberId != null && user?.id != null && blogData.memberId === user.id) ||
-    Boolean(blogData?.isAuthor);
+    blogData?.memberId != null && user?.id != null && blogData.memberId === user.id;
 
   const { mutate: increaseViewCount } = useMutation({
     mutationFn: () => increaseBlogViewCount(Number(idx)),

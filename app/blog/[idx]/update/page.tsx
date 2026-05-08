@@ -59,8 +59,7 @@ export default function BlogEditPage({
   });
 
   const isAuthor =
-    (blogData?.memberId != null && user?.id != null && blogData.memberId === user.id) ||
-    Boolean(blogData?.isAuthor);
+    blogData?.memberId != null && user?.id != null && blogData.memberId === user.id;
 
   useEffect(() => {
     if (isLoading || !blogData || !user?.id || isAuthor || hasShownUnauthorizedRef.current) {

@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { BlogService } from '@/services/blogService';
 import { requireAuthUserFromCookies } from '@/lib/auth';
-import { verifyToken } from '@/lib/jwt';
-import { cookies } from 'next/headers';
 import { UnauthorizedError } from '@/lib/errors';
 
 const blogService = new BlogService();
@@ -21,15 +19,7 @@ export async function GET(
       );
     }
 
-    let userId = '';
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-    if (token?.value) {
-      const user = verifyToken(token.value);
-      if (user) userId = user.id;
-    }
-
-    const result = await blogService.getBlogByIdx({ idx: Number(idx), id: userId });
+    const result = await blogService.getBlogByIdx({ idx: Number(idx), id: '' });
 
     if (!result.success) {
       return NextResponse.json(

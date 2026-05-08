@@ -120,6 +120,18 @@ export class BlogRepository {
       }
     };
   }
+
+  async getBlogsByMinViewCount(minViewCount: number): Promise<BlogItem[]> {
+    const blogs = await prisma.$queryRaw<BlogRow[]>`
+      SELECT *
+      FROM blog
+      WHERE view_count ~ '^[0-9]+$'
+        AND view_count::integer >= ${minViewCount}
+      ORDER BY view_count::integer DESC, idx DESC
+    `;
+
+    return blogs.map((blog: BlogRow) => this.changeToBlogItem(blog));
+  }
   
   // 이달의 블로그 조회 (이번 달 작성된 글)
   async getMonthlyBlogs(params: BlogListRequest): Promise<BlogListResponse> {

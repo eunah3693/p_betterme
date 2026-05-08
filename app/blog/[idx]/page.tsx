@@ -2,10 +2,25 @@ import type { Metadata } from 'next';
 import React from 'react';
 import BlogDetailClient from './BlogDetailClient';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
-import { getBlogByIdx } from '@/functions/apis/blog';
+import { getBlogByIdx, getBlogsByMinViewCount } from '@/functions/apis/blog';
+
+export const revalidate = 3600;
+export const dynamicParams = true;
 
 const getPlainText = (html?: string | null) =>
   html?.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim() || '';
+
+export async function generateStaticParams() {
+  const result = await getBlogsByMinViewCount(10);
+
+  if (!result.success) {
+    return [];
+  }
+
+  return result.data.map((blog) => ({
+    idx: String(blog.idx),
+  }));
+}
 
 export async function generateMetadata({
   params,
