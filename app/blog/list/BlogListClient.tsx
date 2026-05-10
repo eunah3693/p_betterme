@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
@@ -34,9 +34,7 @@ const isBlogListType = (value?: string | null): value is BlogListType =>
 export default function BlogListClient() {
   const searchParams = useSearchParams();
   const loaderRef = useRef<HTMLDivElement | null>(null);
-  const hasNextPageRef = useRef(false);
-  const isFetchingNextPageRef = useRef(false);
-  const isFetchingNextPageLockedRef = useRef(false);
+  const [isNextPageLoadingVisible, setIsNextPageLoadingVisible] = useState(false);
   const typeParam = searchParams.get('type');
   const blogType: BlogListType = isBlogListType(typeParam) ? typeParam : 'monthly';
 
@@ -62,11 +60,6 @@ export default function BlogListClient() {
     retry: 2,
   });
 
-  useEffect(() => {
-    hasNextPageRef.current = Boolean(hasNextPage);
-    isFetchingNextPageRef.current = isFetchingNextPage;
-  }, [hasNextPage, isFetchingNextPage]);
-
   //스크롤시 fetch
   useEffect(() => {
     const el = loaderRef.current;
@@ -77,16 +70,21 @@ export default function BlogListClient() {
         const [entry] = entries;
         if (
           !entry.isIntersecting ||
-          !hasNextPageRef.current ||
-          isFetchingNextPageRef.current ||
-          isFetchingNextPageLockedRef.current
+          !hasNextPage ||
+          isFetchingNextPage
         ) {
           return;
         }
 
-        isFetchingNextPageLockedRef.current = true;
-        void fetchNextPage().finally(() => {
-          isFetchingNextPageLockedRef.current = false;
+        const shouldShowOverlay = window.scrollY > 0;
+        if (shouldShowOverlay) {
+          setIsNextPageLoadingVisible(true);
+        }
+
+        void fetchNextPage({ cancelRefetch: false }).finally(() => {
+          if (shouldShowOverlay) {
+            setIsNextPageLoadingVisible(false);
+          }
         });
       },
       { root: null, rootMargin: '200px', threshold: 0 }
@@ -94,7 +92,7 @@ export default function BlogListClient() {
 
     observer.observe(el);
     return () => observer.disconnect();
-  }, [fetchNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   //data 중복방지
   const blogList = blogListData?.pages.flatMap((page) => page.data) || [];
@@ -102,7 +100,9 @@ export default function BlogListClient() {
 
   return (
     <>
-      <LoadingOverlay isLoading={isLoading} message="블로그를 불러오는 중" />
+      <LoadingOverlay
+        isLoading={isNextPageLoadingVisible}
+      />
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
           <div className="mb-8 md:flex justify-between items-end pt-10 md:pt-0">
@@ -124,12 +124,6 @@ export default function BlogListClient() {
                   <Card key={blog.idx} data={blog} url={'/blog/' + blog.idx} />
                 ))}
               </div>
-
-              {isFetchingNextPage && (
-                <div className="py-20 text-center text-gray-500">
-                  불러오는 중...
-                </div>
-              )}
 
               <div ref={loaderRef} className="h-8" />
             </div>

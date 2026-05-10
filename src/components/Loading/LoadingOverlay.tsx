@@ -7,7 +7,7 @@ interface LoadingOverlayProps {
   message?: string;
 }
 
-function LoadingOverlay({ isLoading, message = '로딩 중...' }: LoadingOverlayProps) {
+function LoadingOverlay({ isLoading, message }: LoadingOverlayProps) {
   return (
     <AnimatePresence>
       {isLoading && (
@@ -34,7 +34,7 @@ function LoadingOverlay({ isLoading, message = '로딩 중...' }: LoadingOverlay
               }}
               className="w-16 h-16 border-4 border-gray-200 border-t-main rounded-full"
             />
-            <p className="text-gray-700 font-medium">{message}</p>
+            {message && <p className="text-gray-700 font-medium">{message}</p>}
           </motion.div>
         </motion.div>
       )}

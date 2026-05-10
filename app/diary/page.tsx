@@ -3,9 +3,9 @@ import React from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { ButtonVariants } from '@/components/Buttons/Button';
-import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import NoContent from '@/components/Empty/NoContent';
 import Card from '@/components/Cards/Card';
+import { CardSkeletonGrid } from '@/components/Cards/CardSkeleton';
 import { cn } from '@/constants/cn';
 import { getAllDiaries } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
@@ -33,7 +33,6 @@ export default function DiaryListPage() {
 
   return (
     <>
-      <LoadingOverlay isLoading={isLoading} message="일기를 불러오는 중" />
       <div className="flex justify-center py-10 md:py-15 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
 
@@ -52,7 +51,9 @@ export default function DiaryListPage() {
               글쓰기
             </Link>
           </div>
-          {diaryList.length === 0 ? (
+          {isLoading ? (
+            <CardSkeletonGrid count={6} />
+          ) : diaryList.length === 0 ? (
             <NoContent message="작성된 일기가 없습니다." />
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
