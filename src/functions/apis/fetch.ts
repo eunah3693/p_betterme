@@ -95,8 +95,8 @@ async function request<T>(
 }
 
 export const api = {
-  get: <T>(endpoint: string, params?: object) =>
-    request<T>(endpoint, { method: 'GET', params }),
+  get: <T>(endpoint: string, params?: object, options?: Omit<FetchOptions, 'method' | 'params'>) =>
+    request<T>(endpoint, { ...options, method: 'GET', params }),
 
   post: <T>(endpoint: string, data?: unknown, noCache?: boolean) =>
     request<T>(endpoint, { 

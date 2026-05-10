@@ -67,7 +67,7 @@ export default function DiaryEditPage({
       if (result.success) {
         showModal('일기가 수정되었습니다.', 'success', () => {
           queryClient.invalidateQueries({ 
-            queryKey: ['diary', user?.id] 
+            queryKey: ['diary'] 
           });
           queryClient.invalidateQueries({ 
             queryKey: ['diary', idx] 

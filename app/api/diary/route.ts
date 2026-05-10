@@ -5,7 +5,7 @@ import { cookies } from 'next/headers';
 
 const diaryService = new DiaryService();
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get('token');
@@ -25,7 +25,12 @@ export async function GET() {
       );
     }
 
-    const result = await diaryService.getAllDiaries(user.id);
+    const pageParam = req.nextUrl.searchParams.get('page');
+    const page = Number(pageParam ?? 0);
+
+    const result = await diaryService.getDiaries(user.id, {
+      page: Number.isNaN(page) || page < 0 ? 0 : page,
+    });
     
     if (!result.success) {
       return NextResponse.json(
@@ -38,6 +43,7 @@ export async function GET() {
       success: true,
       message: '일기 목록 조회 성공',
       data: result.data,
+      page: result.page,
     });
   } catch (error) {
     console.error('Get diaries error:', error);

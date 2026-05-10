@@ -48,14 +48,22 @@ export interface DiaryResponse {
   message?: string;
 }
 
-// Diary 목록 요청 
-export type DiaryListRequest = Record<string, never>;
+// Diary 목록 요청
+export interface DiaryListRequest {
+  page: number;
+}
 
 // Diary 목록 응답
 export interface DiaryListResponse {
   success: boolean;
   data: DiaryItem[];
   message?: string;
+  page?: {
+    number: number;
+    totalPages: number;
+    totalElements: number;
+    size: number;
+  };
 }
 
 export interface DeleteDiaryResponse {

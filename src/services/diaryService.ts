@@ -1,5 +1,12 @@
 import { DiaryRepository } from '@/repositories/diaryRepository';
-import { DiaryItem, DiaryListResponse, DiaryResponse, CreateDiaryData, UpdateDiaryData } from '@/interfaces/diary';
+import {
+  DiaryItem,
+  DiaryListRequest,
+  DiaryListResponse,
+  DiaryResponse,
+  CreateDiaryData,
+  UpdateDiaryData,
+} from '@/interfaces/diary';
 
 export class DiaryService {
   private diaryRepository: DiaryRepository;
@@ -8,13 +15,14 @@ export class DiaryService {
     this.diaryRepository = new DiaryRepository();
   }
   
-  //  일기 조회 
-  async getAllDiaries(memberId?: string): Promise<DiaryListResponse> {
+  // 일기 목록 조회
+  async getDiaries(memberId: string, params: DiaryListRequest): Promise<DiaryListResponse> {
     try {
-      const diaries = await this.diaryRepository.getAllDiaries(memberId);
+      const diaries = await this.diaryRepository.getDiaries(memberId, params);
       return {
         success: true,
-        data: diaries
+        data: diaries.data,
+        page: diaries.page
       };
     } catch (error) {
       console.error('일기 목록 조회 실패:', error);
@@ -116,4 +124,3 @@ export class DiaryService {
     }
   }
 }
-

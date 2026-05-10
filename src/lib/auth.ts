@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { verifyToken, JwtPayload } from '@/lib/jwt';
 import { UnauthorizedError } from '@/lib/errors';
 
-// 서버에서 헤어 쿠키가져오기기
+// 서버에서 헤더 쿠키가져오기
 export const getCookieFromContext = (context: GetServerSidePropsContext, name: string): string | null => {
   const cookies = context.req.headers.cookie;
   if (!cookies) return null;
@@ -49,18 +49,3 @@ export const requireAuthUserFromCookies = async (): Promise<JwtPayload> => {
   return payload;
 };
 
-// 인증실패시 로그인페이지로
-export const redirectToLogin = () => ({
-  redirect: {
-    destination: '/login',
-    permanent: false,
-  },
-});
-
-// 인증성공시 홈페이지로
-export const redirectToHome = () => ({
-  redirect: {
-    destination: '/',
-    permanent: false,
-  },
-});

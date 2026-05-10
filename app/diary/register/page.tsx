@@ -6,11 +6,9 @@ import BlogRegister, { type DiaryFormData } from '@/components/Diary/RegisterTip
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import { createDiary } from '@/functions/apis/diary';
 import { useModal } from '@/functions/hooks/useModal';
-import { useUserStore } from '@/store/user';
 
 export default function DiaryWritePage() {
   const router = useRouter();
-  const user = useUserStore((state) => state.user);
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();
 
@@ -25,7 +23,7 @@ export default function DiaryWritePage() {
       if (result.success) {
         showModal('일기가 등록되었습니다.', 'success', () => {
           queryClient.invalidateQueries({ 
-            queryKey: ['diary', user?.id] 
+            queryKey: ['diary'] 
           });
           router.push('/diary');
         });

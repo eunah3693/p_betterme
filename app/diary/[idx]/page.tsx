@@ -11,7 +11,6 @@ import { getDiaryByIdx, deleteDiary } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
 import Button, { ButtonVariants } from '@/components/Buttons/Button';
 import { useModal } from '@/functions/hooks/useModal';
-import { useUserStore } from '@/store/user';
 import { cn } from '@/constants/cn';
 
 export default function DiaryDetailPage({
@@ -21,7 +20,6 @@ export default function DiaryDetailPage({
 }) {
   const router = useRouter();
   const { idx } = use(params);
-  const user = useUserStore((state) => state.user);
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -67,7 +65,7 @@ export default function DiaryDetailPage({
       if (result.success) {
         showModal('일기가 삭제되었습니다.', 'success', () => {
           queryClient.invalidateQueries({ 
-            queryKey: ['diary', user?.id] 
+            queryKey: ['diary'] 
           });
           router.push('/diary');
         });

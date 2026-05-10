@@ -1,73 +1,57 @@
-'use client';
 import React from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { redirect } from 'next/navigation';
+import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 import { ButtonVariants } from '@/components/Buttons/Button';
-import NoContent from '@/components/Empty/NoContent';
-import Card from '@/components/Cards/Card';
-import { CardSkeletonGrid } from '@/components/Cards/CardSkeleton';
 import { cn } from '@/constants/cn';
-import { getAllDiaries } from '@/functions/apis/diary';
-import type { DiaryItem } from '@/interfaces/diary';
-import { useUserStore } from '@/store/user';
+import { getNextDiaryPageParam } from '@/functions/apis/diary';
+import { requireAuthUserFromCookies } from '@/lib/auth';
+import { DiaryService } from '@/services/diaryService';
+import DiaryListClient from './DiaryListClient';
 
-export default function DiaryListPage() {
-  const user = useUserStore((state) => state.user);
-
-  const { data: diaryList = [], isLoading } = useQuery<DiaryItem[], Error>({
-    queryKey: ['diary', user?.id],
-    queryFn: async (): Promise<DiaryItem[]> => {
-      const result = await getAllDiaries();
-      if (!result.success || !result.data) {
-        throw new Error('Failed to fetch diaries');
-      }
-
-      return result.data;
-    },
-    enabled: !!user,
-    refetchOnMount: 'always',
-    staleTime: 0,
-    gcTime: 1000 * 60 * 10,
-    retry: 2,
+export default async function DiaryListPage() {
+  const queryClient = new QueryClient();
+  const user = await requireAuthUserFromCookies().catch(() => {
+    redirect('/login');
   });
 
-  return (
-    <>
-      <div className="flex justify-center py-10 md:py-15 px-4">
-        <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
+  if (user) {
+    const diaryService = new DiaryService();
 
-          <div className="mb-8 flex justify-between items-end gap-4">
+    await queryClient.prefetchInfiniteQuery({
+      queryKey: ['diary'],
+      queryFn: ({ pageParam = 0 }) =>
+        diaryService.getDiaries(user.id, { page: pageParam as number }),
+      getNextPageParam: getNextDiaryPageParam,
+      initialPageParam: 0,
+    });
+  }
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <div className="flex justify-center px-4 py-10 md:py-15">
+        <div className="w-[90%] max-w-[1200px] md:w-[90%] lg:w-[1200px]">
+          <div className="mb-8 flex items-end justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-main mb-2">일기</h1>
-              <p className="text-gray-600 text-sm">오늘의 하루를 기록해주세요. 일기는 나만 볼 수 있습니다.</p>
+              <h1 className="mb-2 text-3xl font-bold text-main">일기</h1>
+              <p className="text-sm text-gray-600">
+                오늘의 하루를 기록해주세요. 일기는 나만 볼 수 있습니다.
+              </p>
             </div>
             <Link
               href="/diary/register"
               className={cn(
                 ButtonVariants({ color: 'bgMain', size: 'md' }),
-                'inline-block text-center hover:bg-main/90 transition-colors whitespace-nowrap',
+                'inline-block whitespace-nowrap text-center transition-colors hover:bg-main/90'
               )}
             >
               글쓰기
             </Link>
           </div>
-          {isLoading ? (
-            <CardSkeletonGrid count={6} />
-          ) : diaryList.length === 0 ? (
-            <NoContent message="작성된 일기가 없습니다." />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {diaryList.map((diary) => (
-                <Card
-                  key={diary.idx}
-                  data={diary}
-                  url={'/diary/'+diary.idx}
-                />
-              ))}
-            </div>
-          )}
+
+          <DiaryListClient />
         </div>
       </div>
-    </>
+    </HydrationBoundary>
   );
 }

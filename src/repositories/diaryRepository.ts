@@ -1,5 +1,11 @@
 import { prisma } from '@/lib/prisma';
-import { DiaryItem, CreateDiaryData, UpdateDiaryData} from '@/interfaces/diary';
+import {
+  DiaryItem,
+  DiaryListRequest,
+  DiaryListResponse,
+  CreateDiaryData,
+  UpdateDiaryData,
+} from '@/interfaces/diary';
 import { Prisma } from '@prisma/client';
 
 export class DiaryRepository {
@@ -15,16 +21,40 @@ export class DiaryRepository {
     };
   }
 
-  // 일기 조회
-  async getAllDiaries(memberId?: string): Promise<DiaryItem[]> {
-    const diaries = await prisma.diary.findMany({
-      where: memberId ? { memberId } : undefined, 
-      orderBy: {
-        date: 'desc'
-      }
+  // 일기 목록 조회
+  async getDiaries(memberId: string, params: DiaryListRequest): Promise<DiaryListResponse> {
+    const pageSize = 12;
+    const skip = params.page * pageSize;
+    const whereCondition = { memberId };
+
+    const totalElements = await prisma.diary.count({
+      where: whereCondition,
     });
 
-    return diaries.map(diary => this.changeToDiaryItem(diary));
+    const diaries = await prisma.diary.findMany({
+      where: whereCondition,
+      orderBy: [
+        {
+          date: 'desc',
+        },
+        {
+          idx: 'desc',
+        },
+      ],
+      skip,
+      take: pageSize,
+    });
+
+    return {
+      success: true,
+      data: diaries.map(diary => this.changeToDiaryItem(diary)),
+      page: {
+        number: params.page,
+        totalPages: Math.ceil(totalElements / pageSize),
+        totalElements: totalElements,
+        size: pageSize
+      },
+    };
   }
 
   // 일기 조회
@@ -74,4 +104,3 @@ export class DiaryRepository {
     });
   }
 }
-

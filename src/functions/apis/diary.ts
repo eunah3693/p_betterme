@@ -10,10 +10,18 @@ import {
 
 const DIARY_URL = '/api/diary';
 
-// 일기 조회
-export const getAllDiaries = async (): Promise<DiaryListResponse> => {
+export const getNextDiaryPageParam = (lastPage: DiaryListResponse) => {
+  if (!lastPage.page) return undefined;
+
+  const { number, totalPages } = lastPage.page;
+  return number + 1 < totalPages ? number + 1 : undefined;
+};
+
+export const fetchDiaries = async (
+  page = 0
+): Promise<DiaryListResponse> => {
   try {
-    return await api.get<DiaryListResponse>(DIARY_URL);
+    return await api.get<DiaryListResponse>(DIARY_URL, { page });
   } catch (error) {
     console.error('일기 목록 조회 실패:', error);
     throw error;
