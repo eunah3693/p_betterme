@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -35,7 +36,7 @@ export default function SignupPage() {
     handleSubmit,
     watch,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
     mode: 'onBlur',
@@ -83,8 +84,28 @@ export default function SignupPage() {
     setModal((prev) => ({ ...prev, isOpen: false }));
   };
 
+  // 회원가입 Mutation
+  const signupMutation = useMutation({
+    mutationFn: signup,
+    onSuccess: (result) => {
+      if (result.success) {
+        showModal(
+          '회원가입이 완료되었습니다!',
+          'success',
+          () => router.push('/login')
+        );
+      } else {
+        showModal(result.message || '회원가입에 실패했습니다.', 'error');
+      }
+    },
+    onError: (error) => {
+      console.error('회원가입 실패:', error);
+      showModal('회원가입에 실패했습니다.', 'error');
+    },
+  });
+
   // 회원가입 제출
-  const onSubmit = async (data: SignupFormData) => {
+  const onSubmit = (data: SignupFormData) => {
     // ID 중복 체크 확인
     if (!idChecked) {
       showModal('아이디 중복 체크를 해주세요!', 'warning');
@@ -96,35 +117,20 @@ export default function SignupPage() {
       return;
     }
 
-    try {
-      const result = await signup({
-        id: data.id,
-        password: data.password,
-        nickname: data.nickname,
-        job: data.job || '',
-        jobInfo: data.jobInfo || '',
-        myBadge: data.myBadge || '', 
-      });
-
-      if (result.success) {
-        showModal(
-          '회원가입이 완료되었습니다!',
-          'success',
-          () => router.push('/login')
-        );
-      } else {
-        showModal(result.message || '회원가입에 실패했습니다.', 'error');
-      }
-    } catch (error) {
-      console.error('회원가입 실패:', error);
-      showModal('회원가입에 실패했습니다.', 'error');
-    }
+    signupMutation.mutate({
+      id: data.id,
+      password: data.password,
+      nickname: data.nickname,
+      job: data.job || '',
+      jobInfo: data.jobInfo || '',
+      myBadge: data.myBadge || '',
+    });
   };
 
   return (
     <>
       <LoadingOverlay 
-        isLoading={isCheckingId || isSubmitting} 
+        isLoading={isCheckingId || signupMutation.isPending} 
         message={isCheckingId ? 'ID 중복 확인 중' : '회원가입 처리 중'}
       />
       <ConfirmModal
@@ -268,7 +274,7 @@ export default function SignupPage() {
                   color="bgMain"
                   size="lg"
                   className="flex-1"
-                  disabled={isSubmitting}
+                  disabled={signupMutation.isPending}
                 >
                   회원가입
                 </Button>

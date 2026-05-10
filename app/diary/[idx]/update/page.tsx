@@ -1,14 +1,13 @@
 'use client';
 import React, { use } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import BlogRegister, { type DiaryFormData } from '@/components/Diary/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import ErrorMessage from '@/components/Error/ErrorMessage';
 import { getDiaryByIdx, updateDiary } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
-import { useUserStore } from '@/store/user';
 import { useModal } from '@/functions/hooks/useModal';
 
 export default function DiaryEditPage({
@@ -18,7 +17,6 @@ export default function DiaryEditPage({
 }) {
   const router = useRouter();
   const { idx } = use(params);
-  const user = useUserStore((state) => state.user);
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();
 
@@ -28,7 +26,7 @@ export default function DiaryEditPage({
     error,
     refetch
   } = useQuery<DiaryItem | null, Error>({
-    queryKey: ['diary', idx, user?.id],
+    queryKey: ['diary', idx],
     queryFn: async (): Promise<DiaryItem | null> => {
       if (!idx) return null;
 
@@ -50,46 +48,53 @@ export default function DiaryEditPage({
     retry: 2, 
   });
 
-  const handleSubmit = async (data: DiaryFormData) => {
-    try {
-      if (!idx) {
-        showModal('잘못된 요청입니다.', 'error');
-        return;
-      }
-
-      const result = await updateDiary({
-        idx: Number(idx),
-        subject: data.title,
-        content: data.content,
-        date: new Date()
-      });
-
+  const updateDiaryMutation = useMutation({
+    mutationFn: updateDiary,
+    onSuccess: (result) => {
       if (result.success) {
         showModal('일기가 수정되었습니다.', 'success', () => {
-          queryClient.invalidateQueries({ 
-            queryKey: ['diary'] 
+          queryClient.invalidateQueries({
+            queryKey: ['diary']
           });
-          queryClient.invalidateQueries({ 
-            queryKey: ['diary', idx] 
+          queryClient.invalidateQueries({
+            queryKey: ['diary', idx]
           });
           router.push('/diary');
         });
       } else {
         showModal(result.message || '수정에 실패했습니다.', 'error');
       }
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('일기 수정 중 오류:', error);
       showModal('수정에 실패했습니다.', 'error');
-    }
+    },
+  });
+
+  const handleSubmit = (data: DiaryFormData) => {
+      if (!idx) {
+        showModal('잘못된 요청입니다.', 'error');
+        return;
+      }
+
+      updateDiaryMutation.mutate({
+        idx: Number(idx),
+        subject: data.title,
+        content: data.content,
+        date: new Date()
+      });
   };
 
   return (
     <>
-      <LoadingOverlay isLoading={isLoading} message="일기를 불러오는 중" />
+      <LoadingOverlay
+        isLoading={isLoading || updateDiaryMutation.isPending}
+        message={isLoading ? '일기를 불러오는 중' : '일기를 수정하는 중'}
+      />
       
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">
-          {error || !diaryData ? (
+          {isLoading ? null : error || !diaryData ? (
             <ErrorMessage onRetry={() => refetch()} />
           ) : (
             <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">

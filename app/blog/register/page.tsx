@@ -1,10 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/user';
 import BlogRegister from '@/components/Blog/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
+import LoadingOverlay from '@/components/Loading/LoadingOverlay';
 import type { BlogFormData } from '@/components/Blog/RegisterTipTapContent';
 import { createBlog, getCategories } from '@/functions/apis/blog';
 import { useModal } from '@/functions/hooks/useModal';
@@ -40,20 +41,9 @@ export default function BlogWritePage() {
       ? [rawCategories]
       : [];
 
-  const handleSubmit = async (data: BlogFormData) => {
-    try {
-      if(!user?.id){
-        showModal('로그인을 시도해주세요.', 'error');
-        return;
-      }
-      const result = await createBlog({
-        memberId: user?.id,
-        subject: data.title,
-        content: data.content,
-        date: new Date(),
-        categoryIdx: selectedCategoryIdx ?? undefined,
-      });
-
+  const createBlogMutation = useMutation({
+    mutationFn: createBlog,
+    onSuccess: (result) => {
       if (result.success) {
         showModal('블로그가 등록되었습니다.', 'success', () => {
           queryClient.invalidateQueries({
@@ -64,14 +54,34 @@ export default function BlogWritePage() {
       } else {
         showModal(result.message || '등록에 실패했습니다.', 'error');
       }
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('블로그 등록 중 오류:', error);
       showModal('등록에 실패했습니다.', 'error');
-    }
+    },
+  });
+
+  const handleSubmit = (data: BlogFormData) => {
+      if(!user?.id){
+        showModal('로그인을 시도해주세요.', 'error');
+        return;
+      }
+
+      createBlogMutation.mutate({
+        memberId: user?.id,
+        subject: data.title,
+        content: data.content,
+        date: new Date(),
+        categoryIdx: selectedCategoryIdx ?? undefined,
+      });
   };
 
   return (
     <>
+      <LoadingOverlay
+        isLoading={createBlogMutation.isPending}
+        message="블로그를 등록하는 중"
+      />
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%] bg-white rounded-lg shadow-sm p-6 md:p-8">
           <h2 className="text-2xl font-bold text-main mb-6">블로그 글 작성</h2>

@@ -1,7 +1,7 @@
 'use client';
 import React, { use, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import BlogRegister from '@/components/Blog/RegisterTipTapContent';
 import ConfirmModal from '@/components/Modal/ConfirmModal';
 import type { BlogFormData } from '@/components/Blog/RegisterTipTapContent';
@@ -36,7 +36,7 @@ export default function BlogEditPage({
     data: blogData,
     isLoading
   } = useQuery<BlogItem | null, Error>({
-    queryKey: ['blog', idx, user?.id],
+    queryKey: ['blog', idx],
     queryFn: async (): Promise<BlogItem | null> => {
       if (!idx) return null;
 
@@ -72,8 +72,30 @@ export default function BlogEditPage({
     });
   }, [blogData, idx, isAuthor, isLoading, router, showModal, user?.id]);
 
-  const handleSubmit = async (data: BlogFormData) => {
-    try {
+  const updateBlogMutation = useMutation({
+    mutationFn: updateBlog,
+    onSuccess: (result) => {
+      if (result.success) {
+        showModal('블로그가 수정되었습니다.', 'success', () => {
+          queryClient.invalidateQueries({
+            queryKey: ['myblog', user?.id]
+          });
+          queryClient.invalidateQueries({
+            queryKey: ['blog', idx]
+          });
+          router.push(`/blog/myblog?id=${user?.id}`);
+        });
+      } else {
+        showModal(result.message || '수정에 실패했습니다.', 'error');
+      }
+    },
+    onError: (error) => {
+      console.error('블로그 수정 중 오류:', error);
+      showModal('수정에 실패했습니다.', 'error');
+    },
+  });
+
+  const handleSubmit = (data: BlogFormData) => {
       if (!idx || !user?.id) {
         showModal('잘못된 요청입니다.', 'error');
         return;
@@ -84,36 +106,21 @@ export default function BlogEditPage({
         return;
       }
 
-      const result = await updateBlog({
+      updateBlogMutation.mutate({
         idx: Number(idx),
         memberId: user.id,
         subject: data.title,
         content: data.content,
         date: new Date()
       });
-
-      if (result.success) {
-        showModal('블로그가 수정되었습니다.', 'success', () => {
-          queryClient.invalidateQueries({ 
-            queryKey: ['myblog', user?.id] 
-          });
-          queryClient.invalidateQueries({ 
-            queryKey: ['blog', idx] 
-          });
-          router.push(`/blog/myblog?id=${user?.id}`);
-        });
-      } else {
-        showModal(result.message || '수정에 실패했습니다.', 'error');
-      }
-    } catch (error) {
-      console.error('블로그 수정 중 오류:', error);
-      showModal('수정에 실패했습니다.', 'error');
-    }
   };
 
   return (
     <>
-      <LoadingOverlay isLoading={isLoading} message="블로그를 불러오는 중" />
+      <LoadingOverlay
+        isLoading={isLoading || updateBlogMutation.isPending}
+        message={isLoading ? '블로그를 불러오는 중' : '블로그를 수정하는 중'}
+      />
       
       <div className="flex justify-center py-8 px-4">
         <div className="w-full max-w-[1200px] lg:w-[1200px] md:w-[90%] w-[90%]">

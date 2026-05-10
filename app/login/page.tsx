@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,7 +34,7 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -42,11 +43,9 @@ export default function LoginPage() {
     },
   });
 
-  // login 제출
-  const onSubmit = async (data: LoginFormData) => {
-    try {
-      const result = await login({ id: data.id, password: data.password });
-
+  const loginMutation = useMutation({
+    mutationFn: login,
+    onSuccess: (result) => {
       // login success = true
       if (result.success && result.data) {
         setUser(result.data);
@@ -59,16 +58,22 @@ export default function LoginPage() {
         // login success = false
         showModal(result.message || '로그인에 실패했습니다.', 'error');
       }
-    } catch (error) {
+    },
+    onError: (error) => {
       // axios error
       console.error('로그인 실패:', error);
       showModal('로그인에 실패했습니다.', 'error');
-    }
+    },
+  });
+
+  // login 제출
+  const onSubmit = (data: LoginFormData) => {
+    loginMutation.mutate({ id: data.id, password: data.password });
   };
 
   return (
     <>
-      <LoadingOverlay isLoading={isSubmitting} message="로그인 중" />
+      <LoadingOverlay isLoading={loginMutation.isPending} message="로그인 중" />
       <ConfirmModal
         isOpen={modal.isOpen}
         onClose={closeModal}
@@ -118,7 +123,7 @@ export default function LoginPage() {
                 color="bgMain"
                 size="md"
                 className="w-full mt-6"
-                disabled={isSubmitting}
+                disabled={loginMutation.isPending}
               >
                 로그인
               </Button>
