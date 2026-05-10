@@ -17,7 +17,6 @@ export default async function DiaryListPage() {
 
   if (user) {
     const diaryService = new DiaryService();
-
     await queryClient.prefetchInfiniteQuery({
       queryKey: ['diary'],
       queryFn: ({ pageParam = 0 }) =>
