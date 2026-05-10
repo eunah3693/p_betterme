@@ -2,24 +2,31 @@ import type { Metadata } from 'next';
 import React from 'react';
 import BlogDetailClient from './BlogDetailClient';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
-import { getBlogByIdx, getBlogsByMinViewCount } from '@/functions/apis/blog';
+import { BlogService } from '@/services/blogService';
 
 export const revalidate = 3600;
 export const dynamicParams = true;
+
+const blogService = new BlogService();
 
 const getPlainText = (html?: string | null) =>
   html?.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim() || '';
 
 export async function generateStaticParams() {
-  const result = await getBlogsByMinViewCount(10);
+  try {
+    const result = await blogService.getBlogsByMinViewCount(10);
 
-  if (!result.success) {
+    if (!result.success) {
+      return [];
+    }
+
+    return result.data.map((blog) => ({
+      idx: String(blog.idx),
+    }));
+  } catch (error) {
+    console.error('Failed to generate blog static params:', error);
     return [];
   }
-
-  return result.data.map((blog) => ({
-    idx: String(blog.idx),
-  }));
 }
 
 export async function generateMetadata({
@@ -28,7 +35,7 @@ export async function generateMetadata({
   params: Promise<{ idx: string }>;
 }): Promise<Metadata> {
   const { idx } = await params;
-  const result = await getBlogByIdx(Number(idx));
+  const result = await blogService.getBlogByIdx({ idx: Number(idx), id: '' });
 
   if (!result.success || !result.data) {
     return {
@@ -75,7 +82,7 @@ export default async function BlogDetailPage({
     queryFn: async () => {
       if (!idx) return null;
 
-      const result = await getBlogByIdx(Number(idx));
+      const result = await blogService.getBlogByIdx({ idx: Number(idx), id: '' });
 
       if (!result.success || !result.data) {
         return null;
