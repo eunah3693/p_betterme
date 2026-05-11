@@ -6,6 +6,7 @@ import { useUserStore } from '@/store/user';
 
 // 로그인 없이 접근 가능한 공개 페이지 목록
 const PUBLIC_PATHS = ['/login',  '/signup', '/blog', '/blog/myblog'];
+const PROTECTED_PATH_PREFIXES = ['/', '/diary', '/myinfo', '/logout'];
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -20,8 +21,15 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     
     // 정확히 일치하는 경로 또는 /blog로 시작하는 모든 경로는 공개
     const isPublicPath = PUBLIC_PATHS.includes(pathname) || pathname.startsWith('/blog');
+    const isProtectedPath = PROTECTED_PATH_PREFIXES.some((path) => {
+      if (path === '/') {
+        return pathname === path;
+      }
+
+      return pathname === path || pathname.startsWith(`${path}/`);
+    });
     
-    if (!isPublicPath && !user) {
+    if (!isPublicPath && isProtectedPath && !user) {
       router.push('/login');
     }
   }, [router, user, hasHydrated, pathname]);
