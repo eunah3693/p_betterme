@@ -20,17 +20,17 @@ export default function BlogEditPage({
   const router = useRouter();
   const { idx } = use(params);
   const user = useUserStore((state) => state.user);
-  const hasHydrated = useUserStore((state) => state._hasHydrated);
+  const isAuthChecked = useUserStore((state) => state.isAuthChecked);
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();
   const hasShownUnauthorizedRef = useRef(false);
 
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!isAuthChecked) return;
     if (!user) {
       router.push('/login');
     }
-  }, [hasHydrated, user, router]);
+  }, [isAuthChecked, user, router]);
 
   const {
     data: blogData,

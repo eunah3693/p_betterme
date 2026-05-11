@@ -13,21 +13,20 @@ import { login } from '@/functions/apis/member';
 import { loginSchema } from '@/lib/validation';
 import { useUserStore } from '@/store/user';
 import { useModal } from '@/functions/hooks/useModal';
-import { isLoggedIn } from '@/store/user';
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
   const setUser = useUserStore((state) => state.setUser);  // user store 
+  const user = useUserStore((state) => state.user);
   const { modal, showModal, closeModal } = useModal(); // modal hook
-  const isLogged = isLoggedIn();
 
   useEffect(() => {
-    if (isLogged) {
+    if (user) {
       router.push('/');
     }
-  }, [isLogged, router]);
+  }, [user, router]);
 
   //login form 
   const {

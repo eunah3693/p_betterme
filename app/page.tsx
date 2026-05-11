@@ -30,7 +30,7 @@ export default function Page() {
   const queryClient = useQueryClient();
 
   const user = useUserStore((state) => state.user); // 사용자 정보
-  const hasHydrated = useUserStore((state) => state._hasHydrated); // 사용자 정보 hydration 완료 여부
+  const isAuthChecked = useUserStore((state) => state.isAuthChecked); // 서버 인증 확인 완료 여부
 
   const { modal, showModal, closeModal } = useModal(); // modal hook
   const todosQueryKey = ['todos', user?.id, currentDate.year(), currentDate.month()] as const; // todo 쿼리키
@@ -69,7 +69,7 @@ export default function Page() {
         finishDate: parseTodoDate(item.finishDate).format(DATE_FORMAT),
       }));
     },
-    enabled: hasHydrated && !!user?.id, 
+    enabled: isAuthChecked && !!user?.id, 
     staleTime: 0,
     gcTime: 0, 
   });
