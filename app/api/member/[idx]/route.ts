@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { MemberService } from '@/services/memberService';
 import { timingSafeEqual } from 'crypto';
+import { requireAuthUserFromCookies } from '@/lib/auth';
+import { UnauthorizedError } from '@/lib/errors';
 
 const memberService = new MemberService();
 const CSRF_COOKIE_NAME = 'csrfToken';
@@ -23,8 +25,7 @@ export async function GET(
 ) {
   try {
     const { idx } = await params;
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
+    const user = await requireAuthUserFromCookies();
 
     if (!idx) {
       return NextResponse.json(
@@ -33,7 +34,7 @@ export async function GET(
       );
     }
 
-    const result = await memberService.getMemberByIdx(Number(idx), token?.value || '');
+    const result = await memberService.getMemberByIdx(Number(idx), user);
 
     if (!result.success) {
       const status =
@@ -68,6 +69,13 @@ export async function GET(
 
     return response;
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 401 }
+      );
+    }
+
     console.error('Get member error:', error);
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다.' },
@@ -83,8 +91,8 @@ export async function PUT(
   try {
     const { idx } = await params;
     const body = await req.json();
+    const user = await requireAuthUserFromCookies();
     const cookieStore = await cookies();
-    const token = cookieStore.get('token');
     const csrfToken = cookieStore.get(CSRF_COOKIE_NAME);
 
     if (!idx) {
@@ -116,7 +124,7 @@ export async function PUT(
         myBadge,
         csrfToken: requestCsrfToken,
       },
-      token?.value || '',
+      user,
     );
 
     if (!result.success) {
@@ -140,6 +148,13 @@ export async function PUT(
       data: result.data,
     });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 401 }
+      );
+    }
+
     console.error('Update member error:', error);
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다.' },
