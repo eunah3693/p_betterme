@@ -11,6 +11,7 @@ import { getDiaryByIdx, deleteDiary } from '@/functions/apis/diary';
 import type { DiaryItem } from '@/interfaces/diary';
 import Button, { ButtonVariants } from '@/components/Buttons/Button';
 import { useModal } from '@/functions/hooks/useModal';
+import { useDebugInfo } from '@/functions/hooks/useDebugInfo';
 import { cn } from '@/constants/cn';
 
 export default function DiaryDetailPage({
@@ -52,6 +53,12 @@ export default function DiaryDetailPage({
     staleTime: 1000 * 60 * 5, 
     gcTime: 1000 * 60 * 10,
     retry: 2, 
+  });
+
+  useDebugInfo('DiaryDetail', {
+    idx,
+    status: isLoading ? 'loading' : error ? 'error' : diaryData ? 'loaded' : 'empty',
+    isDeleting,
   });
 
   // 삭제 

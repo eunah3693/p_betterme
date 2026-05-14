@@ -1,6 +1,6 @@
 import { MemberRepository } from '@/repositories/memberRepository';
 import { MemberResponse, CheckIdResponse, SignupRequest, LoginRequest, UpdateMemberRequest, LoginResponse } from '@/interfaces/member';
-import { generateToken, verifyToken } from '@/lib/jwt';
+import { generateToken, JwtPayload } from '@/lib/jwt';
 import { ForbiddenError, UnauthorizedError } from '@/lib/errors';
 import { hashPassword, verifyPassword } from '@/lib/password';
 import { randomBytes } from 'crypto';
@@ -16,16 +16,7 @@ export class MemberService {
     return randomBytes(32).toString('hex');
   }
 
-  private async validateMemberToken(token: string, memberIdx: number) {
-    if (!token) {
-      throw new UnauthorizedError('인증이 필요합니다.');
-    }
-
-    const payload = verifyToken(token);
-    if (!payload) {
-      throw new UnauthorizedError('유효하지 않은 토큰입니다.');
-    }
-
+  private async validateMemberPayload(payload: JwtPayload, memberIdx: number) {
     if (payload.idx !== memberIdx) {
       throw new ForbiddenError('본인 정보만 조회/수정할 수 있습니다.');
     }
@@ -124,10 +115,10 @@ export class MemberService {
   }
 
   // 회원 정보 조회
-  async getMemberByIdx(idx: number, token: string): Promise<MemberResponse> {
+  async getMemberByIdx(idx: number, user: JwtPayload): Promise<MemberResponse> {
     try {
-      const payload = await this.validateMemberToken(token, idx);
-      const member = await this.memberRepository.getMemberByIdxAndId(idx, payload.id);
+      const validatedUser = await this.validateMemberPayload(user, idx);
+      const member = await this.memberRepository.getMemberByIdxAndId(idx, validatedUser.id);
 
       if (!member) {
         return {
@@ -163,10 +154,10 @@ export class MemberService {
   }
 
   // 회원 정보 수정
-  async updateMemberInfo(data: UpdateMemberRequest, token: string): Promise<MemberResponse> {
+  async updateMemberInfo(data: UpdateMemberRequest, user: JwtPayload): Promise<MemberResponse> {
     try {
-      const payload = await this.validateMemberToken(token, data.idx);
-      const member = await this.memberRepository.updateMemberByIdxAndId(data.idx, payload.id, {
+      const validatedUser = await this.validateMemberPayload(user, data.idx);
+      const member = await this.memberRepository.updateMemberByIdxAndId(data.idx, validatedUser.id, {
         nickname: data.nickname,
         job: data.job,
         jobInfo: data.jobInfo,

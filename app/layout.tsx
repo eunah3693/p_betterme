@@ -3,6 +3,7 @@ import React from 'react';
 import { Noto_Sans_KR } from 'next/font/google';
 import '@/styles/global.css';
 import Providers from './Providers';
+import WebVitals from './WebVitals';
 
 const notoSansKR = Noto_Sans_KR({
   subsets: ['latin'], //폰트 언어범주 설정해서 특정언어만 다움받기
@@ -48,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className={notoSansKR.variable}>
       <body className={notoSansKR.className}>
+        <WebVitals />
         <Providers>
           {children}
         </Providers>

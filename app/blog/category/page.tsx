@@ -15,7 +15,7 @@ import CategoryListItem from '@/components/Blog/CategoryListItem';
 export default function BlogCategoryPage() {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
-  const hasHydrated = useUserStore((state) => state._hasHydrated);
+  const isAuthChecked = useUserStore((state) => state.isAuthChecked);
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();
 
@@ -28,11 +28,11 @@ export default function BlogCategoryPage() {
 
   // 로그인 체크
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!isAuthChecked) return;
     if (!user) {
       router.push('/login');
     }
-  }, [hasHydrated, user, router]);
+  }, [isAuthChecked, user, router]);
 
   // 카테고리 목록 조회 
   const { data: categoriesData, isLoading } = useQuery({

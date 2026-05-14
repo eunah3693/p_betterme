@@ -5,6 +5,8 @@ const MEMBER_URL = '/api/member';
 const CHECK_ID_URL = `${MEMBER_URL}/check-id`;
 const SIGNUP_URL = `${MEMBER_URL}/signup`;
 const LOGIN_URL = `${MEMBER_URL}/login`;
+const ME_URL = `${MEMBER_URL}/me`;
+const LOGOUT_URL = `${MEMBER_URL}/logout`;
 
 // 아이디 중복 체크
 export const checkId = async (id: string): Promise<CheckIdResponse> => {
@@ -32,6 +34,21 @@ export const login = async (loginData: LoginRequest): Promise<LoginResponse> => 
     return await api.post<LoginResponse>(LOGIN_URL, loginData);
   } catch (error) {
     console.error('로그인 실패:', error);
+    throw error;
+  }
+};
+
+// 현재 로그인 사용자 조회
+export const getCurrentMember = async (): Promise<MemberResponse> => {
+  return await api.get<MemberResponse>(ME_URL, undefined, { noCache: true });
+};
+
+// 로그아웃
+export const logout = async (): Promise<MemberResponse> => {
+  try {
+    return await api.post<MemberResponse>(LOGOUT_URL);
+  } catch (error) {
+    console.error('로그아웃 실패:', error);
     throw error;
   }
 };

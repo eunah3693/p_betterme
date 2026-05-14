@@ -1,16 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { Noto_Sans_KR } from 'next/font/google';
 import { paths } from '@/constants/paths';
 import '@/styles/global.css';
-
-const notoSansKR = Noto_Sans_KR({
-  subsets: ['latin'],
-  weight: ['100', '300', '400', '500', '700', '900'],
-  display: 'swap',
-  variable: '--font-noto-sans-kr',
-});
 
 export default function GlobalError({
   error,
@@ -20,8 +12,8 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html lang="ko" className={notoSansKR.variable}>
-      <body className={notoSansKR.className}>
+    <html lang="ko">
+      <body>
         <main className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-16">
           <section className="w-full max-w-xl text-center">
             <h1 className="text-2xl font-bold text-main md:text-4xl">

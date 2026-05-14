@@ -16,19 +16,19 @@ import { cn } from '@/constants/cn';
 import { useCheckId } from '@/functions/hooks/member/useCheckId';
 import { signup } from '@/functions/apis/member';
 import { signupSchema } from '@/lib/validation';
-import { isLoggedIn } from '@/store/user';
+import { useUserStore } from '@/store/user';
 
 type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
   const router = useRouter();
-  const isLogged = isLoggedIn();
+  const user = useUserStore((state) => state.user);
 
   useEffect(() => {
-    if (isLogged) {
+    if (user) {
       router.push('/');
     }
-  }, [isLogged, router]);
+  }, [user, router]);
 
   // signup form
   const {

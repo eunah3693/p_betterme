@@ -14,17 +14,17 @@ import type { BlogCategoryItem } from '@/interfaces/blog';
 export default function BlogWritePage() {
   const router = useRouter();
   const user = useUserStore((state) => state.user);
-  const hasHydrated = useUserStore((state) => state._hasHydrated);
+  const isAuthChecked = useUserStore((state) => state.isAuthChecked);
   const queryClient = useQueryClient();
   const { modal, showModal, closeModal } = useModal();
   const [selectedCategoryIdx, setSelectedCategoryIdx] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!isAuthChecked) return;
     if (!user) {
       router.push('/login');
     }
-  }, [hasHydrated, user, router]);
+  }, [isAuthChecked, user, router]);
 
 
   // 로그인한 사용자의 카테고리 목록 조회

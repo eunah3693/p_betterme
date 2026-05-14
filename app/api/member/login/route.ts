@@ -42,6 +42,7 @@ export async function POST(req: NextRequest) {
         path: '/',
         maxAge: 60 * 60 * 24 * 7, // 7 days
         sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production',
       });
     }
 

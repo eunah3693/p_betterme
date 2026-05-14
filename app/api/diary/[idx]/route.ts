@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { DiaryService } from '@/services/diaryService';
-import { verifyToken } from '@/lib/jwt';
-import { cookies } from 'next/headers';
+import { requireAuthUserFromCookies } from '@/lib/auth';
+import { UnauthorizedError } from '@/lib/errors';
 
 const diaryService = new DiaryService();
 
@@ -11,23 +11,7 @@ export async function GET(
 ) {
   try {
     const { idx } = await params;
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token?.value) {
-      return NextResponse.json(
-        { success: false, error: '인증이 필요합니다.' },
-        { status: 401 }
-      );
-    }
-
-    const user = verifyToken(token.value);
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: '유효하지 않은 토큰입니다.' },
-        { status: 401 }
-      );
-    }
+    const user = await requireAuthUserFromCookies();
 
     if (!idx) {
       return NextResponse.json(
@@ -51,6 +35,13 @@ export async function GET(
       data: result.data,
     });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 401 }
+      );
+    }
+
     console.error('Get diary error:', error);
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다.' },
@@ -65,23 +56,7 @@ export async function PUT(
 ) {
   try {
     const { idx } = await params;
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token?.value) {
-      return NextResponse.json(
-        { success: false, error: '인증이 필요합니다.' },
-        { status: 401 }
-      );
-    }
-
-    const user = verifyToken(token.value);
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: '유효하지 않은 토큰입니다.' },
-        { status: 401 }
-      );
-    }
+    const user = await requireAuthUserFromCookies();
     const body = await req.json();
 
     if (!idx) {
@@ -116,6 +91,13 @@ export async function PUT(
       data: result.data,
     });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 401 }
+      );
+    }
+
     console.error('Update diary error:', error);
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다.' },
@@ -130,23 +112,7 @@ export async function DELETE(
 ) {
   try {
     const { idx } = await params;
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token');
-
-    if (!token?.value) {
-      return NextResponse.json(
-        { success: false, error: '인증이 필요합니다.' },
-        { status: 401 }
-      );
-    }
-
-    const user = verifyToken(token.value);
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: '유효하지 않은 토큰입니다.' },
-        { status: 401 }
-      );
-    }
+    const user = await requireAuthUserFromCookies();
 
     if (!idx) {
       return NextResponse.json(
@@ -170,6 +136,13 @@ export async function DELETE(
       data: null,
     });
   } catch (error) {
+    if (error instanceof UnauthorizedError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 401 }
+      );
+    }
+
     console.error('Delete diary error:', error);
     return NextResponse.json(
       { success: false, error: '서버 오류가 발생했습니다.' },
